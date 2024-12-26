@@ -34,6 +34,81 @@
 	<link rel="stylesheet" type="text/css" href="css/util.css">
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 <!--===============================================================================================-->
+
+<style>
+	/* Dropdown container styling */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown link styling */
+.sign-in-link {
+    color: #007bff;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 0.5rem;
+    transition: color 0.3s;
+}
+
+.sign-in-link:hover {
+    color: #0056b3;
+}
+
+/* Dropdown content styling */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 150px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 1;
+    margin-top: 4px; /* Adds spacing between the link and the dropdown menu */
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    transform: translateY(-10px); /* Adds a slide-down effect */
+    pointer-events: none;
+}
+
+/* Show the dropdown on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Dropdown links styling */
+.dropdown-content a {
+    color: #333;
+    text-decoration: none;
+    display: block;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    transition: background 0.3s, color 0.3s;
+    border-bottom: 1px solid #f0f0f0; /* Optional: for separation */
+}
+
+.dropdown-content a:last-child {
+    border-bottom: none; /* Remove border for the last item */
+}
+
+/* Hover effect on links */
+.dropdown-content a:hover {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.header {
+	position: relative;
+	z-index: 500;
+}
+
+</style>
+
 </head>
 <body class="animsition">
 	
@@ -111,7 +186,25 @@
 					</div>	
 
 					<!-- Icon header -->
+
 					<div class="wrap-icon-header flex-w flex-r-m">
+						<% if(locals.user){ %>
+							<div class="dropdown">
+								<a href="#" class="sign-in-link"><%= locals.user.name %></a>
+								<div class="dropdown-content">
+									 <a href="/userProfile">Profile</a>
+									 <a href="/logout">Logout</a>
+								</div>
+
+							</div>
+						<% }else{%>
+						<a href="/signup" class="flex-c-m trans-04 p-lr-15 ">
+							SignUp
+						</a>
+						<a href="/login" class="flex-c-m trans-04 ">
+							LogIn
+						</a>
+						<%}%>
 						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-modal-search">
 							<i class="zmdi zmdi-search"></i>
 						</div>
@@ -123,6 +216,7 @@
 						<a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
 							<i class="zmdi zmdi-favorite-outline"></i>
 						</a>
+						
 					</div>
 				</nav>
 			</div>	
@@ -219,7 +313,7 @@
 				</li>
 
 				<li>
-					<a href="contact.html">Contact</a>
+					
 				</li>
 			</ul>
 		</div>

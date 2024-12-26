@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Page</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body>
+    <div class="background"></div>
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+    <div class="form-container">
+        <h1>Signup</h1>
+        <form action="/signup" method="POST" id="signform" >
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+            <div id="error1" class="error-message"></div>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            <div id="error2" class="error-message"></div>
+
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+            <div id="error3" class="error-message"></div>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <div id="error4" class="error-message"></div>
+
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+            <div id="error5" class="error-message"></div>
+            <%if(locals.message && message.length>0){%>
+                <div class="alert alert-danger text-center">
+                    <%=message%>
+                </div>
+            <%}%>
+
+            <input type="submit" value="Sign Up">
+        </form>
+        <p>Already have an account? <a href="/login">Login here</a></p>
+        <div class="social-signup">
+            <a href="/auth/google" class="social-button">
+                <img src="/images/google_icon.png" alt="Google Logo">
+                Sign Up with Google
+            </a>
+            
+        </div>
+    </div>
+
+    <script>
+
+        const nameId = document.getElementById('name');
+        const emailId = document.getElementById('email');
+        const phoneId = document.getElementById('phone');
+        const passwordId = document.getElementById('password');
+        const confirmPasswordId = document.getElementById('confirmPassword');
+
+        const error1 = document.getElementById('error1');
+        const error2 = document.getElementById('error2');
+        const error3 = document.getElementById('error3');
+        const error4 = document.getElementById('error4');
+        const error5 = document.getElementById('error5');
+
+        const signForm = document.getElementById('signform')
+
+        function nameValidateChecking(e){
+            const nameVal = nameId.value.trim();
+            const namePattern = /^[A-Za-z\s]+$/;
+            if(nameVal===""){
+                error1.style.display="block";
+                error1.innerHTML="Please enter a valid name"
+            }else if(!namePattern.test(nameVal)){
+                error1.style.display="block";
+                error1.innerHTML="Name can only contain aphabets and spaces";
+            }else{
+                error1.style.display="none";
+                error1.innerHTML="";
+            }
+        }
+
+        function emailValidateChecking(e){
+            const emailVal = emailId.value.trim();
+            const emailPattern = /^([a-zA-Z0-9._-]+)@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
+
+            if(!emailPattern.test(emailVal)){
+                error2.style.display="block";
+                error2.innerHTML="Invalid format";
+            }else{
+                error2.style.display="none";
+                error2.innerHTML=""
+            }
+        }
+
+        function phoneValidateChecking(e){
+            const phoneVal = phoneId.value.trim();
+            
+            if(phoneVal === ""){
+                error3.style.display="block",
+                error3.innerHTML="Enter a valid phone number"
+            }else if(phoneVal.length<10 || phoneVal.length>10){
+                error3.style.display="block";
+                error3.innerHTML="Enter 10 digit";
+            }else{
+                error3.style.display="none";
+                error3.innerHTML="";
+            }
+
+        }
+
+        function passwordValidateChecking(e){
+            const passwordVal = passwordId.value.trim();
+            const confirmPasswordVal = confirmPasswordId.value.trim();
+            const alpha = /[a-zA-Z]/;
+            const digit = /\d/;
+
+            if(passwordVal.length<8){
+                error4.style.display="block";
+                error4.innerHTML = "Should contain at least 8 characters";
+            }else if(!alpha.test(passwordVal) || !digit.test(passwordVal)){
+                error4.style.display="block";
+                error4.innerHTML = "Should contain at least one alphabet and one digit";
+            }else{
+                error4.style.display="none";
+                error4.innerHTML="";
+            }
+
+            if(passwordVal!==confirmPasswordVal){
+                error5.style.display="block";
+                error5.innerHTML = "Password do not match";
+            }else{
+                error5.style.display="none";
+                error5.innerHTML="";
+            }
+        }
+
+
+
+   
+        document.addEventListener('DOMContentLoaded',function(){
+            signForm.addEventListener("submit",(e)=>{
+                nameValidateChecking(e);
+                emailValidateChecking(e);
+                phoneValidateChecking(e);
+                passwordValidateChecking(e);
+                
+                if(!nameId || !emailId || !phoneId || !passwordId || !confirmPasswordId || !error1 || !error2 || !error3 || !error4 || !error5 || !signForm){
+                    console.error("One or more elements not found")
+                }
+                if(error1.innerHTML || error2.innerHTML || error3.innerHTML || error4.innerHTML || error5.innerHTML){
+                    e.preventDefault();
+                }
+            })
+        })
+   
+   
+   
+   
+   </script>
+
+    </body>
+    </html>

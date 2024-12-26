@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Login</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+    <div class="background">
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+        <div class="floating-circle"></div>
+    </div>
+    <div class="main-container">
+        <div class="login-box animate-fade-in">
+            <div class="welcome-text animate-slide-in">
+                <h1>Login</h1>
+                <p>Access your account and stay connected with us.</p>
+            </div>
+            <form id="loginform" action="/login" method="POST" class="login-form animate-zoom-in">
+                <div class="input-container">
+                    <input type="email" id="email" name="email" placeholder=" " required>
+                    <div id="error1" class="error-message"></div>
+                    <label for="email">Email</label>
+                </div>
+                <div class="input-container">
+                    <input type="password" id="password" name="password" placeholder=" " required>
+                    <div id="error1" class="error-message"></div>
+                    <label for="password">Password</label>
+                </div>
+                <%if(locals.message && message.length>0){%>
+                    <div class="alert alert-danger text-center">
+                        <%=message%>
+                    </div>
+                <%}%>
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+            <div class="divider animate-slide-up">
+                <span>OR</span>
+            </div>
+            <a href="/auth/google" class="btn-google animate-slide-up">
+                <img src="/images/google_icon.png" alt="Google Logo">
+                Login with Google
+            </a>
+            <p class="register-text animate-slide-up">Don't have an account? <a href="/signup">Sign up here</a></p>
+        </div>
+    </div>
+
+    <script src="/js/login.js"></script>
+</body>
+</html>
