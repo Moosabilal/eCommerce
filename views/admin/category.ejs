@@ -10,7 +10,7 @@
         type="text" 
         name="search" 
         class="form-control" 
-        placeholder="Search for customers..." 
+        placeholder="Search for Category..." 
         value=""
       >
       <button type="submit" class="btn btn-primary ml-2">Search</button>
@@ -55,26 +55,30 @@
         <td><%= category.description %></td>
         <td>
           <% if(category.categoryOffer){ %>
-              <%= category.categoryOffer %>
+             <p> <%= category.categoryOffer %> %</p>
             <% }else{ %>
               0%
               <% } %>
         </td>
         <td>
           <% if(category.categoryOffer===0){ %>
-          <button class="btn btn-success btn-sm"><a href="#" onclick="addOffer('<%= category._id %>')">Add Offer</a></button>
+            <a href="#" onclick="addOffer('<%= category._id %>')" class="text-white"><button class="btn btn-success btn-sm ">Add Offer</button></a>
           <% }else{ %>
-          <button class="btn btn-danger btn-sm"><a href="#" onclick="removeOffer('<%= category._id %>')">Remove Offer</a></button>
+            <a href="#" onclick="removeOffer('<%= category._id %>')" class="text-white"><button class="btn btn-danger btn-sm">Remove Offer</button></a>
           <% } %>
         </td>
         <td>
-          <%= category.status === 'listed' ? 'Listed' : 'Unlisted' %>
+          <% if(category.isListed){ %>
+            <span>Listed</span>
+          <% }else{ %>
+            <span>Unlisted</span>
+          <% } %>
         </td>
         <td>
-          <% if (category.status === 'listed') { %>
-          <button class="btn btn-danger btn-sm">Unlist</button>
+          <% if (category.isListed) { %>
+            <a href="/admin/listCategory?id=<%= category._id %>" class="text-white"><button class="btn btn-danger btn-sm">Unlist</button></a>
           <% } else { %>
-          <button class="btn btn-success btn-sm">List</button>
+            <a href="/admin/unlistCategory?id=<%= category._id %>" class="text-white"><button class="btn btn-success btn-sm">List</button></a>
           <% } %>
         </td>
         <td>
