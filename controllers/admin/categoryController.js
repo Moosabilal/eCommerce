@@ -138,9 +138,9 @@ const editCategory = async (req,res)=>{
         const id = req.params.id;
         const {categoryName, description} = req.body;
         const existingCategory = await Category.findOne({name:categoryName});
-        if(existingCategory){
-            return res.status(400).json({error:"Category already exists, Please choose another name"})
-        }
+        // if(existingCategory){
+        //     return res.status(400).json({error:"Category already exists"})
+        // }
         
         const updateCategory = await Category.findByIdAndUpdate(id,{
             name:categoryName,
@@ -150,7 +150,7 @@ const editCategory = async (req,res)=>{
         if(updateCategory){
             res.redirect("/admin/category");
         }else{
-            res.stauts(404).json({error:"Category not found"})
+            res.status(404).json({error:"Category not found"})
         }
     } catch (error) {
         res.status(500).json({error:"Internal Server Error"})
