@@ -1,0 +1,153 @@
+<%- include('../../views/partials/admin/header')%>
+<div class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="text-dark">Product Listing</h4>
+            <div class="input-group w-25">
+              <input type="text" class="form-control" placeholder="Search products...">
+              <button class="btn btn-primary" type="button">Search</button>
+            </div>
+          </div>
+          <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+              <tr>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Sale Price</th>
+                <th>Offer Price</th>
+                <th>Offer</th>
+                <th>Quantity</th>
+                <th>Action</th>
+                <th>Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+                <% for(let i = data.length-1 ; i>=0 ; i--){ %>
+              <tr>
+                <td><%= data[i].productName %></td>
+                <td><%= data[i].category.name %></td>
+                <td>$<%= data[i].salePrice %></td>
+                <td>
+                  
+                    <% if(data[i].productOffer){ %>
+                        <p><%= data[i].productOffer %>%</p>
+                    <% }else{ %>
+                        0%
+                    <% } %>    
+                </td>
+                <td>
+                  <% if(data[i].productOffer === 0) { %>
+                      <button class="btn btn-success btn-sm" onclick="addOffer('<%= data[i]._id %>')">Add Offer</button>
+                  <% } else { %> 
+                      <button class="btn btn-danger btn-sm" onclick="removeOffer('<%= data[i]._id %>')">Remove Offer</button>
+                  <% } %>     
+              </td>
+              
+                <td><%= data[i].quantity %></td>
+                <td>
+                  <button class="btn btn-warning btn-sm">Block</button>
+                  <button class="btn btn-primary btn-sm">Unblock</button>
+                </td>
+                <td>
+                  <button class="btn btn-secondary btn-sm">Edit</button>
+                </td>
+              </tr>
+              
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <%- include('../../views/partials/admin/pagination')%>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <%- include('../../views/partials/admin/footer')%>
+
+<script>
+  async function addOffer(productId) {
+    console.log("Product ID:", productId);
+    const { value: amount } = await Swal.fire({
+        title: "Offer in percentage",
+        input: "number",
+        inputLabel: "Percentage",
+        inputPlaceholder: "%",
+    });
+
+    if (!amount || isNaN(amount) || amount <= 0) {
+        Swal.fire("Invalid Input", "Please enter a valid percentage.", "error");
+        return;
+    }
+
+    console.log("Percentage:", amount);
+    try {
+        const response = await fetch("/admin/addProductOffer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ percentage: amount, productId: productId }),
+        });
+
+        const data = await response.json();
+        console.log("Response from server:", data);
+        if (data.status === true) {
+            Swal.fire("Offer Added", "The offer has been successfully applied.", "success").then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire("Failed", data.message || "Something went wrong.", "error");
+        }
+    } catch (error) {
+        console.error("Error in Fetch request:", error);
+        Swal.fire("Error", "Unable to add the offer.", "error");
+    }
+}
+
+
+
+
+
+async function removeOffer(productId) {
+    const result = await Swal.fire({
+        title: "Remove Offer",
+        text: "Are you sure you want to remove the offer?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, remove it!",
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch("/admin/removeProductOffer", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ productId: productId }),
+            });
+
+            const data = await response.json();
+            if (data.status === true) {
+                Swal.fire("Removed!", "The offer has been removed.", "success").then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire("Failed", data.message || "Unable to remove the offer.", "error");
+            }
+        } catch (error) {
+            console.error("Error in Fetch request:", error);
+            Swal.fire("Error", "Unable to remove the offer.", "error");
+        }
+    }
+}
+
+
+</script>
+
+
