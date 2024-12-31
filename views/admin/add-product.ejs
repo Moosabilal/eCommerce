@@ -149,22 +149,40 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block">Publish Product</button>
+            <button type="button" onclick="validateAndSubmit()" class="btn btn-primary btn-block">Publish Product</button>
         </form>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
 
 
 
         <script>
 
             function validateAndSubmit() {
+                
                 if (validateForm()) {
+                   let rew= Swal.fire({
+                        icon:"success",
+                        title:"Product added successfully",
+                        showConfirmButton: false,
+                        timer:1500,
+
+                    })
+                    let res= document.getElementsByClassName('swal2-confirm')
+                    if(res===ok){
                     document.forms[0].submit();
-                }
+                    }
+                    
+                    
+
+                    }
+            
             }
+            
 
             function viewImage1(event) {
                 document.getElementById('imgView1').src = URL.createObjectURL(event.target.files[0])
@@ -193,7 +211,7 @@
                     let image = document.getElementById('imgView' + index);
                     image.src = dataURL;
                     let cropper = new Cropper(image, {
-                        aspectRatio: 1,
+                        aspectRatio: 0.8,
                         viewMode: 1,
                         guides: true,
                         background: false,
@@ -286,7 +304,7 @@
    if (description.trim() === "") {
       displayErrorMessage('description-error', 'Please enter a product description.');
       isValid = false;
-   } else if (!/^[a-zA-Z\s]+$/.test(description.trim())) {
+   } else if (!/[a-zA-Z]/.test(description) && !/[0-9]/.test(description) && !/[!@#$%^&*(),.?":{}|<>]/.test(description)) {
       displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
       isValid = false;
    }
@@ -313,16 +331,17 @@
    }
   
   
-              if (color.trim() === "") {
-                  displayErrorMessage('color-error', 'Please enter a color.');
-                  isValid = false;
-              }
+            //   if (color.trim() === "") {
+            //       displayErrorMessage('color-error', 'Please enter a color.');
+            //       isValid = false;
+            //   }
   
   
               if (images.files.length === 0) {
                   displayErrorMessage("images-error",'Please select an image.');
                   isValid = false;
               }
+             
               return isValid;
           }
 

@@ -9,6 +9,17 @@
 
 
     <link rel="stylesheet" href="/css/login.css">
+    <style>
+        .forgot-password-link {
+            font-size:0.75rem;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .forgot-password-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="background">
@@ -30,8 +41,11 @@
                 </div>
                 <div class="input-container">
                     <input type="password" id="password" name="password" placeholder=" " required>
-                    <div id="error1" class="error-message"></div>
+                    <div id="error2" class="error-message"></div>
                     <label for="password">Password</label>
+                </div>
+                <div class="form-group dis-flex justify-content-end">
+                    <a href="/forgot-password" class="forgot-password-link ms-auto">Forgot Password?</a>
                 </div>
                 <%if(locals.message && message.length>0){%>
                     <div class="alert alert-danger text-center">

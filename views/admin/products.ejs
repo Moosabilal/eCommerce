@@ -54,7 +54,7 @@
                     <% } %>
                 </td>
                 <td>
-                  <button class="btn btn-secondary btn-sm">Edit</button>
+                  <a href="/admin/editProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;"><button class="btn btn-secondary btn-sm">Edit</button></a>
                 </td>
               </tr>
               
@@ -66,7 +66,6 @@
     </div>
     <%- include('../../views/partials/admin/pagination')%>
   </div>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <%- include('../../views/partials/admin/footer')%>
 
@@ -152,5 +151,3 @@ async function removeOffer(productId) {
 
 
 </script>
-
-
