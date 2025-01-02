@@ -165,22 +165,16 @@
             function validateAndSubmit() {
                 
                 if (validateForm()) {
-                   let rew= Swal.fire({
+                    let rew= Swal.fire({
                         icon:"success",
                         title:"Product added successfully",
                         showConfirmButton: false,
                         timer:1500,
 
                     })
-                    let res= document.getElementsByClassName('swal2-confirm')
-                    if(res===ok){
+                    
                     document.forms[0].submit();
-                    }
-                    
-                    
-
-                    }
-            
+                }
             }
             
 
@@ -229,7 +223,7 @@
                         let croppedImage = document.getElementById("croppedImg" + index);
                         croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
                         let timestamp = new Date().getTime();
-                        let fileName = `cropped-img-${timestamp}-${index}.png`;
+                        let fileName = `cropped-img-${timestamp}-${index}.WebP`;
                         await croppedCanvas.toBlob(blob => {
                             let input = document.getElementById('input' + index);
                             let imgFile = new File([blob], fileName, blob)

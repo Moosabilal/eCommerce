@@ -18,14 +18,14 @@ const pageNotFound = async (req,res)=>{
 }
 
 
-const loadShopping = async (req,res)=>{
-    try {
-        return res.render('shop');
-    } catch (error) {
-        console.log('shopping page not loading :',error);
-        res.status(500).send('Server Error');
-    }
-}
+// const loadShopping = async (req,res)=>{
+//     try {
+//         return res.render('shop');
+//     } catch (error) {
+//         console.log('shopping page not loading :',error);
+//         res.status(500).send('Server Error');
+//     }
+// }
 
 const loadHomepage = async (req,res)=>{
     try {
@@ -243,6 +243,14 @@ const logout = async (req,res)=> {
     }
 }
 
+const loadShoppingPage = async (req, res) => {
+    try {
+        res.render("shop")
+    } catch (error) {
+        res.redirect("/pageNotFound")
+    }
+}
+
 
 
 
@@ -250,11 +258,13 @@ module.exports={
     pageNotFound,
     loadHomepage,
     loadSignup,
-    loadShopping,
+    // loadShopping,
     signup,
     verifyOtp,
     resendOtp,
     loadLogin,
     login,
     logout,
+    loadShoppingPage,
+    
 }

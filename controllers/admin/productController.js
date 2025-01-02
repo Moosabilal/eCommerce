@@ -42,7 +42,6 @@ const addProducts = async (req, res) => {
             
 
             
-            
             const newProduct = new Product({
                 productName:products.productName,
                 description:products.description,
@@ -56,7 +55,6 @@ const addProducts = async (req, res) => {
                 productImage:images,
                 status:"Available",
             })
-
             await newProduct.save();
             return res.redirect("/admin/Products")
         
@@ -76,20 +74,14 @@ const getAllProducts = async (req,res)=>{
         const page = req.query.page || 1;
         const limit = 10;
         const productData = await Product.find({
-            // $or:[
                 productName:{$regex:new RegExp(".*"+search+".*","i")},
 
-            // ],
         }).limit(limit*1).skip((page-1)*limit).populate("category").exec();
-        
         const count = await Product.find({
-            // $or:[
                 productName:{$regex:new RegExp(".*"+search+".*","i")},
-            // ]
         }).countDocuments();
 
         const category = await Category.find({isListed:true});
-
         if(category){
             res.render("products",{
                 data:productData,

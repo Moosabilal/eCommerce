@@ -1,44 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Product</title>
+	<title>Home</title>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-<!--===============================================================================================-->	
+	<meta name="viewport" content="width=device-width, initial-scale=1">	
 	<link rel="icon" type="image/png" href="images/icons/favicon.png"/>
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="fonts/linearicons-v1.0.0/icon-font.min.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
-<!--===============================================================================================-->	
 	<link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
-<!--===============================================================================================-->	
 	<link rel="stylesheet" type="text/css" href="vendor/daterangepicker/daterangepicker.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="vendor/slick/slick.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="vendor/MagnificPopup/magnific-popup.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
-<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="css/util.css">
 	<link rel="stylesheet" type="text/css" href="css/main.css">
-<!--===============================================================================================-->
+
+<style>
+	/* Dropdown container styling */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+/* Dropdown link styling */
+.sign-in-link {
+    color: #007bff;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 0.5rem;
+    transition: color 0.3s;
+}
+.sign-in-link:hover {
+    color: #0056b3;
+}
+/* Dropdown content styling */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 150px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 1;
+    margin-top: 4px; /* Adds spacing between the link and the dropdown menu */
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    transform: translateY(-10px); /* Adds a slide-down effect */
+    pointer-events: none;
+}
+/* Show the dropdown on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+/* Dropdown links styling */
+.dropdown-content a {
+    color: #333;
+    text-decoration: none;
+    display: block;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    transition: background 0.3s, color 0.3s;
+    border-bottom: 1px solid #f0f0f0; /* Optional: for separation */
+}
+.dropdown-content a:last-child {
+    border-bottom: none; /* Remove border for the last item */
+}
+/* Hover effect on links */
+.dropdown-content a:hover {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 4px;
+}
+.header {
+	position: relative;
+	z-index: 500;
+}
+
+
+</style>
 </head>
 <body class="animsition">
 	
 	<!-- Header -->
-	<header class="header-v4">
+	<header>
 		<!-- Header desktop -->
 		<div class="container-menu-desktop">
 			<!-- Topbar -->
@@ -49,26 +101,14 @@
 					</div>
 
 					<div class="right-top-bar flex-w h-full">
-						<a href="#" class="flex-c-m trans-04 p-lr-25">
-							Help & FAQs
-						</a>
-
-						<!-- <a href="#" class="flex-c-m trans-04 p-lr-25">
-							My Account
-						</a> -->
-
-						<a href="#" class="flex-c-m trans-04 p-lr-25">
-							EN
-						</a>
-
-						<a href="#" class="flex-c-m trans-04 p-lr-25">
-							USD
-						</a>
+						<a href="#" class="flex-c-m trans-04 p-lr-25">Help & FAQs</a>
+						<a href="#" class="flex-c-m trans-04 p-lr-25">EN</a>
+						<a href="#" class="flex-c-m trans-04 p-lr-25">USD</a>
 					</div>
 				</div>
 			</div>
 
-			<div class="wrap-menu-desktop how-shadow1">
+			<div class="wrap-menu-desktop">
 				<nav class="limiter-menu-desktop container">
 					
 					<!-- Logo desktop -->		
@@ -80,38 +120,35 @@
 					<!-- Menu desktop -->
 					<div class="menu-desktop">
 						<ul class="main-menu">
-							<li>
-								<a href="/">Home</a>
+							<li class="active-menu">
+								<a href="index.html">Home</a>
 								<ul class="sub-menu">
 									<li><a href="index.html">Homepage 1</a></li>
 									<!-- <li><a href="home-02.html">Homepage 2</a></li>
 									<li><a href="home-03.html">Homepage 3</a></li> -->
 								</ul>
 							</li>
-
-							<li class="active-menu">
+							<li>
 								<a href="/shop">Shop</a>
 							</li>
 
 							<li class="label1" data-label1="hot">
 								<a href="shoping-cart.html">Features</a>
 							</li>
-
 							<!-- <li>
 								<a href="blog.html">Blog</a>
 							</li>
-
 							<li>
 								<a href="about.html">About</a>
-							</li>
-
+							</li> -->
 							<li>
 								<a href="contact.html">Contact</a>
-							</li> -->
+							</li>
 						</ul>
 					</div>	
 
 					<!-- Icon header -->
+
 					<div class="wrap-icon-header flex-w flex-r-m">
 						<% if(locals.user){ %>
 							<div class="dropdown">
@@ -160,7 +197,8 @@
             </div>
 
 			<!-- Icon header -->
-			<div class="wrap-icon-header flex-w flex-r-m m-r-15">
+			<div class="wrap-icon-header flex-w flex-r-m m-r-15 m-l--5">
+
 				<div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 js-show-modal-search">
 					<i class="zmdi zmdi-search"></i>
 				</div>
@@ -172,7 +210,6 @@
 				<a href="#" class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-r-11 p-l-10 icon-header-noti" data-notify="0">
 					<i class="zmdi zmdi-favorite-outline"></i>
 				</a>
-
 				<div class="icon-header-item cl2 hov-cl1 trans-04 p-r-11 js-show-modal-search">
 					<% if(locals.user){ %>
 						<div class="dropdown">
@@ -204,7 +241,6 @@
 			</div>
 		</div>
 
-
 		<!-- Menu Mobile -->
 		<div class="menu-mobile">
 			<ul class="topbar-mobile">
@@ -216,21 +252,10 @@
 
 				<li>
 					<div class="right-top-bar flex-w h-full">
-						<a href="#" class="flex-c-m p-lr-10 trans-04">
-							Help & FAQs
-						</a>
-
-						<!-- <a href="#" class="flex-c-m p-lr-10 trans-04">
-							My Account
-						</a> -->
-
-						<a href="#" class="flex-c-m p-lr-10 trans-04">
-							EN
-						</a>
-
-						<a href="#" class="flex-c-m p-lr-10 trans-04">
-							USD
-						</a>
+						<a href="#" class="flex-c-m p-lr-10 trans-04">Help & FAQs</a>
+						<!-- <a href="#" class="flex-c-m p-lr-10 trans-04">My Account</a> -->
+						<a href="#" class="flex-c-m p-lr-10 trans-04">EN</a>
+						<a href="#" class="flex-c-m p-lr-10 trans-04">USD</a>
 					</div>
 				</li>
 			</ul>
@@ -239,34 +264,20 @@
 				<li>
 					<a href="index.html">Home</a>
 					<ul class="sub-menu-m">
-						<li><a href="/">Homepage 1</a></li>
-						<!-- <li><a href="home-02.html">Homepage 2</a></li>
-						<li><a href="home-03.html">Homepage 3</a></li> -->
+						<li><a href="index.html">Homepage 1</a></li>
+						<li><a href="home-02.html">Homepage 2</a></li>
+						<li><a href="home-03.html">Homepage 3</a></li>
+						
 					</ul>
 					<span class="arrow-main-menu-m">
 						<i class="fa fa-angle-right" aria-hidden="true"></i>
 					</span>
 				</li>
-
-				<li>
-					<a href="/shop">Shop</a>
-				</li>
-
-				<li>
-					<a href="shoping-cart.html" class="label1 rs1" data-label1="hot">Features</a>
-				</li>
-
-				<li>
-					<a href="blog.html">Blog</a>
-				</li>
-
-				<li>
-					<a href="about.html">About</a>
-				</li>
-
-				<li>
-					<a href="contact.html">Contact</a>
-				</li>
+				<li><a href="/shop">Shop</a></li>
+				<li><a href="shoping-cart.html" class="label1 rs1" data-label1="hot">Features</a></li>
+				<li><a href="blog.html">Blog</a></li>
+				<li><a href="about.html">About</a></li>
+				<li></li>
 			</ul>
 		</div>
 

@@ -3,7 +3,8 @@ const router = express.Router();
 const adminController = require('../controllers/admin/adminController');
 const customerController = require('../controllers/admin/customerController')
 const categoryController = require('../controllers/admin/categoryController')
-const productController = require('../controllers/admin/productController')
+const productController = require('../controllers/admin/productController');
+const bannerController = require('../controllers/admin/bannerController');
 const multer = require('multer'); // Import multer
 const { userAuth, adminAuth } = require("../middlewares/auth");
 
@@ -48,6 +49,7 @@ router.get("/unblockProduct",adminAuth,productController.unBlockProduct)
 router.get("/editProduct",adminAuth,productController.getEditProduct)
 router.post("/editProduct/:id",adminAuth,uploads.array("images",4),productController.editProduct)
 router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
-
+//banner Management
+router.get("/banner",adminAuth,bannerController.getBannerPage)
 
 module.exports = router;
