@@ -191,7 +191,6 @@ const getEditProduct = async (req,res)=>{
 const editProduct = async (req,res)=>{
     try {
         const id = req.params.id;
-        console.log(id)
         const product = await Product.findOne({_id:id});
         const data = req.body;
         const existingProduct = await Product.findOne({
@@ -208,7 +207,6 @@ const editProduct = async (req,res)=>{
                 images.push(req.files[i].filename);
             }
         }
-        console.log(images)
         const updateFields = {
             productName:data.productName,
             description:data.description,

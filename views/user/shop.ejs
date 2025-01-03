@@ -92,11 +92,15 @@
 		<div class="container">
 			<div class="flex-w flex-sb-m p-b-52">
 				<div class="flex-w flex-l-m filter-tope-group m-tb-10">
-					<% for(let i = 0 ; i <category.length ; i++){ %>
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1" data-filter="*">
-						<%= category[i].name %>
-					</button>
+					<% for (let i = 0; i < category.length; i++) { %>
+						<button 
+							class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 <%= category === category[i]._id ? 'how-active1' : '' %>" 
+							data-filter="*"
+						>
+							<a href="/filter?category=<%= category[i]._id %>&page=1"><%= category[i].name %></a>
+						</button>
 					<% } %>
+					
 					<!-- <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".women">
 						Women
 					</button>
@@ -133,15 +137,18 @@
 				</div>
 				
 				<!-- Search product -->
+			<form action="/search" method="POST" class="search-form">
 				<div class="dis-none panel-search w-full p-t-10 p-b-15">
 					<div class="bor8 dis-flex p-l-15">
-						<button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+						<button type="submit" class="search-button size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
 							<i class="zmdi zmdi-search"></i>
 						</button>
 
-						<input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
+						<input class="search-input mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="query" placeholder="Search">
+
 					</div>	
 				</div>
+			</form>
 
 				<!-- Filter -->
 				<div class="dis-none panel-filter w-full p-t-10">
@@ -203,32 +210,32 @@
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$0.00 - $50.00
+									<a href="/filterPrice?gt=0&lt=500" class="filter-link stext-106 trans-04">
+										&#8377; 0.00 - &#8377; 500.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$50.00 - $100.00
+									<a href="filterPrice?gt=500&lt=1000" class="filter-link stext-106 trans-04">
+										&#8377; 500.00 - &#8377; 1000.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$100.00 - $150.00
+									<a href="filterPrice?gt=1000&lt=1500" class="filter-link stext-106 trans-04">
+										&#8377; 1000.00 - &#8377; 1500.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$150.00 - $200.00
+									<a href="/filterPrice?gt=1500&lt=2000" class="filter-link stext-106 trans-04">
+										&#8377; 1500.00 - &#8377; 2000.00
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$200.00+
+									<a href="/filterPrice?gt=2000&lt=1000000" class="filter-link stext-106 trans-04">
+										&#8377; 2000.00+
 									</a>
 								</li>
 							</ul>
@@ -359,6 +366,11 @@
 							</div>
 
 							<div class="block2-txt-child2 flex-r p-t-3">
+								<!-- here add a add to cart button -->
+								<form action="/add-to-cart" method="POST" class="add-to-cart-form">
+									<input type="hidden" name="productId" value="<%= products[i]._id %>">
+									<button type="submit" class="btn btn-primary btn-sm mt-4 " style="margin-right: -20px;">Add to Cart</button>
+								</form>
 								<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
 									<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
 									<img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">

@@ -22,9 +22,12 @@ router.get("/login",userController.loadLogin)
 router.post('/login',userController.login)
 router.get('/logout',userController.logout)
 
-//home management
+//home management && shop
 router.get('/',userController.loadHomepage);
-router.get("/shop",userAuth,userController.loadShoppingPage)
+router.get("/shop",userAuth,userController.loadShoppingPage);
+router.get("/filter",userAuth,userController.filterProduct);
+router.get('/filterPrice',userAuth,userController.filterByPrice);
+router.post("/search",userAuth,userController.searchProducts)
 
 //profile management
 router.get("/forgot-password",profileController.getForgotPassPage)

@@ -55,6 +55,6 @@ router.get("/editProduct",adminAuth,productController.getEditProduct)
 router.post("/editProduct/:id",adminAuth,upload.array("images",4),productController.editProduct)
 router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
 //banner Management
-router.get("/banner",adminAuth,bannerController.getBannerPage)
+// router.get("/banner",adminAuth,bannerController.getBannerPage)
 
 module.exports = router;
