@@ -100,7 +100,6 @@ const getAllProducts = async (req,res)=>{
 
 const addProductOffer = async (req, res) => {
     try {
-        console.log("Request Body:", req.body); // Debugging request body
         const { productId, percentage } = req.body;
 
         if (!productId || !percentage) {
@@ -128,7 +127,6 @@ const addProductOffer = async (req, res) => {
         findCategory.categoryOffer = 0; // Reset category offer
         await findCategory.save();
 
-        console.log("Product Updated:", findProduct); // Debugging product update
         res.json({ status: true });
     } catch (error) {
         console.error("Error in addProductOffer:", error); // Debugging server error
@@ -234,11 +232,12 @@ const editProduct = async (req,res)=>{
     }
 }
 
+
 const deleteSingleImage = async (req,res)=>{
     try {
         const {imageNameToServer,productIdToServer} = req.body;
         const product = await Product.findByIdAndUpdate(productIdToServer,{$pull:{productImage:imageNameToServer}});
-        const imagePath = path.join("public","uploads","re-image",imageNameToServer);
+        const imagePath = path.join("public","uploads","product-images",imageNameToServer);
         if(fs.existsSync(imagePath)){
             await fs.unlinkSync(imagePath);
             console.log(`Image ${imageNameToServer} deleted successfully`)

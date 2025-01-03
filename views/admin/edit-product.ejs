@@ -182,10 +182,17 @@
 <script>
 
 function validateAndSubmit() {
-                if (validateForm()) {
-                    document.forms[0].submit();
-                }
-            }
+    if (validateForm()) {
+        Swal.fire({
+            icon: "success",
+            title: "Product edited successfully",
+            showConfirmButton: false,
+            timer: 1500,
+        }).then(() => {
+            document.forms[0].submit(); // Submit the form after the Swal completes
+        });
+    }
+}
 
             function viewImage1(event) {
                 document.getElementById('imgView1').src = URL.createObjectURL(event.target.files[0])
@@ -207,47 +214,49 @@ function validateAndSubmit() {
             }
 
             function viewImage(event, index) {
-                let input = event.target;
-                let reader = new FileReader();
-                reader.onload = function () {
-                    let dataURL = reader.result;
-                    let image = document.getElementById('imgView' + index);
-                    image.src = dataURL;
-                    let cropper = new Cropper(image, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        guides: true,
-                        background: false,
-                        autoCropArea: 1,
-                        zoomable: true
-                    });
-                    let cropperContainer = document.querySelector('#croppedImg' + index).parentNode;
-                    cropperContainer.style.display = 'block';
-                    let saveButton = document.querySelector('#saveButton' + index);
-                    saveButton.addEventListener('click', async function () {
-                        let croppedCanvas = cropper.getCroppedCanvas({
-                            width:400,
-                            height:300
-                        });
-                        let croppedImage = document.getElementById("croppedImg" + index);
-                        croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
-                        let timestamp = new Date().getTime();
-                        let fileName = `cropped-img-${timestamp}-${index}.png`;
-                        await croppedCanvas.toBlob(blob => {
-                            let input = document.getElementById('input' + index);
-                            let imgFile = new File([blob], fileName, blob)
-                            const fileList = new DataTransfer();
-                            fileList.items.add(imgFile);
-                            input.files = fileList.files
-                        });
-                        image.style.display = "none"
-                        cropperContainer.style.display = 'none';
-                        croppedImage.style.display = 'block';
-                        cropper.destroy();
-                    });
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
+    let input = event.target;
+    let originalFile = input.files[0]; // Get the original file
+
+    if (!originalFile) return; // Handle cases where no file is selected
+
+    let image = document.getElementById('imgView' + index);
+    image.src = URL.createObjectURL(originalFile); // Preview original image directly
+
+    let cropper = new Cropper(image, {
+        aspectRatio: 0.8,
+        viewMode: 1,
+        guides: true,
+        background: false,
+        autoCropArea: 1,
+        zoomable: true,
+    });
+
+    let cropperContainer = document.querySelector('#croppedImg' + index).parentNode;
+    cropperContainer.style.display = 'block';
+
+    let saveButton = document.querySelector('#saveButton' + index);
+    saveButton.addEventListener('click', async function () {
+        let croppedCanvas = cropper.getCroppedCanvas(); // Create cropped canvas
+
+        // Convert cropped canvas to blob and save
+        await croppedCanvas.toBlob(blob => {
+            let input = document.getElementById('input' + index);
+            let imgFile = new File([blob], originalFile.name, { type: originalFile.type });
+            const fileList = new DataTransfer();
+            fileList.items.add(imgFile);
+            input.files = fileList.files;
+        }, originalFile.type); // Ensure the original format
+
+        let croppedImage = document.getElementById("croppedImg" + index);
+        croppedImage.src = croppedCanvas.toDataURL(originalFile.type); // Update cropped image preview
+
+        image.style.display = "none";
+        cropperContainer.style.display = 'none';
+        croppedImage.style.display = 'block';
+        cropper.destroy();
+    });
+}
+
 
 
             const selectedImages = [];

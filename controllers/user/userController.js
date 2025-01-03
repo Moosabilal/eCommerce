@@ -245,7 +245,35 @@ const logout = async (req,res)=> {
 
 const loadShoppingPage = async (req, res) => {
     try {
-        res.render("shop")
+        const user = req.session.user;
+        const userData =await User.findOne({_id:user});
+        const categories = await Category.find({isListed:true});
+        const categoryIds = categories.map((category)=>category._id);
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9;
+        const skip = (page - 1) * limit;
+        const products = await Product.find({
+            isBlocked:false,
+            // category:{$in:categoryIds},
+            quantity:{$gt:0}
+        }).sort({createdOn:-1}).skip(skip).limit(limit)
+        console.log(products)
+        const totalProducts = await Product.countDocuments({
+            isBlocked:false,
+            category:{$in:categoryIds},
+            quantity:{$gt:0}
+        });
+        const totalPages = Math.ceil(totalProducts/limit);
+        const categoriesWithIds = categories.map((category)=>({_id:category._id,name:category.name}));
+        res.render('shop',{
+            user:userData,
+            category:categoriesWithIds,
+            products:products,
+            totalProducts:totalProducts,
+            totalPages:totalPages,
+            currentPage:page,
+        });
+        
     } catch (error) {
         res.redirect("/pageNotFound")
     }
