@@ -1,239 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eagles Wing Admin Panel</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
-  <style>
-    body {
-      display: flex;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-    }
-    .sidebar {
-      width: 250px;
-      background-color: #343a40;
-      color: #fff;
-      padding-top: 20px;
-      height: 100%;
-      position: fixed;
-      top: 0;
-      left: 0;
-      transition: transform 0.3s ease-in-out;
-      z-index: 1000; 
-    }
-    .sidebar a {
-      color: #fff;
-      padding: 10px 15px;
-      display: block;
-      text-decoration: none;
-      font-size: 16px;
-    }
-    .sidebar a:hover {
-      background-color: #007bff;
-    }
-    .header {
-      background-color: #343a40;
-      color: #fff;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-left: 250px;
-      height: 70px;
-    }
-    .content {
-      flex-grow: 1;
-      padding: 20px;
-      margin-left: 250px; 
-    }
-    .toggle-sidebar-btn {
-      display: none;
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 2000;
-      color: #eea1a1;
-      border: none;
-      padding: 10px;
-      font-size: 20px; 
-      cursor: pointer;
-    }
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-250px);
-      }
-      .header {
-        margin-left: 0;
-        padding-left: 40px; 
-      }
-      .content {
-        margin-left: 0; 
-      }
-      .toggle-sidebar-btn {
-        display: block;
-      }
-      .sidebar.show {
-        transform: translateX(0); 
-      }
-    }
-    #imagePreview {
-      max-width: 100%;
-      height: auto;
-      margin-top: 10px;
-    }
-    #cropContainer {
-      display: none;
-    }
-  </style>
-</head>
-<body>
+<%-include('../partials/user/header')%>
 
-  <div class="sidebar">
-    <h4 class="text-center text-white">Eagles Wing</h4>
-    <hr>
-    <a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="/admin/users"><i class="fas fa-users"></i> Customers</a>
-    <a href="/admin/category"><i class="fas fa-tags"></i> Category</a>
-    <a href="/admin/addProducts"><i class="fas fa-clipboard-list"></i> Add Product</a>
-    <a href="#"><i class="fas fa-cogs"></i> Product</a>
-    <a href="#"><i class="fas fa-gift"></i> Coupons</a>
-    <a href="#"><i class="fas fa-image"></i> Banners</a>
-    <a href="#"><i class="fas fa-box"></i> Orders</a>
-  </div>
+<div class="container py-5">
+    <h1 class="text-center mb-4">My Wishlist</h1>
 
-  <div class="d-flex flex-column flex-grow-1">
+    <!-- Wishlist Item -->
+     <% if(wishlist.length>0){ %>
+        <% for(let product of wishlist){ %>
+    <div class="card mb-3 shadow-sm">
+        <div class="row g-0">
+            <div class="col-md-3">
+                <img src="uploads/product-images/<%= product.productImage[0] %>" alt="Product Image" class="img-fluid rounded-start">
+            </div>
+            <div class="col-md-6">
+                <div class="card-body">
+                    <h5 class="card-title"><%= product.productName %></h5>
+                    <p class="card-text"><span class="fw-bold"><%= product.category.name %></span></p>
+                    <% if(product.quantity > 0){ %>
+                    <p class="card-text">
+                        <small class="text-success fw-bold">In Stock</small>
+                    </p>
+                    <% } else { %>
+                        <p class="card-text">
+                            <small class="text-success fw-bold">Out Of Stock</small>
+                        </p>
+                        <% } %>
+                </div>
+            </div>
 
-    <div class="header">
-      <button class="btn toggle-sidebar-btn" id="toggleSidebarBtn">
-        <i class="fas fa-bars"></i> 
-      </button>
-      <div class="website-name">Eagles Wing</div>
-      <div class="admin-profile">
-        <img src="admin-profile.jpg" alt="Admin" style="width: 30px; height: 30px; border-radius: 50%;">
-        <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <span>Admin</span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-dark">
-            <li><a class="dropdown-item active" href="#">Action</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-          </ul>
+            <div class="col-md-6">
+                <div class="card-body">
+                    <h5 class="card-title">Price</h5>
+                    <p class="card-text"><span class="fw-bold"><%= product.salePrice %></span></p>
+     
+                </div>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-center justify-content-center">
+                <div class="d-flex flex-column gap-2">
+                    <button class="btn btn-primary">
+                        <i class="fa-solid fa-cart-plus"></i> Move to Cart
+                    </button>
+                    <button class="btn btn-danger">
+                        <i class="fa-solid fa-trash"></i> Remove
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-
-    <div class="content container mt-4">
-      <h3 class="text-center mb-4">Add New Banner</h3>
-      <form id="addBannerForm" action="/admin/add-banner" method="post" enctype="multipart/form-data">
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="bannerTitle" class="form-label">Banner Title</label>
-            <input type="text" class="form-control" id="bannerTitle" name="title" placeholder="Enter banner title" required>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="bannerDescription" class="form-label">Description</label>
-            <textarea class="form-control" id="bannerDescription" name="description" rows="3" placeholder="Enter banner description" required></textarea>
-          </div>
+    <% } %>
+    <% } else { %>
+        <div class="d-flex justify-content-center vh-100" style="margin-top:-20%;">
+            <div class="card shadow-sm m-auto" style="width: 24rem;">
+                <div class="card-body text-center">
+                    <h5 class="card-title">No Items Found In Wishlist</h5>
+                </div>
+            </div>
         </div>
+        <% } %>
 
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="startDate" class="form-label">Start Date</label>
-            <input type="date" class="form-control" id="startDate" name="start_date" required>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="endDate" class="form-label">End Date</label>
-            <input type="date" class="form-control" id="endDate" name="end_date" required>
-          </div>
-        </div>
+    <!-- Repeat the above block for each wishlist item -->
+</div>
 
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="bannerLink" class="form-label">Link</label>
-            <input type="url" class="form-control" id="bannerLink" name="link" placeholder="https://example.com" required>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="bannerImage" class="form-label">Banner Image</label>
-            <input type="file" class="form-control" id="bannerImage" name="image" accept="image/*" required>
-            <img id="imagePreview" alt="Image Preview" />
-          </div>
-        </div>
-
-        <div id="cropContainer">
-          <h5>Crop Image</h5>
-          <div>
-            <img id="cropImage" alt="Crop" />
-          </div>
-          <button type="button" id="cropButton" class="btn btn-success mt-3">Crop & Save</button>
-        </div>
-
-        <div class="text-center mt-4">
-          <button type="submit" class="btn btn-primary w-50">Add Banner</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    const bannerImage = document.getElementById("bannerImage");
-    const imagePreview = document.getElementById("imagePreview");
-    const cropContainer = document.getElementById("cropContainer");
-    const cropImage = document.getElementById("cropImage");
-    const cropButton = document.getElementById("cropButton");
-    let cropper;
-
-    bannerImage.addEventListener("change", (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          imagePreview.src = e.target.result;
-          cropImage.src = e.target.result;
-          cropContainer.style.display = "block";
-
-          if (cropper) {
-            cropper.destroy();
-          }
-
-          cropper = new Cropper(cropImage, {
-            aspectRatio: 16 / 9,
-            viewMode: 1,
-            autoCropArea: 1
-          });
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    cropButton.addEventListener("click", () => {
-      if (cropper) {
-        const canvas = cropper.getCroppedCanvas();
-        canvas.toBlob((blob) => {
-          const formData = new FormData();
-          formData.append("croppedImage", blob, "cropped-banner.jpg");
-
-          fetch("/admin/upload-banner", {
-            method: "POST",
-            body: formData
-          }).then((response) => {
-            if (response.ok) {
-              Swal.fire("Success", "Image cropped and saved successfully!", "success");
-            } else {
-              Swal.fire("Error", "Failed to upload image.", "error");
-            }
-          });
-        }, "image/jpeg");
-      }
-    });
-  </script>
-</body>
-</html>
+<%-include('../partials/user/footer')%>

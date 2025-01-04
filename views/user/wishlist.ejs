@@ -1,0 +1,40 @@
+
+<% if(wishlist.length>0){ %>
+    <% for(let product of wishlist){ %>
+    <div class="wishlist-row d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <img src="uploads/product-images/<%= product.productImage[0] %>" class="wishlist-image" alt="<%= product.productName %>">
+            <div>
+                <p class="wishlist-title mb-1"><%= product.productName %></p>
+                <p class="wishlist-price mb-0"><%= product.category.name %></p>
+                <% if(product.quantity > 0){ %>
+                    <p class="card-text">
+                        <small class="text-success fw-bold">In Stock</small>
+                    </p>
+                    <% } else { %>
+                        <p class="card-text">
+                            <small class="text-success fw-bold">Out Of Stock</small>
+                        </p>
+                        <% } %>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <div>
+                <h5 class="card-title">Price</h5>
+                    <p class="card-text"><span class="fw-bold"><%= product.salePrice %></span></p>
+            </div>
+        </div>
+
+        <div class="wishlist-actions d-flex gap-2">
+            <button class="btn btn-success btn-sm">
+                <i class="fas fa-shopping-cart"></i> Move to Cart
+            </button>
+            <button class="btn btn-danger btn-sm">
+                <i class="fas fa-trash"></i> Remove
+            </button>
+        </div>
+    </div>
+    <% } %>
+    <% } %>
+    

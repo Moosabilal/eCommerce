@@ -3,6 +3,8 @@ const router = express.Router();
 const userController = require('../controllers/user/userController');
 const passport = require('passport');
 const profileController = require("../controllers/user/profileController");
+const productController = require("../controllers/user/productController")
+const wishlistController = require("../controllers/user/wishlistController")
 const { userAuth, adminAuth } = require("../middlewares/auth");
 
 
@@ -39,4 +41,11 @@ router.post("/reset-password",profileController.postNewPassword);
 //userProfile
 router.get("/userProfile",userAuth,profileController.userProfile);
 
+//product managing
+router.get("/productDetails",userAuth,productController.productDetails);
+
+
+//whishlist manage
+router.get("/whishlist",userAuth,wishlistController.loadWishlit);
+router.post("/addToWishlist",userAuth,wishlistController.addToWishlist)
 module.exports=router;

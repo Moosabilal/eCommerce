@@ -101,25 +101,7 @@
 						</button>
 					<% } %>
 					
-					<!-- <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".women">
-						Women
-					</button>
-
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".men">
-						Men
-					</button>
-
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".bag">
-						Bag
-					</button>
-
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".shoes">
-						Shoes
-					</button>
-
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".watches">
-						Watches
-					</button> -->
+					
 				</div>
 
 				<div class="flex-w flex-c-m m-tb-10">
@@ -137,18 +119,29 @@
 				</div>
 				
 				<!-- Search product -->
-			<form action="/search" method="POST" class="search-form">
 				<div class="dis-none panel-search w-full p-t-10 p-b-15">
-					<div class="bor8 dis-flex p-l-15">
-						<button type="submit" class="search-button size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
-							<i class="zmdi zmdi-search"></i>
-						</button>
-
-						<input class="search-input mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="query" placeholder="Search">
-
-					</div>	
+					<form action="/search" method="POST" class="search-form">
+						<div class="bor8 dis-flex p-l-15">
+							<!-- Search Icon -->
+							<button type="submit" class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04" aria-label="Search">
+								<i class="zmdi zmdi-search"></i>
+							</button>
+							<!-- Search Input Field -->
+							<input 
+								class="search-input mtext-107 cl2 size-114 plh2 p-r-15" 
+								type="text" 
+								name="query" 
+								placeholder="Search for products..." 
+								required
+							>
+							<!-- Submit Button -->
+							<button type="submit" class="search-button btn btn-primary" style="width: 18%; margin-left: 5px;">
+								Search
+							</button>
+						</div>
+					</form>
 				</div>
-			</form>
+				
 
 				<!-- Filter -->
 				<div class="dis-none panel-filter w-full p-t-10">
@@ -356,7 +349,7 @@
 
 						<div class="block2-txt flex-w flex-t p-t-14">
 							<div class="block2-txt-child1 flex-col-l ">
-								<a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+								<a href="productDetails?id=<%= products[i]._id %>" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
 									<%= products[i].productName %>
 								</a>
 
@@ -371,9 +364,9 @@
 									<input type="hidden" name="productId" value="<%= products[i]._id %>">
 									<button type="submit" class="btn btn-primary btn-sm mt-4 " style="margin-right: -20px;">Add to Cart</button>
 								</form>
-								<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+								<a href="#" class="btn-addwish-b2 dis-block pos-relative "  onclick="addToWishlist('<%= products[i]._id %>')">
 									<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-									<img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
+									<!-- <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON"> -->
 								</a>
 							</div>
 						</div>
@@ -429,3 +422,44 @@
 	</div>
 		
 	<%-include('../../views/partials/user/footer')%>
+<script>
+	function addToWishlist(productId){
+		$.ajax({
+			url:"/addToWishlist",
+			method:"POST",
+			data:{productId:productId},
+			success:(response)=>{
+				console.log(response.status)
+				if(response.status){
+					Swal.fire({
+						title:"Added to Wishlist",
+						text:"The product has been added to your wishlist",
+						icon:"success",
+						timer:2000,
+						showConfirmButton:false
+
+					})
+				}else{
+					Swal.fire({
+						title:"Error",
+						text:response.message,
+						icon:"info",
+						timer:2000,
+						showConfirmButton:false
+					})
+				}
+			},
+			error:(error)=>{
+				Swal.fire({
+					title:"Error",	
+					text:"There was an error adding the product to your wishlist",
+					icon:"error",
+					timer:2000,
+					showConfirmButton:false
+				})
+			}
+
+		})
+	}
+
+</script>

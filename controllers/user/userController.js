@@ -250,7 +250,7 @@ const loadShoppingPage = async (req, res) => {
         const categories = await Category.find({isListed:true});
         const categoryIds = categories.map((category)=>category._id);
         const page = parseInt(req.query.page) || 1;
-        const limit = 10;
+        const limit = 12;
         const skip = (page - 1) * limit;
         const products = await Product.find({
             isBlocked:false,
