@@ -33,8 +33,23 @@ const addToWishlist = async (req, res) => {
     }
 }
 
+const removeProduct = async (req, res) => {
+    try {
+        const productId = req.body.productId;
+        const userId = req.session.user;
+        const user = await User.findById(userId);
+        const index = user.wishlist.indexOf(productId);
+        user.wishlist.splice(index,1);
+        await user.save();
+        return res.redirect("/wishlist")
+    } catch (error) {
+        console.error("Error in wishlist",error);
+        return res.status(500).json({status:false,messae:'Server Error'})
+    }
+}
 
 module.exports = {
     loadWishlit,
     addToWishlist,
+    removeProduct,
 }

@@ -1,0 +1,156 @@
+<%- include('../../views/partials/user/header') %>
+
+<%- include('../../views/partials/user/profile-sidebar') %>
+
+<style>
+  .main-content {
+    background-color: rgb(230, 244, 230);
+    margin-left: 16.4%;
+    padding: 40px 30px;
+    margin-top: 0px;
+    border-radius: 8px;
+  }
+
+  h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+  }
+
+  .profile-display {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 700px;
+    margin: auto;
+    font-size: 16px;
+    color: #444;
+  }
+
+  .profile-display img {
+    display: block;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 20px auto;
+    object-fit: cover;
+    border: 3px solid #4CAF50;
+  }
+
+  .profile-display .detail {
+    margin-bottom: 15px;
+    margin-left: 40%;
+  }
+
+  .profile-display .detail span {
+    font-weight: bold;
+    color: #333;
+  }
+
+  .address-section {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .address-section h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    margin-left: 32%;
+    color: #333;
+  }
+
+  .btn-edit {
+    display: block;
+    width: fit-content;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-edit:hover {
+    background-color: #45a049;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .main-content {
+      margin-left: 0;
+      padding: 20px;
+    }
+
+    .profile-display {
+      padding: 20px;
+      width: 100%;
+    }
+
+    .address-section {
+      margin-top: 15px;
+    }
+  }
+</style>
+
+<div class="main-content">
+  <!-- Display the content here -->
+  <h2>My Profile</h2>
+  <div class="profile-display">
+    <!-- Profile Image -->
+    <!-- <img src="<%= user.profileImage ? user.profileImage : '/images/default-profile.png' %>" alt="Profile Image"> -->
+    <img src="images\1735493350930-cropped-img-1735493280191-1.png" alt="Profile Image">
+
+    <!-- Full Name -->
+    <div class="detail">
+      <span>Name:</span> <%= user.name %>
+    </div>
+
+    <!-- Phone -->
+    <div class="detail">
+      <span>Phone:</span> <%= user.phone %>
+    </div>
+
+    <!-- Email -->
+    <div class="detail">
+      <span>Email:</span> <%= user.email %>
+    </div>
+
+    <!-- Password (Hidden or Masked) -->
+    <!-- <div class="detail">
+      <span>Password:</span> ****** (hidden for security)
+    </div> -->
+
+    <!-- Address Section -->
+    <div class="address-section">
+      <h3>Address Details</h3>
+      <div class="detail">
+        <span>Street:</span> asdg
+      </div>
+      <div class="detail">
+        <span>City:</span> asdg
+      </div>
+      <div class="detail">
+        <span>State:</span>asdf
+      </div>
+      <div class="detail">
+        <span>ZIP Code:</span> ajdsf
+      </div>
+      <div class="detail">
+        <span>Country:</span> hello
+      </div>
+    </div>
+
+    <!-- Edit Button -->
+    <!-- <a href="/edit-profile" class="btn-edit">Edit Profile</a> -->
+  </div>
+  <!-- till here -->
+</div>
+
+<%- include('../../views/partials/user/footer') %>

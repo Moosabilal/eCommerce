@@ -107,15 +107,35 @@
 						<div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11">
 						<% if(locals.user){ %>
 							<div class="dropdown">
-								<a class="btn  href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+								<a 
+								  class="btn d-flex align-items-center" 
+								  href="#" 
+								  role="button" 
+								  id="dropdownMenuLink" 
+								  data-bs-toggle="dropdown" 
+								  aria-expanded="false"
+								>
+								  <!-- Profile Image -->
+								  <!-- <%= locals.user.profileImage ? locals.user.profileImage : '/images/default-profile.png' %> -->
+								  <img 
+									src="images\1735484584367-cropped-img-1735484581711-1.png"    
+									alt="User Image" 
+									class="rounded-circle" 
+									width="40" 
+									height="40"
+									style="object-fit: cover; margin-right: 10px;border: 1px solid rgb(85, 85, 201);"
+								  >
+								  <!-- User Name -->
 								  <%= locals.user.name %>
 								</a>
+							  
 								<ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
 								  <li><a class="dropdown-item" href="/userProfile">Profile</a></li>
 								  <li><hr class="dropdown-divider"></li>
 								  <li><a class="dropdown-item" href="/logout">Logout</a></li>
 								</ul>
-							</div>
+							  </div>
+							  
 							  
 						<% }else{%>
 						

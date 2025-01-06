@@ -1,64 +1,59 @@
-<%-include('../partials/user/header')%>
+<%-include('../../views/partials/user/header')%>
 
-<div class="container py-5">
-    <h1 class="text-center mb-4">My Wishlist</h1>
-
-    <!-- Wishlist Item -->
-     <% if(wishlist.length>0){ %>
-        <% for(let product of wishlist){ %>
-    <div class="card mb-3 shadow-sm">
-        <div class="row g-0">
-            <div class="col-md-3">
-                <img src="uploads/product-images/<%= product.productImage[0] %>" alt="Product Image" class="img-fluid rounded-start">
-            </div>
-            <div class="col-md-6">
-                <div class="card-body">
-                    <h5 class="card-title"><%= product.productName %></h5>
-                    <p class="card-text"><span class="fw-bold"><%= product.category.name %></span></p>
-                    <% if(product.quantity > 0){ %>
-                    <p class="card-text">
-                        <small class="text-success fw-bold">In Stock</small>
-                    </p>
-                    <% } else { %>
-                        <p class="card-text">
-                            <small class="text-success fw-bold">Out Of Stock</small>
-                        </p>
-                        <% } %>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card-body">
-                    <h5 class="card-title">Price</h5>
-                    <p class="card-text"><span class="fw-bold"><%= product.salePrice %></span></p>
-     
-                </div>
-            </div>
-
-            <div class="col-md-3 d-flex align-items-center justify-content-center">
-                <div class="d-flex flex-column gap-2">
-                    <button class="btn btn-primary">
-                        <i class="fa-solid fa-cart-plus"></i> Move to Cart
-                    </button>
-                    <button class="btn btn-danger">
-                        <i class="fa-solid fa-trash"></i> Remove
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <% } %>
-    <% } else { %>
-        <div class="d-flex justify-content-center vh-100" style="margin-top:-20%;">
-            <div class="card shadow-sm m-auto" style="width: 24rem;">
-                <div class="card-body text-center">
-                    <h5 class="card-title">No Items Found In Wishlist</h5>
-                </div>
-            </div>
-        </div>
-        <% } %>
-
-    <!-- Repeat the above block for each wishlist item -->
+<!-- Sidebar -->
+<div class="d-flex flex-column flex-shrink-0 p-3  bg-light" id="sidebar" style="width: 250px; height: 100vh; position: fixed;  left: 0; z-index: 1050; padding-top: 100px;">
+  <h5 class="d-flex align-items-center mb-3 px-3">
+      <i class="bi bi-person-circle me-2"></i> My Account
+  </h5>
+  <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item">
+          <a href="/profile" class="nav-link link-dark">
+              <i class="bi bi-person"></i> Profile
+          </a>
+      </li>
+      <li>
+          <a href="/update-profile" class="nav-link link-dark">
+              <i class="bi bi-pencil-square"></i> Update Profile
+          </a>
+      </li>
+      <li>
+          <a href="/my-address" class="nav-link link-dark">
+              <i class="bi bi-geo-alt"></i> My Address
+          </a>
+      </li>
+      <li>
+          <a href="/orders" class="nav-link link-dark">
+              <i class="bi bi-bag"></i> Orders
+          </a>
+      </li>
+      <li>
+          <a href="/wallet" class="nav-link link-dark">
+              <i class="bi bi-wallet2"></i> Wallet
+          </a>
+      </li>
+      <li>
+          <a href="/logout" class="nav-link link-dark">
+              <i class="bi bi-box-arrow-right"></i> Logout
+          </a>
+      </li>
+  </ul>
 </div>
 
-<%-include('../partials/user/footer')%>
+<!-- Sidebar Toggle for Small Screens -->
+<div class="d-lg-none position-fixed" style="top: 10px; left: 10px; z-index: 1100;">
+  <button class="btn btn-primary" id="sidebarToggleBtn">
+      <i class="bi bi-list"></i>
+  </button>
+</div>
+
+<script>
+  // JavaScript to toggle sidebar visibility on small screens
+  const toggleBtn = document.getElementById('sidebarToggleBtn');
+  const sidebar = document.getElementById('sidebar');
+
+  toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('d-none'); // Toggle the display on small screens
+  });
+</script>
+
+<%-include('../../views/partials/user/footer')%>

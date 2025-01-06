@@ -40,12 +40,23 @@ router.post("/resend-forgot-otp",profileController.resendOtp)
 router.post("/reset-password",profileController.postNewPassword);
 //userProfile
 router.get("/userProfile",userAuth,profileController.userProfile);
+router.get("/updateProfile",userAuth,profileController.getEditProfile)
+router.get("/change-email",userAuth,profileController.changeEmail)
+router.post("/change-email",userAuth,profileController.changeEmailValid)
+router.get("/verify-email-otp",userAuth,profileController.getNewEmail)
+router.post("/verify-email-otp",userAuth,profileController.verifyEmailOtp)
+router.post("/update-email",userAuth,profileController.updateEmail)
+
 
 //product managing
 router.get("/productDetails",userAuth,productController.productDetails);
 
 
 //whishlist manage
-router.get("/whishlist",userAuth,wishlistController.loadWishlit);
+router.get("/wishlist",userAuth,wishlistController.loadWishlit);
 router.post("/addToWishlist",userAuth,wishlistController.addToWishlist)
+router.get("/removeFromWishlist",userAuth,wishlistController.removeProduct)
+
+
+
 module.exports=router;

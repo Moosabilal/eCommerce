@@ -37,7 +37,7 @@ const login = async (req,res)=>{
 }
 
 const loadDashboard = async (req,res)=>{
-   
+    console.log("res",req.session.admin)
     if(req.session.admin){
         try {
             res.render("dashboard");
