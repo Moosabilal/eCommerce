@@ -1,0 +1,96 @@
+<%- include('../../views/partials/user/header') %>
+<%- include('../../views/partials/user/profile-sidebar') %>
+
+<style>
+    .main-content {
+        background-color: rgb(211, 218, 211);
+        margin-left: 16.4%;
+        padding: 40px 30px;
+        margin-top: 0px;
+        border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .main-content {
+            margin-left: 0;
+            padding: 20px;
+        }
+    }
+</style>
+
+
+<div class="main-content">
+<div class="container mt-5">
+  <h3 class="text-center mb-4">Edit Address</h3>
+
+  <form action="/editAddress?id=<%= address._id %>" method="POST" class="shadow p-4 rounded bg-light">
+    <div class="row">
+      <!-- Address Type -->
+      <div class="form-group col-md-6">
+        <label for="addressType">Address Type:</label>
+        <select class="form-control" id="addressType" name="addressType" required>
+          <option value="Home" <%= address.addressType === 'Home' ? 'selected' : '' %>>Home</option>
+          <option value="Work" <%= address.addressType === 'Work' ? 'selected' : '' %>>Work</option>
+          <option value="Other" <%= address.addressType === 'Other' ? 'selected' : '' %>>Other</option>
+        </select>
+      </div>
+
+      <!-- Name -->
+      <div class="form-group col-md-6">
+        <label for="name">Name:</label>
+        <input type="text" class="form-control" id="name" name="name" value="<%= address.name %>" required>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- City -->
+      <div class="form-group col-md-6">
+        <label for="city">City:</label>
+        <input type="text" class="form-control" id="city" name="city" value="<%= address.city %>" required>
+      </div>
+
+      <!-- Landmark -->
+      <div class="form-group col-md-6">
+        <label for="landMark">Landmark:</label>
+        <input type="text" class="form-control" id="landMark" name="landMark" value="<%= address.landMark %>" required>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- State -->
+      <div class="form-group col-md-6">
+        <label for="state">State:</label>
+        <input type="text" class="form-control" id="state" name="state" value="<%= address.state %>" required>
+      </div>
+
+      <!-- Pincode -->
+      <div class="form-group col-md-6">
+        <label for="pincode">Pincode:</label>
+        <input type="text" class="form-control" id="pincode" name="pincode" value="<%= address.pincode %>" required>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Phone -->
+      <div class="form-group col-md-6">
+        <label for="phone">Phone:</label>
+        <input type="text" class="form-control" id="phone" name="phone" value="<%= address.phone %>" required>
+      </div>
+
+      <!-- Alternate Phone -->
+      <div class="form-group col-md-6">
+        <label for="altPhone">Alternate Phone:</label>
+        <input type="text" class="form-control" id="altPhone" name="altPhone" value="<%= address.altPhone %>" required>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-primary">Update Address</button>
+      <a href="/addAddress" class="btn btn-secondary ml-2">Cancel</a>
+    </div>
+  </form>
+</div>
+</div>
+
+<%- include('../../views/partials/user/footer') %>

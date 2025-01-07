@@ -46,11 +46,23 @@ router.post("/change-email",userAuth,profileController.changeEmailValid)
 router.get("/verify-email-otp",userAuth,profileController.getNewEmail)
 router.post("/verify-email-otp",userAuth,profileController.verifyEmailOtp)
 router.post("/update-email",userAuth,profileController.updateEmail)
+router.get("/change-password",userAuth,profileController.changePassword)
+router.post("/change-password",userAuth,profileController.changePasswordValid)
+router.post("/verify-changePassword-otp",userAuth,profileController.verifyChangePassOtp)
+router.get("/reset-profile-password",profileController.getResetProfilePassPage);
+router.post("/reset-profile-password",profileController.postNewProfilePassword);
+//address manage
+router.get("/addAddress",userAuth,profileController.addAddress)
+router.post("/addAddress",userAuth,profileController.postAddAddress)
+router.get("/editAddress",userAuth,profileController.editAddress);
+router.post("/editAddress",userAuth,profileController.postEditAddress);
+router.get("/deleteAddress",userAuth,profileController.deleteAddress)
+
+
 
 
 //product managing
 router.get("/productDetails",userAuth,productController.productDetails);
-
 
 //whishlist manage
 router.get("/wishlist",userAuth,wishlistController.loadWishlit);
