@@ -3,7 +3,117 @@
  
 <%- include('../../views/partials/admin/header')%>
 <!-- Content Area -->
+<!-- Dashboard Content -->
 <div class="content">
-    <h3>Customers List</h3>
+    <div class="container-fluid">
+      <h2 class="mb-4">Admin Dashboard</h2>
+  
+      <!-- Summary Cards -->
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Total Sales</h5>
+              <p class="card-text">₹<span id="totalSales">1,20,000</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Total Profit</h5>
+              <p class="card-text">₹<span id="totalProfit">45,000</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Total Orders</h5>
+              <p class="card-text"><span id="totalOrders">350</span> Orders</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-white bg-danger mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Customers</h5>
+              <p class="card-text"><span id="totalCustomers">120</span> Customers</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Charts -->
+      <div class="row">
+        <div class="col-md-6">
+          <canvas id="salesChart"></canvas>
+        </div>
+        <div class="col-md-6">
+          <canvas id="ordersChart"></canvas>
+        </div>
+      </div>
     </div>
+  </div>
+  
+  <!-- Include Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    // Data for the Sales Chart
+    const salesChartCtx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(salesChartCtx, {
+      type: 'bar',
+      data: {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+        datasets: [{
+          label: 'Monthly Sales (₹)',
+          data: [20000, 30000, 25000, 40000, 50000, 45000],
+          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  
+    // Data for the Orders Chart
+    const ordersChartCtx = document.getElementById('ordersChart').getContext('2d');
+    const ordersChart = new Chart(ordersChartCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Electronics', 'Fashion', 'Groceries', 'Home Appliances', 'Books'],
+        datasets: [{
+          label: 'Category Orders',
+          data: [120, 90, 60, 80, 40],
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(153, 102, 255, 0.7)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true
+      }
+    });
+  </script>
+  
  <%- include('../../views/partials/admin/footer')%>

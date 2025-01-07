@@ -335,7 +335,11 @@ const addAddress = async (req,res)=>{
         const userData = await User.findOne({_id:userId});
         const userAddress = await Address.findOne({userId:userData._id});
 
-        res.render("address",{userAddress:userAddress,})
+        res.render("address",{
+            userAddress:userAddress,
+            user:userData
+        
+        })
     } catch (error) {
         res.redirect("/pageNotFound")
     }

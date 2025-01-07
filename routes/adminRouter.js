@@ -6,18 +6,18 @@ const customerController = require('../controllers/admin/customerController')
 const categoryController = require('../controllers/admin/categoryController')
 const productController = require('../controllers/admin/productController');
 const bannerController = require('../controllers/admin/bannerController');
-const multer = require('multer'); // Import multer
+const multer = require('multer'); 
 const { userAuth, adminAuth } = require("../middlewares/auth");
 
-// Configure multer for file upload
+// multer
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads/product-images'); // Destination for uploaded files
+        cb(null, 'public/uploads/product-images'); 
     },
     filename: function (req, file, cb) {
-        const originalExtension = file.originalname.split('.').pop(); // Get original file extension
+        const originalExtension = file.originalname.split('.').pop(); 
         const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}.${originalExtension}`;
-        cb(null, uniqueName); // Save with original extension
+        cb(null, uniqueName); 
     }
 });
 
