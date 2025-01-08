@@ -1,4 +1,16 @@
 <%- include('../partials/user/header') %>
+<div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+        <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+            Home
+            <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+        </a>
+
+        <span class="stext-109 cl4">
+            My Wishlist
+        </span>
+    </div>
+</div>
 
 <div class="container py-5">
     <h1 class="text-center mb-4">My Wishlist</h1>
@@ -31,7 +43,7 @@
                     <button class="btn btn-success btn-sm">
                         <i class="fas fa-cart-plus"></i> Move to Cart
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="confirmRemove('< product._id %>')">
+                    <button class="btn btn-danger btn-sm" onclick="confirmRemove('<%= product._id %>')">
                         <i class="fas fa-trash"></i> Remove
                     </button>
                 </div>

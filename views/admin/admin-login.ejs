@@ -22,12 +22,48 @@
     <!-- Login Form -->
     <div class="login-container">
         <h1>Admin Login</h1>
-        <form action="/admin/login" method="POST">
-            <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
-            <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+        <form action="/admin/login" method="POST" id="adminLoginForm">
+            <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" required>
+            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
+            <div id="error" class="error-message"></div>
+
+            <%if(locals.message && message.length>0){%>
+                <div class="alert alert-danger text-center rounded-pill">
+                    <%=message%>
+                </div>
+            <%}%>
+            
             <button type="submit">Login</button>
         </form>
         <p>Forgot Password? <a href="/admin/forgot-password">Click here</a></p>
     </div>
+
+<script>
+    document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            
+            if (!email.includes('@')) {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = 'Invalid Email or Password.';
+                event.preventDefault();
+            } else {
+                document.getElementById('error').style.display = 'none';
+            }
+            
+            
+            if (password.length < 8) {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = 'Password must be at least 6 characters.';
+                event.preventDefault();
+            } else {
+                document.getElementById('error').style.display = 'none';
+            }
+        });
+    </script>
+
+</script>
+    
 </body>
 </html>

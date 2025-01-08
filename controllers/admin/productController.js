@@ -30,9 +30,9 @@ const addProducts = async (req, res) => {
                 for(let i = 0 ; i < req.files.length ; i++){
                     const originalImagesPath = req.files[i].path;
 
-                    const resizedImagePath = path.join("public","uploads","product-images",req.files[i].filename);
+                    const resizedImagePath = path.join("public","uploads","product-images",`resized_${req.files[i].filename}`);
                     await sharp(originalImagesPath).resize({width:300,height:400}).toFile(resizedImagePath);
-                    images.push(req.files[i].filename);
+                    images.push(`resized_${req.files[i].filename}`);
                 }
             }
             const categoryId = await Category.findOne({name:products.category});
@@ -43,17 +43,17 @@ const addProducts = async (req, res) => {
 
             
             const newProduct = new Product({
-                productName:products.productName,
-                description:products.description,
-                category:categoryId._id,
-                regularPrice:products.regularPrice,
-                salePrice:products.salePrice,
-                createdOn:new Date(),
-                quantity:products.quantity,
-                size:products.size,
-                color:products.color,
-                productImage:images,
-                status:"Available",
+                productName: products.productName,
+                description: products.description,
+                category: categoryId._id,
+                regularPrice: products.regularPrice,
+                salePrice: products.salePrice,
+                createdOn: new Date(),
+                quantity: products.quantity,
+                size: products.size,
+                color: products.color,
+                productImage: images,
+                status: "Available",
             })
             await newProduct.save();
             return res.redirect("/admin/Products")

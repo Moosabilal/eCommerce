@@ -29,13 +29,13 @@ const addToWishlist = async (req, res) => {
         return res.status(200).json({status:true,message:"Product added to wishlist"})
     } catch (error) {
         console.error("Error in saving to wishlist",error);
-        return res.status(500).json({status:false,message:"Server error"})
+        return res.status(500).json({status:false,message:"Server Error"})
     }
 }
 
 const removeProduct = async (req, res) => {
     try {
-        const productId = req.body.productId;
+        const productId = req.query.productId;
         const userId = req.session.user;
         const user = await User.findById(userId);
         const index = user.wishlist.indexOf(productId);

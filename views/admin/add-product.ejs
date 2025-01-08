@@ -15,6 +15,36 @@
         margin-right: 10px;
     }
 
+    .image-cropper {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.image-preview {
+    max-height: 300px;
+    overflow: hidden;
+}
+
+.cropper-container {
+    margin-bottom: 15px;
+}
+
+#croppedImg1, #croppedImg2, #croppedImg3, #croppedImg4 {
+    max-width: 100%;
+    max-height: 200px;
+    display: none;
+    margin-right: 10px;
+}
+
+.btn-crop-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
     /* Ensure the cropped images fit well in the container */
     .image-cropper img {
         max-width: 100%;
@@ -196,47 +226,94 @@ function validateAndSubmit() {
             }
 
             function viewImage(event, index) {
-    let input = event.target;
-    let originalFile = input.files[0]; // Get the original file
-
-    if (!originalFile) return; // Handle cases where no file is selected
-
-    let image = document.getElementById('imgView' + index);
-    image.src = URL.createObjectURL(originalFile); // Preview original image directly
-
-    let cropper = new Cropper(image, {
+    const input = event.target;
+    const originalFile = input.files[0];
+    
+    if (!originalFile) return;
+    
+    // Clear any existing cropper
+    const image = document.getElementById('imgView' + index);
+    if (image.cropper) {
+        image.cropper.destroy();
+    }
+    
+    // Set up image preview
+    image.src = URL.createObjectURL(originalFile);
+    image.style.display = 'block';
+    
+    // Initialize cropper
+    const cropper = new Cropper(image, {
         aspectRatio: 0.8,
-        viewMode: 1,
+        viewMode: 2,
         guides: true,
-        background: false,
+        background: true,
         autoCropArea: 1,
         zoomable: true,
+        cropBoxResizable: true,
+        cropBoxMovable: true,
+        dragMode: 'move',
+        ready: function() {
+            // Show cropper container when ready
+            const cropperContainer = document.querySelector('#croppedImg' + index).parentNode;
+            cropperContainer.style.display = 'block';
+        }
     });
-
-    let cropperContainer = document.querySelector('#croppedImg' + index).parentNode;
-    cropperContainer.style.display = 'block';
-
-    let saveButton = document.querySelector('#saveButton' + index);
-    saveButton.addEventListener('click', async function () {
-        let croppedCanvas = cropper.getCroppedCanvas(); // Create cropped canvas
-
-        // Convert cropped canvas to blob and save
-        await croppedCanvas.toBlob(blob => {
-            let input = document.getElementById('input' + index);
-            let imgFile = new File([blob], originalFile.name, { type: originalFile.type });
-            const fileList = new DataTransfer();
-            fileList.items.add(imgFile);
-            input.files = fileList.files;
-        }, originalFile.type); // Ensure the original format
-
-        let croppedImage = document.getElementById("croppedImg" + index);
-        croppedImage.src = croppedCanvas.toDataURL(originalFile.type); // Update cropped image preview
-
-        image.style.display = "none";
-        cropperContainer.style.display = 'none';
-        croppedImage.style.display = 'block';
-        cropper.destroy();
-    });
+    
+    image.cropper = cropper;
+    
+    // Set up save button functionality
+    const saveButton = document.querySelector('#saveButton' + index);
+    saveButton.onclick = async function() {
+        try {
+            const croppedCanvas = cropper.getCroppedCanvas({
+                width: 800,  // Max width
+                height: 1000, // Max height
+                imageSmoothingQuality: 'high'
+            });
+            
+            if (!croppedCanvas) {
+                throw new Error('Cropping failed');
+            }
+            
+            // Convert to blob and update file input
+            const blob = await new Promise(resolve => croppedCanvas.toBlob(resolve, originalFile.type, 0.8));
+            const croppedFile = new File([blob], originalFile.name, { 
+                type: originalFile.type,
+                lastModified: new Date().getTime()
+            });
+            
+            // Update file input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(croppedFile);
+            input.files = dataTransfer.files;
+            
+            // Update preview
+            const croppedImg = document.getElementById('croppedImg' + index);
+            croppedImg.src = croppedCanvas.toDataURL(originalFile.type);
+            croppedImg.style.display = 'block';
+            
+            // Clean up
+            image.style.display = 'none';
+            cropper.destroy();
+            image.cropper = null;
+            
+            // Add success feedback
+            Swal.fire({
+                icon: 'success',
+                title: 'Image cropped successfully',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            
+        } catch (error) {
+            console.error('Cropping error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to crop image. Please try again.'
+            });
+        }
+    };
 }
 
 

@@ -1,90 +1,20 @@
 
 <%-include('../../views/partials/user/header')%>
 
-	<!-- Cart -->
-	<div class="wrap-header-cart js-panel-cart">
-		<div class="s-full js-hide-cart"></div>
+<div class="container">
+	<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+		<a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+			Home
+			<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+		</a>
 
-		<div class="header-cart flex-col-l p-l-65 p-r-25">
-			<div class="header-cart-title flex-w flex-sb-m p-b-8">
-				<span class="mtext-103 cl2">
-					Your Cart
-				</span>
-
-				<div class="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-cart">
-					<i class="zmdi zmdi-close"></i>
-				</div>
-			</div>
-			
-			<div class="header-cart-content flex-w js-pscroll">
-				<ul class="header-cart-wrapitem w-full">
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="images/item-cart-01.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								White Shirt Pleat
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $19.00
-							</span>
-						</div>
-					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="images/item-cart-02.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Converse All Star
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $39.00
-							</span>
-						</div>
-					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="images/item-cart-03.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Nixon Porter Leather
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $17.00
-							</span>
-						</div>
-					</li>
-				</ul>
-				
-				<div class="w-full">
-					<div class="header-cart-total w-full p-tb-40">
-						Total: $75.00
-					</div>
-
-					<div class="header-cart-buttons flex-w w-full">
-						<a href="shoping-cart.html" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10">
-							View Cart
-						</a>
-
-						<a href="shoping-cart.html" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10">
-							Check Out
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
+		<span class="stext-109 cl4">
+			Shop
+		</span>
 	</div>
+</div>
+
+	
 
 	
 	<!-- Product -->
@@ -359,14 +289,15 @@
 							</div>
 
 							<div class="block2-txt-child2 flex-r p-t-3">
-								<!-- here add a add to cart button -->
-								<form action="/add-to-cart" method="POST" class="add-to-cart-form">
-									<input type="hidden" name="productId" value="<%= products[i]._id %>">
-									<button type="submit" class="btn btn-primary btn-sm mt-4 " style="margin-right: -20px;">Add to Cart</button>
-								</form>
-								<a href="#" class="btn-addwish-b2 dis-block pos-relative "  onclick="addToWishlist('<%= products[i]._id %>')">
+								<button
+									type="button"
+									class="btn btn-primary btn-sm mt-4"
+									onclick="addToCart('<%= products[i]._id %>')"
+									style="margin-right: -20px;">
+									Add to Cart
+								</button>
+								<a href="#" class="btn-addwish-b2 dis-block pos-relative" onclick="addToWishlist('<%= products[i]._id %>')">
 									<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-									<!-- <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON"> -->
 								</a>
 							</div>
 						</div>
@@ -423,43 +354,89 @@
 		
 	<%-include('../../views/partials/user/footer')%>
 <script>
-	function addToWishlist(productId){
-		$.ajax({
-			url:"/addToWishlist",
+	async function addToWishlist(productId) {
+    try {
+        const response = await fetch("/addToWishlist", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ productId: productId }) // Send the productId in the body as a JSON string
+        });
+
+        const data = await response.json(); // Parse the JSON response
+
+        console.log(data.status);
+        if (data.status) {
+            Swal.fire({
+                title: "Added to Wishlist",
+                text: data.message,
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } else {
+            Swal.fire({
+                title: "Error",
+                text: data.message,
+                icon: "info",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            title: "Error",    
+            text: "There was an error adding the product to your wishlist",
+            icon: "error",
+            timer: 2000,
+            showConfirmButton: false
+        });
+        console.error("Error in adding to wishlist:", error); // Log the error for debugging
+    }
+}
+
+
+async function addToCart(productId){
+	try {
+		const response = await fetch("/addToCart",{
 			method:"POST",
-			data:{productId:productId},
-			success:(response)=>{
-				console.log(response.status)
-				if(response.status){
-					Swal.fire({
-						title:"Added to Wishlist",
-						text:"The product has been added to your wishlist",
-						icon:"success",
-						timer:2000,
-						showConfirmButton:false
-
-					})
-				}else{
-					Swal.fire({
-						title:"Error",
-						text:response.message,
-						icon:"info",
-						timer:2000,
-						showConfirmButton:false
-					})
-				}
+			headers:{
+				"Content-Type":"application/json"
 			},
-			error:(error)=>{
-				Swal.fire({
-					title:"Error",	
-					text:"There was an error adding the product to your wishlist",
-					icon:"error",
-					timer:2000,
-					showConfirmButton:false
-				})
-			}
+			body:JSON.stringify({productId:productId})
+		});
 
-		})
+		const data = await response.json();
+
+		if(data.status){
+			Swal.fire({
+				title:"Added to cart",
+				text:data.message,
+				icon:"success",
+				timer:2000,
+				showConfirmButton:false
+			})
+		}else{
+			Swal.fire({
+				title:"Error",
+				text:data.message,
+				icon:"info",
+				timer:2000,
+				showConfirmButton:false
+			})
+		}
+	} catch (error) {
+		Swal.fire({
+			title: "Error",
+			text: "There was an error adding the product to your cart",
+			icon: "error",
+			timer: 2000,
+			showConfirmButton: false
+		});
+		console.error("Error in adding to cart:",error);
 	}
+}
+
 
 </script>
