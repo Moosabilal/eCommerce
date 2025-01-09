@@ -1,12 +1,25 @@
 const express = require('express');
+const Cart = require('../models/cartSchema')
+const User = require('../models/userSchema')
 const router = express.Router();
 const userController = require('../controllers/user/userController');
-const passport = require('passport');
+const passport = require('../config/passport');
 const profileController = require("../controllers/user/profileController");
 const productController = require("../controllers/user/productController")
 const wishlistController = require("../controllers/user/wishlistController");
 const cartController = require("../controllers/user/cartController")
 const { userAuth, adminAuth } = require("../middlewares/auth");
+
+
+router.use(async (req, res, next) => {
+    const userId = req.session.user;
+    const user = await User.findById(userId);
+        const cart = await Cart.find({ _id: userId }).populate('product');
+        res.locals.cart = cart; // Make cart globally accessible in views
+    
+    next();
+});
+
 
 
 //error management
@@ -19,6 +32,7 @@ router.post('/resend-otp',userController.resendOtp);
 
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),(req,res)=>{
+    res.redirect('/')
 });
 //login management
 router.get("/login",userController.loadLogin)

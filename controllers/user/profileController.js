@@ -366,7 +366,7 @@ const postAddAddress = async (req,res)=>{
         const {addressType, name, city, landMark, state, pincode, phone, altPhone} = req.body;
 
         const userAddress = await Address.findOne({userId:userData._id});
-        // console.log("user address : ",userAddress)
+        console.log("user address : ",userAddress)
         if(!userAddress){
             const newAddress = new Address({
                 userId:userData._id,

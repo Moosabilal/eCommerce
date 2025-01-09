@@ -9,7 +9,7 @@ const getCart = async (req, res) => {
         const products = await Product.find({_id:{$in:user.cart}}).populate('category');
         console.log(products)
         res.render('shopping-cart',{
-            user,
+            user:user,
             cart:products
         })
     } catch (error) {
