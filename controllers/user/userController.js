@@ -264,6 +264,7 @@ const loadShoppingPage = async (req, res) => {
         });
         const totalPages = Math.ceil(totalProducts/limit);
         const categoriesWithIds = categories.map((category)=>({_id:category._id,name:category.name}));
+        console.log(userData)
         res.render('shop',{
             user:userData,
             category:categoriesWithIds,

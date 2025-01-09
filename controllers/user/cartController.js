@@ -1,13 +1,15 @@
 const Cart = require("../../models/cartSchema");
+const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema")
 
 const getCart = async (req, res) => {
     try {
         const userId = req.session.user;
         const user = await User.findById(userId);
-        const products = await Cart.find({_id:{$in:user.cart}}).populate('category');
+        const products = await Product.find({_id:{$in:user.cart}}).populate('category');
+        console.log(products)
         res.render('shopping-cart',{
-            user:user,
+            user,
             cart:products
         })
     } catch (error) {

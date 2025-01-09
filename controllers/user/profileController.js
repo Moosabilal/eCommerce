@@ -171,6 +171,20 @@ const getEditProfile = async (req,res)=>{
     }
 }
 
+const postEditProfile = async (req,res)=>{
+    try {
+        const {name, phone} = req.body;
+        const userId = req.session.user;
+        const userData = await User.findById(userId)
+        await User.findByIdAndUpdate(userId,{name:name,phone:phone})
+        res.redirect("/userProfile")
+
+    } catch (error) {
+        console.log("Error in updating user profile",error);
+        res.redirect("/pageerror")
+    }
+}
+
 
 const changeEmail = async (req,res)=>{
     try {
@@ -464,6 +478,7 @@ module.exports = {
     postNewPassword,
     userProfile,
     getEditProfile,
+    postEditProfile,
     changeEmail,
     changeEmailValid,
     verifyEmailOtp,
@@ -479,5 +494,6 @@ module.exports = {
     editAddress,
     postEditAddress,
     deleteAddress,
+    
 
 }
