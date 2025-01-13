@@ -7,6 +7,7 @@ const sharp = require("sharp")
 
 const getProductAddPage = async (req, res) => {
     try {
+        
         const category = await Category.find({isListed:true});
         res.render("add-product",{
             cat: category // Pass the fetched categories to the view
@@ -40,6 +41,7 @@ const addProducts = async (req, res) => {
                 return res.status(400).json("Invalid category name")
             }
             
+            
 
             
             const newProduct = new Product({
@@ -49,12 +51,15 @@ const addProducts = async (req, res) => {
                 regularPrice: products.regularPrice,
                 salePrice: products.salePrice,
                 createdOn: new Date(),
-                quantity: products.quantity,
-                size: products.size,
+                stock:[{
+                    size: products.size,
+                    quantity: products.quantity,
+                }],
                 color: products.color,
                 productImage: images,
                 status: "Available",
             })
+            console.log(newProduct)
             await newProduct.save();
             return res.redirect("/admin/Products")
         
@@ -197,6 +202,9 @@ const editProduct = async (req,res)=>{
             productName:data.productName,
             _id:{$ne:id}
         })
+        const categoryId = await Category.findOne({name:data.category});
+
+        
         if(existingProduct){
             return res.status(400).json({error:"Product with this name already exists, Please try with another name"});
         }
@@ -210,17 +218,38 @@ const editProduct = async (req,res)=>{
         const updateFields = {
             productName:data.productName,
             description:data.description,
-            category:product.category,
+            category:categoryId._id,
             regularPrice:data.regularPrice,
             salePrice:data.salePrice,
-            quantity:data.quantity,
-            size:data.size,
+            // stock:[{
+            //     size:data.size,
+            //     quantity:data.quantity
+            // }],
             color:data.color
         }
+        console.log("first error")
+        // Check if the size already exists in the stock array
+        const size = data.size;      // Get the size from the form
+        const quantity = data.quantity;  // Get the quantity from the form
+
+        // Check if the size already exists in the stock array
+        const existingSize = product.stock.find((item) => item.size === size);
+
+        if (existingSize) {
+            // Size exists, update the quantity
+            existingSize.quantity += Number(quantity);
+        } else {
+            // Size does not exist, add a new size and quantity
+            product.stock.push({ size: size, quantity: quantity });
+        }
+
+        // Push the updated stock array to updateFields
+        updateFields.stock = product.stock;
 
         if(req.files.length>0){
             updateFields.$push = {productImage:{$each:images}};
         }
+        console.log("updateFields",updateFields)
         
         await Product.findByIdAndUpdate(id,updateFields,{new:true});
         res.redirect("/admin/products");

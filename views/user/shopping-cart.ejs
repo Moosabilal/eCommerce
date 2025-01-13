@@ -1,5 +1,26 @@
 
 <%-include('../../views/partials/user/header')%>
+<style>
+	/* Styling for the Remove button */
+.btn-remove {
+    background-color: #ff4d4d; /* Light red background */
+    color: #fff; /* White text color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 8px 16px; /* Spacing */
+    font-size: 14px; /* Text size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* Hover effect for the Remove button */
+.btn-remove:hover {
+    background-color: #e60000; /* Darker red on hover */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transform: scale(1.05); /* Slightly enlarge the button */
+}
+
+</style>
 
 	<!-- Cart -->
 	<!-- <div class="wrap-header-cart js-panel-cart">
@@ -90,7 +111,7 @@
 	<!-- breadcrumb -->
 	<div class="container">
 		<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-			<a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
+			<a href="/" class="stext-109 cl8 hov-cl1 trans-04">
 				Home
 				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
 			</a>
@@ -116,38 +137,47 @@
 									<th class="column-3">Price</th>
 									<th class="column-4">Quantity</th>
 									<th class="column-5">Total</th>
+									<th class="column-6">Action</th>
 								</tr>
-								<% if(cart.length > 0){ %>
-									<% for(let product of cart){ %>
-								<tr class="table_row">
-									<td class="column-1">
-										<div class="how-itemcart1">
-											<img src="uploads/product-images/<%= product.productImage[0] %>" alt="IMG">
-										</div>
-									</td>
-									<td class="column-2"><%= product.productName %></td>
-									<td class="column-3">&#8377;<%= product.salePrice %></td>
-									<td class="column-4">
-										<div class="wrap-num-product flex-w m-l-auto m-r-0">
-											<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-												<i class="fs-16 zmdi zmdi-minus"></i>
+								<% if (cart && cart.items.length > 0) { %>
+									<% for (let i = 0; i < cart.items.length; i++) { 
+										let item = cart.items[i];
+										let product = products.find(p => p._id.toString() === item.productId.toString());
+									%>
+									<tr class="table_row">
+										<% if (product) { %> <!-- Check if product exists -->
+										<td class="column-1">
+											<div class="how-itemcart1">
+												<img src="uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>">
 											</div>
-											<% if(product.quantity > 0){ %>
-											<input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="1">
-											<% } else { %>
-											<input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="out of stock">
-											<% } %>
-
-
-											<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-												<i class="fs-16 zmdi zmdi-plus"></i>
+										</td>
+										<td class="column-2"><%= product.productName %></td>
+										<td class="column-3">&#8377;<%= product.salePrice %></td>
+										<td class="column-4">
+											<div class="wrap-num-product flex-w m-l-auto m-r-0">
+												<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
+													<i class="fs-16 zmdi zmdi-minus" onclick="return decTotalPrice('<%= product._id %>')"></i>
+												</div>
+												<input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="<%= item.quantity %>">
+												<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
+													<i class="fs-16 zmdi zmdi-plus" onclick="return incTotalPrice('<%= product._id %>')"></i>
+												</div>
 											</div>
-										</div>
-									</td>
-									<td class="column-5">$ 36.00</td>
-								</tr>
+										</td>
+										<td class="column-5">&#8377;<%= item.totalPrice %></td>
+										<td class="column-6">
+											<button class="btn-remove" onclick="return removeFromCart('<%= product._id %>',event)">Remove</button>
+										</td>
+										<% } else { %> <!-- Fallback for missing product -->
+										<td colspan="6">Product not found</td>
+										<% } %>
+									</tr>
+									<% } %>
+								<% } else { %>
+									<tr><td colspan="6" style="text-align: center; ">No items in the cart.</td></tr>
 								<% } %>
-								<% } %>
+								
+								
 
 								
 							</table>
@@ -258,3 +288,20 @@
 		
 	
 	<%-include('../../views/partials/user/footer')%>
+
+	<script>
+		function removeFromCart(productId,event) {
+			event.preventDefault();
+			Swal.fire({
+				title:"are you sure?",
+				text:"You want to remove this product from cart",
+				icon:"warning",
+				showCancelButton:true,
+				confirmButtonText:"Yes, delete it!"
+			}).then((result)=>{
+				if(result.isConfirmed){
+					window.location.href=`/removeFromCart/?productId=${productId}`;
+				}
+			})
+		}
+	</script>

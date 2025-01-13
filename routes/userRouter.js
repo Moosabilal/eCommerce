@@ -1,32 +1,26 @@
 const express = require('express');
 const Cart = require('../models/cartSchema')
 const User = require('../models/userSchema')
+const Product = require('../models/productSchema')
 const router = express.Router();
+const {userAuth, userLogin} = require('../middlewares/userAuthentication')
 const userController = require('../controllers/user/userController');
 const passport = require('../config/passport');
 const profileController = require("../controllers/user/profileController");
 const productController = require("../controllers/user/productController")
 const wishlistController = require("../controllers/user/wishlistController");
 const cartController = require("../controllers/user/cartController")
-const { userAuth, adminAuth } = require("../middlewares/auth");
+// const { userAuth, adminAuth } = require("../middlewares/auth");
 
 
-router.use(async (req, res, next) => {
-    const userId = req.session.user;
-    const user = await User.findById(userId);
-        const cart = await Cart.find({ _id: userId }).populate('product');
-        res.locals.cart = cart; // Make cart globally accessible in views
-    
-    next();
-});
 
 
 
 //error management
 router.get('/pageNotFound',userController.pageNotFound)
 //signup management
-router.get('/signup',userController.loadSignup);
-router.post('/signup',userController.signup)
+router.get('/signup',userLogin,userController.loadSignup);
+router.post('/signup',userLogin,userController.signup)
 router.post('/verify-otp',userController.verifyOtp)
 router.post('/resend-otp',userController.resendOtp);
 
@@ -35,12 +29,12 @@ router.get('/auth/google/callback',passport.authenticate('google',{failureRedire
     res.redirect('/')
 });
 //login management
-router.get("/login",userController.loadLogin)
-router.post('/login',userController.login)
-router.get('/logout',userController.logout)
+router.get("/login",userLogin,userController.loadLogin)
+router.post('/login',userLogin,userController.login)
+router.get('/logout',userAuth,userController.logout)
 
 //home management && shop
-router.get('/',userController.loadHomepage);
+router.get('/',userAuth,userController.loadHomepage);
 router.get("/shop",userAuth,userController.loadShoppingPage);
 router.get("/filter",userAuth,userController.filterProduct);
 router.get('/filterPrice',userAuth,userController.filterByPrice);
@@ -88,5 +82,6 @@ router.get("/removeFromWishlist",userAuth,wishlistController.removeProduct)
 //cart management
 router.get("/loadCart",userAuth,cartController.getCart);
 router.post("/addToCart",userAuth,cartController.addToCart);
+router.get("/removeFromCart",userAuth,cartController.removeProduct);
 
 module.exports=router;

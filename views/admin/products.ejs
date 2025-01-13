@@ -19,8 +19,8 @@
                 <th>Offer Price</th>
                 <th>Offer</th>
                 <th>Quantity</th>
+                <th>Size</th>
                 <th>Action</th>
-                <th>Edit</th>
               </tr>
             </thead>
             <tbody>
@@ -45,15 +45,15 @@
                   <% } %>     
               </td>
               
-                <td><%= data[i].quantity %></td>
+              <td><%- data[i].stock.map(item => item.size).join('<br>') %></td>
+              <td><%- data[i].stock.map(item => item.quantity).join('<br>') %></td>
+              
                 <td>
                   <% if(data[i].isBlocked===false){ %>
-                  <a href="/admin/blockProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;"><button class="btn btn-warning btn-sm">Block</button></a>
-                  <% }else{ %>
-                    <a href="/admin/unblockProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;"><button class="btn btn-primary btn-sm">UnBlock</button></a>
-                    <% } %>
-                </td>
-                <td>
+                    <a href="/admin/blockProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;"><button class="btn btn-warning btn-sm">Block</button></a>
+                    <% }else{ %>
+                      <a href="/admin/unblockProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;"><button class="btn btn-primary btn-sm">UnBlock</button></a>
+                      <% } %>
                   <a href="/admin/editProduct?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;"><button class="btn btn-secondary btn-sm">Edit</button></a>
                 </td>
               </tr>

@@ -7,7 +7,8 @@ const categoryController = require('../controllers/admin/categoryController')
 const productController = require('../controllers/admin/productController');
 const bannerController = require('../controllers/admin/bannerController');
 const multer = require('multer'); 
-const { userAuth, adminAuth } = require("../middlewares/auth");
+// const { userAuth, adminAuth } = require("../middlewares/auth");
+const {isAuthenticated, isLogin} = require('../middlewares/adminAuthentication')
 
 // multer
 const storage = multer.diskStorage({
@@ -28,33 +29,32 @@ const upload = multer({ storage });
 router.get("/pageerror",adminController.pageerror)
 router.get('/login',adminController.loadLogin);
 router.post('/login',adminController.login);
-router.get('/',adminAuth,adminController.loadDashboard);
+router.get('/',isAuthenticated,adminController.loadDashboard);
 router.get('/logout',adminController.logout);
 
-router.get('/users',adminAuth,customerController.customerInfo)
-router.get('/blockCustomer',adminAuth,customerController.customerBlocked)
-router.get('/unblockCustomer',adminAuth,customerController.customerUnBlocked)
+router.get('/users',isAuthenticated,customerController.customerInfo)
+router.get('/blockCustomer',isAuthenticated,customerController.customerBlocked)
+router.get('/unblockCustomer',isAuthenticated,customerController.customerUnBlocked)
 //category
-router.get("/category",adminAuth,categoryController.categoryInfo)
-router.post("/addCategory",adminAuth,categoryController.addCategory)
-router.post("/addCategoryOffer",adminAuth,categoryController.addCategoryOffer)
-router.post("/removeCategoryOffer",adminAuth,categoryController.removeCategoryOffer);
-router.get("/listCategory",adminAuth,categoryController.getlistCategory);
-router.get("/unlistCategory",adminAuth,categoryController.getunlistCategory)
-router.get("/editCategory",adminAuth,categoryController.getEditCategory)
-router.post("/editCategory/:id",adminAuth,categoryController.editCategory)
+router.get("/category",isAuthenticated,categoryController.categoryInfo)
+router.post("/addCategory",isAuthenticated,categoryController.addCategory)
+router.post("/addCategoryOffer",isAuthenticated,categoryController.addCategoryOffer)
+router.post("/removeCategoryOffer",isAuthenticated,categoryController.removeCategoryOffer);
+router.get("/listCategory",isAuthenticated,categoryController.getlistCategory);
+router.get("/unlistCategory",isAuthenticated,categoryController.getunlistCategory)
+router.get("/editCategory",isAuthenticated,categoryController.getEditCategory)
+router.post("/editCategory/:id",isAuthenticated,categoryController.editCategory)
 //product
-router.get("/addProducts",adminAuth,productController.getProductAddPage);
-router.post("/addProducts",adminAuth,upload.array("images",4),productController.addProducts)
-router.get("/products",adminAuth,productController.getAllProducts)
-router.post("/addProductOffer",adminAuth,productController.addProductOffer)
-router.post("/removeProductOffer",adminAuth,productController.removeProductOffer)
-router.get("/blockProduct",adminAuth,productController.blockProduct);
-router.get("/unblockProduct",adminAuth,productController.unBlockProduct)
-router.get("/editProduct",adminAuth,productController.getEditProduct)
-router.post("/editProduct/:id",adminAuth,upload.array("images",4),productController.editProduct)
-router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
-//banner Management
-// router.get("/banner",adminAuth,bannerController.getBannerPage)
+router.get("/addProducts",isAuthenticated,productController.getProductAddPage);
+router.post("/addProducts",isAuthenticated,upload.array("images",4),productController.addProducts)
+router.get("/products",isAuthenticated,productController.getAllProducts)
+router.post("/addProductOffer",isAuthenticated,productController.addProductOffer)
+router.post("/removeProductOffer",isAuthenticated,productController.removeProductOffer)
+router.get("/blockProduct",isAuthenticated,productController.blockProduct);
+router.get("/unblockProduct",isAuthenticated,productController.unBlockProduct)
+router.get("/editProduct",isAuthenticated,productController.getEditProduct)
+router.post("/editProduct/:id",isAuthenticated,upload.array("images",4),productController.editProduct)
+router.post("/deleteImage",isAuthenticated,productController.deleteSingleImage)
+
 
 module.exports = router;

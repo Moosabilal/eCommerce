@@ -1,7 +1,39 @@
 
 <%-include('../../views/partials/user/header')%>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-
+<style>
+    .img-zoom-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+    
+    .main-img {
+        width: 100%;
+        display: block;
+    }
+    
+    .img-zoom-box {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border: 2px solid #ddd;
+        background-color: white;
+        display: none;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    
+    .zoomed-img {
+        position: absolute;
+        max-width: none;
+        transform-origin: 0 0;
+    }
+    
+    .img-zoom-container:hover .img-zoom-box {
+        display: block;
+    }
+    </style>
 
 
 <!-- breadcrumb -->
@@ -39,9 +71,18 @@
                                 <% product.productImage.forEach((image, index) => { %>
                                     <div class="item-slick3" data-thumb="/uploads/product-images/<%= image %>">
                                         <div class="wrap-pic-w pos-relative">
-                                            <img src="/uploads/product-images/<%= image %>" alt="<%= product.productName %> Image <%= index + 1 %>">
-                        
-                                            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/product-images/<%= image %>">
+                                            <div class="img-zoom-container">
+                                                <img src="/uploads/product-images/<%= image %>" 
+                                                     alt="<%= product.productName %> Image <%= index + 1 %>"
+                                                     class="main-img">
+                                                <div class="img-zoom-box">
+                                                    <img src="/uploads/product-images/<%= image %>" 
+                                                         alt="<%= product.productName %> Image <%= index + 1 %>"
+                                                         class="zoomed-img">
+                                                </div>
+                                            </div>
+                                            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" 
+                                               href="/uploads/product-images/<%= image %>">
                                                 <i class="fa fa-expand"></i>
                                             </a>
                                         </div>
@@ -102,7 +143,7 @@
                     
                     <!--  -->
                     <div class="p-t-33">
-                        <!-- <div class="flex-w flex-r-m p-b-10">
+                        <div class="flex-w flex-r-m p-b-10">
                             <div class="size-203 flex-c-m respon6">
                                 Size
                             </div>
@@ -121,7 +162,7 @@
                             </div>
                         </div>
 
-                        <div class="flex-w flex-r-m p-b-10">
+                        <!-- <div class="flex-w flex-r-m p-b-10">
                             <div class="size-203 flex-c-m respon6">
                                 Color
                             </div>
@@ -154,7 +195,8 @@
                                     </div>
                                 </div>
 
-                                <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
+                                <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" onclick="addToCart('<%= product._id %>')"
+                                    >
                                     Add to cart
                                 </button>
                                 <div class="flex-m bor9 p-r-10 m-r-11 m-l-15">
@@ -203,7 +245,7 @@
                     <div class="flex-w flex-m p-l-100 p-t-15 respon7">
                         <div class="flex-m bor9 p-r-10 m-r-11">
                             <P>
-                                Availability:<span style="color: rgb(70, 184, 219);"> <%= quantity %> In Stock</span>
+                                Availability:<span style="color: rgb(70, 184, 219);">20</span>
                             </P>
                         </div>
                     </div>
@@ -411,11 +453,12 @@
         <!-- Slide2 -->
         <div class="wrap-slick2">
             <div class="slick2">
+                <% for(let i = 0 ; i < relatedProducts.length ; i++){ %>
                 <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
                     <!-- Block2 -->
                     <div class="block2">
                         <div class="block2-pic hov-img0">
-                            <img src="images/product-01.jpg" alt="IMG-PRODUCT">
+                            <img src="/uploads/product-images/<%= relatedProducts[i].productImage[0] %>" alt="<%= relatedProducts[i].productImage[0] %>">
 
                             <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
                                 Quick View
@@ -424,248 +467,26 @@
 
                         <div class="block2-txt flex-w flex-t p-t-14">
                             <div class="block2-txt-child1 flex-col-l ">
-                                <a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                                    Esprit Ruffle Shirt
+                                <a href="productDetails?id=<%= relatedProducts[i]._id %>" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                                    <%= relatedProducts[i].productName %>
                                 </a>
 
                                 <span class="stext-105 cl3">
-                                    $16.64
+                                    &#8377;<%= relatedProducts[i].salePrice %>
                                 </span>
                             </div>
 
                             <div class="block2-txt-child2 flex-r p-t-3">
-                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2" onclick="addToWishlist('<%= relatedProducts[i]._id %>')">
                                     <img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
+                <% } %>
 
-                <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-                    <!-- Block2 -->
-                    <div class="block2">
-                        <div class="block2-pic hov-img0">
-                            <img src="images/product-02.jpg" alt="IMG-PRODUCT">
-
-                            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                                Quick View
-                            </a>
-                        </div>
-
-                        <div class="block2-txt flex-w flex-t p-t-14">
-                            <div class="block2-txt-child1 flex-col-l ">
-                                <a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                                    Herschel supply
-                                </a>
-
-                                <span class="stext-105 cl3">
-                                    $35.31
-                                </span>
-                            </div>
-
-                            <div class="block2-txt-child2 flex-r p-t-3">
-                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                                    <img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-                    <!-- Block2 -->
-                    <div class="block2">
-                        <div class="block2-pic hov-img0">
-                            <img src="images/product-03.jpg" alt="IMG-PRODUCT">
-
-                            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                                Quick View
-                            </a>
-                        </div>
-
-                        <div class="block2-txt flex-w flex-t p-t-14">
-                            <div class="block2-txt-child1 flex-col-l ">
-                                <a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                                    Only Check Trouser
-                                </a>
-
-                                <span class="stext-105 cl3">
-                                    $25.50
-                                </span>
-                            </div>
-
-                            <div class="block2-txt-child2 flex-r p-t-3">
-                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                                    <img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-                    <!-- Block2 -->
-                    <div class="block2">
-                        <div class="block2-pic hov-img0">
-                            <img src="images/product-04.jpg" alt="IMG-PRODUCT">
-
-                            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                                Quick View
-                            </a>
-                        </div>
-
-                        <div class="block2-txt flex-w flex-t p-t-14">
-                            <div class="block2-txt-child1 flex-col-l ">
-                                <a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                                    Classic Trench Coat
-                                </a>
-
-                                <span class="stext-105 cl3">
-                                    $75.00
-                                </span>
-                            </div>
-
-                            <div class="block2-txt-child2 flex-r p-t-3">
-                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                                    <img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-                    <!-- Block2 -->
-                    <div class="block2">
-                        <div class="block2-pic hov-img0">
-                            <img src="images/product-05.jpg" alt="IMG-PRODUCT">
-
-                            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                                Quick View
-                            </a>
-                        </div>
-
-                        <div class="block2-txt flex-w flex-t p-t-14">
-                            <div class="block2-txt-child1 flex-col-l ">
-                                <a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                                    Front Pocket Jumper
-                                </a>
-
-                                <span class="stext-105 cl3">
-                                    $34.75
-                                </span>
-                            </div>
-
-                            <div class="block2-txt-child2 flex-r p-t-3">
-                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                                    <img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-                    <!-- Block2 -->
-                    <div class="block2">
-                        <div class="block2-pic hov-img0">
-                            <img src="images/product-06.jpg" alt="IMG-PRODUCT">
-
-                            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                                Quick View
-                            </a>
-                        </div>
-
-                        <div class="block2-txt flex-w flex-t p-t-14">
-                            <div class="block2-txt-child1 flex-col-l ">
-                                <a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                                    Vintage Inspired Classic 
-                                </a>
-
-                                <span class="stext-105 cl3">
-                                    $93.20
-                                </span>
-                            </div>
-
-                            <div class="block2-txt-child2 flex-r p-t-3">
-                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                                    <img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-                    <!-- Block2 -->
-                    <div class="block2">
-                        <div class="block2-pic hov-img0">
-                            <img src="images/product-07.jpg" alt="IMG-PRODUCT">
-
-                            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                                Quick View
-                            </a>
-                        </div>
-
-                        <div class="block2-txt flex-w flex-t p-t-14">
-                            <div class="block2-txt-child1 flex-col-l ">
-                                <a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                                    Shirt in Stretch Cotton
-                                </a>
-
-                                <span class="stext-105 cl3">
-                                    $52.66
-                                </span>
-                            </div>
-
-                            <div class="block2-txt-child2 flex-r p-t-3">
-                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                                    <img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-                    <!-- Block2 -->
-                    <div class="block2">
-                        <div class="block2-pic hov-img0">
-                            <img src="images/product-08.jpg" alt="IMG-PRODUCT">
-
-                            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-                                Quick View
-                            </a>
-                        </div>
-
-                        <div class="block2-txt flex-w flex-t p-t-14">
-                            <div class="block2-txt-child1 flex-col-l ">
-                                <a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                                    Pieces Metallic Printed
-                                </a>
-
-                                <span class="stext-105 cl3">
-                                    $18.96
-                                </span>
-                            </div>
-
-                            <div class="block2-txt-child2 flex-r p-t-3">
-                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-                                    <img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="images/icons/icon-heart-02.png" alt="ICON">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -673,43 +494,140 @@
 
 <%-include('../../views/partials/user/footer')%>
 <script>
-	function addToWishlist(productId){
-		$.ajax({
-			url:"/addToWishlist",
-			method:"POST",
-			data:{productId:productId},
-			success:(response)=>{
-				console.log(response.status)
-				if(response.status){
-					Swal.fire({
-						title:"Added to Wishlist",
-						text:"The product has been added to your wishlist",
-						icon:"success",
-						timer:2000,
-						showConfirmButton:false
+    // Function to add a product to the wishlist
+    async function addToWishlist(productId) {
+        console.log(Swal.version)
+        try {
+            // Sending POST request using fetch
+            const response = await fetch("/addToWishlist", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ productId: productId }) 
+            });
 
-					})
-				}else{
-					Swal.fire({
-						title:"Error",
-						text:response.message,
-						icon:"info",
-						timer:2000,
-						showConfirmButton:false
-					})
-				}
-			},
-			error:(error)=>{
-				Swal.fire({
-					title:"Error",	
-					text:"There was an error adding the product to your wishlist",
-					icon:"error",
-					timer:2000,
-					showConfirmButton:false
-				})
-			}
+            const data = await response.json();
 
-		})
-	}
+            if (data.status) {
+                Swal.fire({
+                    title: "Added to Wishlist",
+                    text: "The product has been added to your wishlist",
+                    icon: "success",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: data.message,
+                    icon: "info",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: "Warning",
+                text: "There was an error adding the product to your wishlist",
+                icon: "error",
+                timer: 2000,
+                showConfirmButton: false
+            });
+            console.error("Error in adding to wishlist:", error);
+        }
+    }
 
+    async function addToCart(productId) {
+        try {
+            const response = await fetch("/addToCart", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ productId: productId })
+            });
+
+            const data = await response.json();
+
+            if (data.status) {
+                Swal.fire({
+                    title: "Added to cart",
+                    text: data.message,
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    title: "Warning",
+                    text: data.message,
+                    icon: "info",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: "Error",
+                text: "There was an error adding the product to your cart",
+                icon: "error",
+                timer: 2000,
+                showConfirmButton: false
+            });
+            console.error("Error in adding to cart:", error);
+        }
+    }
+
+
+    
+
+document.addEventListener('DOMContentLoaded', function() {
+    const containers = document.querySelectorAll('.img-zoom-container');
+    
+    containers.forEach(container => {
+        const mainImg = container.querySelector('.main-img');
+        const zoomBox = container.querySelector('.img-zoom-box');
+        const zoomedImg = container.querySelector('.zoomed-img');
+        
+        // Set zoom level
+        const zoomLevel = 1.5;
+        
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Position the zoom box
+            let boxX = x - zoomBox.offsetWidth / 2;
+            let boxY = y - zoomBox.offsetHeight / 2;
+            
+            // Keep zoom box inside container bounds
+            boxX = Math.max(0, Math.min(boxX, container.offsetWidth - zoomBox.offsetWidth));
+            boxY = Math.max(0, Math.min(boxY, container.offsetHeight - zoomBox.offsetHeight));
+            
+            zoomBox.style.left = `${boxX}px`;
+            zoomBox.style.top = `${boxY}px`;
+            
+            // Calculate zoomed image position
+            const ratioX = x / container.offsetWidth;
+            const ratioY = y / container.offsetHeight;
+            
+            const zoomedX = -ratioX * (zoomedImg.offsetWidth - zoomBox.offsetWidth);
+            const zoomedY = -ratioY * (zoomedImg.offsetHeight - zoomBox.offsetHeight);
+            
+            // Set zoomed image size and position
+            zoomedImg.style.width = `${mainImg.offsetWidth * zoomLevel}px`;
+            zoomedImg.style.height = `${mainImg.offsetHeight * zoomLevel}px`;
+            zoomedImg.style.left = `${zoomedX}px`;
+            zoomedImg.style.top = `${zoomedY}px`;
+        });
+        
+        // Handle image load to ensure proper sizing
+        mainImg.addEventListener('load', () => {
+            zoomedImg.style.width = `${mainImg.offsetWidth * zoomLevel}px`;
+            zoomedImg.style.height = `${mainImg.offsetHeight * zoomLevel}px`;
+        });
+    });
+});
 </script>

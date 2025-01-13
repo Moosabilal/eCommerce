@@ -97,6 +97,20 @@
             </div>
 
             <div class="row g-3">
+
+                <div class="col-md-6 col-12">
+                    <label for="size" class="form-label">Size</label>
+                    <select class="form-control" name="size" id="size">
+                        <option value="" disabled selected>Select the size</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                    </select>
+                    <div id="size-error" class="error-message"></div>
+                </div>
+                
+
                 <div class="col-md-6 col-12">
                     <label for="quantity" class="form-label">Quantity</label>
                     <input type="number" class="form-control" name="quantity" id="quantity" placeholder="Enter quantity">
@@ -296,6 +310,7 @@ function validateAndSubmit() {
             image.style.display = 'none';
             cropper.destroy();
             image.cropper = null;
+            saveButton.style.display="block"
             
             // Add success feedback
             Swal.fire({
@@ -363,7 +378,8 @@ function validateAndSubmit() {
               const color = document.getElementsByName('color')[0].value;
               const category = document.getElementsByName('category')[0].value;
               const images = document.getElementById('input1')
-              const quantity=document.getElementsByName('quantity')
+              const sizeElement = document.getElementsByName('size')[0]; // Get the first element with name 'Size'
+              const size = sizeElement.value;              const quantity=document.getElementsByName('quantity')
               let isValid = true
               if (name.trim() === "") {
       displayErrorMessage('productName-error', 'Please enter a product name.');
@@ -381,7 +397,10 @@ function validateAndSubmit() {
       isValid = false;
    }
   
-  
+                if(size === "") {
+                    displayErrorMessage('size-error', 'Please select a size.');
+                    isValid = false;
+                }
               if ( parseInt(quantity) < 0) {
                   displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
                   isValid = false;

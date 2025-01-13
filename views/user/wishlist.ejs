@@ -27,11 +27,12 @@
                     <p class="wishlist-price mb-0">
                         <span class="text-muted">Category: </span><%= product.category.name %>
                     </p>
-                    <% if (product.quantity > 0) { %>
+                    <% if (product.stock.map((item=>item.quantity)) > 0) { %>
                     <p class="text-success mb-0"><small>In Stock</small></p>
                     <% } else { %>
                     <p class="text-danger mb-0"><small>Out of Stock</small></p>
                     <% } %>
+            
                 </div>
             </div>
             <!-- Price and Actions -->
@@ -40,7 +41,7 @@
                 <p class="wishlist-price mb-0 fw-bold" >Price : &#8377;<%= product.salePrice %></p>
                 <!-- Buttons -->
                 <div class="d-flex gap-2">
-                    <button class="btn btn-success btn-sm">
+                    <button class="btn btn-success btn-sm" onclick="addToCart('<%= product._id %>')">
                         <i class="fas fa-cart-plus"></i> Move to Cart
                     </button>
                     <button class="btn btn-danger btn-sm" onclick="confirmRemove('<%= product._id %>')">
@@ -66,16 +67,53 @@
     function confirmRemove(productId){
         Swal.fire({
             title:"Are You Sure?",
-            text:"You won't be able to revert this",
+            text:"Do you want to remove this product from wishlist?",
             icon:"warning",
             showCancelButton:true,
-            confirmButtonColor:"#3085d6",
-            cancelButtonColor:"#d33",
             confirmButtonText:"Yes, delete it!"
         }).then((result)=>{
             if(result.isConfirmed){
                 window.location.href=`/removeFromWishlist/?productId=${productId}`;
             }
         })
+    }
+
+    async function addToCart(productId) {
+        try {
+            const response = await fetch('/addToCart',{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({productId:productId})
+            })  
+            const data = await response.json();
+            if(data.status){
+                Swal.fire({
+                    title:"Added to cart",
+                    text:data.message,
+                    icon:"success",
+                    timer:1500,
+                    showCancelButton:false
+                })
+            }else{
+                Swal.fire({
+                    title:"Warning",
+                    text:data.message,
+                    icon:"info",
+                    timer:1500,
+                    showCancelButton:false
+                })
+            }
+             } catch (error) {
+                Swal.fire({
+                    title:"Error",
+                    text:"There was an error adding to the cart",
+                    icon:"info",
+                    timer:1500,
+                    showCancelButton:false
+                })
+                console.log('Error in adding to cart',error)
+        }
     }
 </script>

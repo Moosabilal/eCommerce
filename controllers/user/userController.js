@@ -1,3 +1,4 @@
+
 const User = require('../../models/userSchema');
 const Category = require("../../models/categorySchema")
 const Product = require("../../models/productSchema")
@@ -29,12 +30,16 @@ const pageNotFound = async (req,res)=>{
 
 const loadHomepage = async (req,res)=>{
     try {
+        
         const user = req.session.user;
+        const userData = await User.findOne({_id:user});
+        
+
         const categories = await Category.find({isListed:true});
             let productData = await Product.find({
                 isBlocked:false,
                 category:{$in:categories.map(category=>category._id)},
-                quantity:{$gt:0}
+                // quantity:{$gt:0}
             })
             productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn));
             productData = productData.slice(0,4);
@@ -153,6 +158,8 @@ const verifyOtp = async (req, res) => {
                 phone:user.phone,
                 password:passwordHash,
             })
+            console.log("cominh")
+            console.log(saveUserData)
 
             await saveUserData.save();
             req.session.user = saveUserData._id;
@@ -254,16 +261,17 @@ const loadShoppingPage = async (req, res) => {
         const skip = (page - 1) * limit;
         const products = await Product.find({
             isBlocked:false,
-            // category:{$in:categoryIds},
-            quantity:{$gt:0}
+            category:{$in:categoryIds},
+            
         }).sort({createdOn:-1}).skip(skip).limit(limit)
         const totalProducts = await Product.countDocuments({
             isBlocked:false,
             category:{$in:categoryIds},
-            quantity:{$gt:0}
+           
         });
         const totalPages = Math.ceil(totalProducts/limit);
         const categoriesWithIds = categories.map((category)=>({_id:category._id,name:category.name}));
+        console.log(products)
         res.render('shop',{
             user:userData,
             category:categoriesWithIds,
@@ -289,7 +297,7 @@ const filterProduct = async (req, res) => {
 
         const query = {
             isBlocked: false,
-            quantity: { $gt: 0 },
+            // quantity: { $gt: 0 },
         };
         if (findCategory) {
             query.category = findCategory._id; 
@@ -339,7 +347,7 @@ const filterByPrice = async (req, res) => {
         let findProducts = await Product.find({
             salePrice:{$gt:req.query.gt,$lt:req.query.lt},
             isBlocked:false,
-            quantity:{$gt:0}
+            // quantity:{$gt:0}
         }).lean();
 
         findProducts.sort((a,b)=>new Date(b.createdOn) - new Date(a.createdOn));
@@ -380,7 +388,7 @@ const searchProducts = async (req,res)=>{
             searchResult = await Product.find({
                 productName:{$regex:".*"+search+".*",$options:"i"},
                 isBlocked:false,
-                quantity:{$gt:0},
+                // quantity:{$gt:0},
                 category:{$in:categoryIds}  
             })
         }

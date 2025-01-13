@@ -9,15 +9,21 @@ const productDetails = async (req,res)=>{
         const productId = req.query.id;
         const product = await Product.findById(productId).populate("category");
         const findCategory = product.category;
+        const stock = product.stock.length;
+        console.log("stock",stock);
+        let relatedProducts = await Product.find({category:findCategory._id}).populate('category');
+
+        
         const categoryOffer = findCategory ?. categoryOffer || 0 ;
         const productOffer = product.productOffer || 0;
         const totalOffer = categoryOffer + productOffer;
         res.render("product-details",{
             user:userData,
             product:product,
-            quantity:product.quantity,
+            
             totalOffer:totalOffer,
-            category:findCategory
+            category:findCategory,
+            relatedProducts:relatedProducts,
         })
 
 

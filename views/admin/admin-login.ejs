@@ -23,8 +23,8 @@
     <div class="login-container">
         <h1>Admin Login</h1>
         <form action="/admin/login" method="POST" id="adminLoginForm">
-            <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" required>
-            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
+            <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" value="habid@gmail.com" required>
+            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" value="habid12345" required>
             <div id="error" class="error-message"></div>
 
             <%if(locals.message && message.length>0){%>

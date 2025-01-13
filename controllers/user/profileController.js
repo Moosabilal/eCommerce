@@ -281,7 +281,7 @@ const changePasswordValid = async (req,res)=>{
             const emailSent = await sendVerificationEmail(email,otp);
             if(emailSent){
                 req.session.userOtp =  otp;
-                req.session.userEmail = email;
+                req.session.email = email;
                 req.session.userData = req.body;
                 res.render("change-password-otp");
                 console.log("OTP",otp)
@@ -306,7 +306,7 @@ const verifyChangePassOtp = async (req,res)=>{
     try {
         const enteredOtp = req.body.otp;
         if(enteredOtp===req.session.userOtp){
-            res.json({success:true,redirectUrl:"/reset-profile-password"})
+            res.json({success:true,redirectUrl:"/reset-password"})
         }else{
             res.json({success:false,message:"OTP not matching"})
         }
@@ -318,24 +318,28 @@ const verifyChangePassOtp = async (req,res)=>{
 
 const getResetProfilePassPage = async (req,res)=>{
     try {
-        res.render("reset-profile-password")
+        res.render("reset-password")
     } catch (error) {
         res.redirect("/pageNotFound")
     }
 }
 
 const postNewProfilePassword = async (req,res)=>{
+    console.log("coming")
     try {
         const {newPassword, confirmPassword} = req.body;
         const email = req.session.email;
+        console.log(email,req.session.email)
         if(newPassword===confirmPassword){
             const passwordHash =  await securePassword(newPassword);
+            console.log("passwordHash",passwordHash)
             await User.updateOne({email:email},{$set:{password:passwordHash}});
-            res.render("userProfile")
+           console.log(await User.findOne({email:email}))
+            res.redirect("userProfile")
             
 
         }else{
-            res.render("reset-profile-password",{message:"Password do not match"})
+            res.render("reset-password",{message:"Password do not match"})
         }
     } catch (error) {
         res.redirect("/pageNotFound")
@@ -366,7 +370,6 @@ const postAddAddress = async (req,res)=>{
         const {addressType, name, city, landMark, state, pincode, phone, altPhone} = req.body;
 
         const userAddress = await Address.findOne({userId:userData._id});
-        console.log("user address : ",userAddress)
         if(!userAddress){
             const newAddress = new Address({
                 userId:userData._id,
