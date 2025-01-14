@@ -146,7 +146,6 @@ const securePassword = async (password)=>{
 const verifyOtp = async (req, res) => {
     try {
         const {otp} = req.body;
-        console.log(otp)
 
         if(otp===req.session.userOtp){
             const user = req.session.userData;
@@ -158,8 +157,6 @@ const verifyOtp = async (req, res) => {
                 phone:user.phone,
                 password:passwordHash,
             })
-            console.log("cominh")
-            console.log(saveUserData)
 
             await saveUserData.save();
             req.session.user = saveUserData._id;
@@ -271,7 +268,6 @@ const loadShoppingPage = async (req, res) => {
         });
         const totalPages = Math.ceil(totalProducts/limit);
         const categoriesWithIds = categories.map((category)=>({_id:category._id,name:category.name}));
-        console.log(products)
         res.render('shop',{
             user:userData,
             category:categoriesWithIds,

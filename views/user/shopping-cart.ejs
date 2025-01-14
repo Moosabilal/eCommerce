@@ -20,6 +20,10 @@
     transform: scale(1.05); /* Slightly enlarge the button */
 }
 
+div.wrap-table-shopping-cart {
+	width:105%;
+}
+
 </style>
 
 	<!-- Cart -->
@@ -135,11 +139,13 @@
 									<th class="column-1">Product</th>
 									<th class="column-2"></th>
 									<th class="column-3">Price</th>
-									<th class="column-4">Quantity</th>
-									<th class="column-5">Total</th>
-									<th class="column-6">Action</th>
+									<th class="column-4">Size</th>
+									<th class="column-5">Quantity</th>
+									<th class="column-6">Total</th>
+									<th class="column-7">Action</th>
 								</tr>
-								<% if (cart && cart.items.length > 0) { %>
+								<% if (cart && cart.items.length > 0) {
+									 %>
 									<% for (let i = 0; i < cart.items.length; i++) { 
 										let item = cart.items[i];
 										let product = products.find(p => p._id.toString() === item.productId.toString());
@@ -154,21 +160,42 @@
 										<td class="column-2"><%= product.productName %></td>
 										<td class="column-3">&#8377;<%= product.salePrice %></td>
 										<td class="column-4">
+											<% item.stock.forEach(pSize => { %>
+												<span><%= pSize.size %></span>
+											<% }) %>
+										</td>
+										<td class="column-4">
 											<div class="wrap-num-product flex-w m-l-auto m-r-0">
 												<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-													<i class="fs-16 zmdi zmdi-minus" onclick="return decTotalPrice('<%= product._id %>')"></i>
+													<i class="fs-16 zmdi zmdi-minus" 
+														onclick="return decQuantity('<%= item.stock[0]._id %>', '<%= product._id %>')"></i>
 												</div>
-												<input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="<%= item.quantity %>">
+												<input 
+													class="mtext-104 cl3 txt-center num-product" 
+													min="1"
+													type="number" 
+													data-id="<%= product._id %>" 
+													data-stock-id="<%= item.stock[0]._id %>" 
+													data-price="<%= product.salePrice %>" 
+													value="<%= item.stock[0].quantity %>"
+													oninput="if (this.value < 1) this.value = 1;"  >
 												<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-													<i class="fs-16 zmdi zmdi-plus" onclick="return incTotalPrice('<%= product._id %>')"></i>
+													<i class="fs-16 zmdi zmdi-plus" 
+														onclick="return incQuantity('<%= item.stock[0]._id %>', '<%= product._id %>')"></i>
 												</div>
 											</div>
 										</td>
-										<td class="column-5">&#8377;<%= item.totalPrice %></td>
+										
+										<td class="column-5 total-price" 
+										data-id="<%= product._id %>" 
+										data-stock-id="<%= item.stock[0]._id %>">
+										₹<%= item.totalPrice %></td>
 										<td class="column-6">
-											<button class="btn-remove" onclick="return removeFromCart('<%= product._id %>',event)">Remove</button>
+											<button class="btn-remove" onclick="return removeFromCart('<%= product._id %>', event)">Remove</button>
 										</td>
-										<% } else { %> <!-- Fallback for missing product -->
+
+
+										<% } else { %>
 										<td colspan="6">Product not found</td>
 										<% } %>
 									</tr>
@@ -214,7 +241,7 @@
 
 							<div class="size-209">
 								<span class="mtext-110 cl2">
-									$79.65
+									34
 								</span>
 							</div>
 						</div>
@@ -304,4 +331,99 @@
 				}
 			})
 		}
+
+
+		async function decQuantity(stockId, productId) {
+    try {
+        const quantityInput = document.querySelector(`input[data-id="${productId}"][data-stock-id="${stockId}"]`);
+
+        if (quantityInput) {
+            const currentQuantity = parseInt(quantityInput.value, 10);
+
+            if (currentQuantity <= 1) {
+                Swal.fire("Error", "Minimum quantity should be 1", "error");
+                return;
+            }
+
+            const response = await fetch('/decreaseQuantity', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ stockId }) 
+            });
+
+            const data = await response.json();
+
+            if (data.status) {
+                const newQuantity = currentQuantity - 1;
+                quantityInput.value = newQuantity;
+
+                const pricePerUnit = parseFloat(quantityInput.dataset.price); 
+                const updatedTotalPrice = newQuantity * pricePerUnit;
+
+                const totalPriceElement = document.querySelector(`.total-price[data-id="${productId}"][data-stock-id="${stockId}"]`);
+                if (totalPriceElement) {
+                    totalPriceElement.textContent = `₹${updatedTotalPrice}`;
+                }
+            } else {
+                Swal.fire("Error", data.message, "error");
+            }
+        }
+    } catch (error) {
+        console.error("Error in decreasing quantity:", error);
+        Swal.fire("Error", "An unexpected error occurred", "error");
+    }
+}
+
+
+
+
+
+
+
+
+async function incQuantity(stockId, productId) {
+    try {
+        const quantityInput = document.querySelector(`input[data-id="${productId}"][data-stock-id="${stockId}"]`);
+
+        if (quantityInput) {
+            const currentQuantity = parseInt(quantityInput.value, 10);
+
+            const response = await fetch('/increaseQuantity', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ stockId }) 
+            });
+
+            const data = await response.json();
+
+            if (data.status) {
+                const newQuantity = currentQuantity + 1; 
+                quantityInput.value = newQuantity;
+
+                const pricePerUnit = parseFloat(quantityInput.dataset.price); 
+                const updatedTotalPrice = newQuantity * pricePerUnit;
+
+                const totalPriceElement = document.querySelector(`.total-price[data-id="${productId}"][data-stock-id="${stockId}"]`);
+                if (totalPriceElement) {
+                    totalPriceElement.textContent = `₹${updatedTotalPrice}`;
+                }
+            } else {
+                Swal.fire("Error", data.message, "error");
+            }
+        }
+    } catch (error) {
+        console.error("Error in increasing quantity:", error);
+        Swal.fire("Error", "An unexpected error occurred", "error");
+    }
+}
+
+
+
+
+
+
 	</script>

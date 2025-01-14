@@ -83,5 +83,7 @@ router.get("/removeFromWishlist",userAuth,wishlistController.removeProduct)
 router.get("/loadCart",userAuth,cartController.getCart);
 router.post("/addToCart",userAuth,cartController.addToCart);
 router.get("/removeFromCart",userAuth,cartController.removeProduct);
+router.post("/decreaseQuantity",userAuth,cartController.decreaseQuantity);
+router.post("/increaseQuantity",userAuth,cartController.increaseQuantity);
 
 module.exports=router;

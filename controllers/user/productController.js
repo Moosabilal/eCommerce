@@ -9,8 +9,7 @@ const productDetails = async (req,res)=>{
         const productId = req.query.id;
         const product = await Product.findById(productId).populate("category");
         const findCategory = product.category;
-        const stock = product.stock.length;
-        console.log("stock",stock);
+        // const stock = product.stock.;
         let relatedProducts = await Product.find({category:findCategory._id}).populate('category');
 
         

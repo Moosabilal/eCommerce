@@ -147,66 +147,48 @@
                             <div class="size-203 flex-c-m respon6">
                                 Size
                             </div>
-
+                    
                             <div class="size-204 respon6-next">
                                 <div class="rs1-select2 bor8 bg0">
-                                    <select class="js-select2" name="time">
-                                        <option>Choose an option</option>
-                                        <option>Size S</option>
-                                        <option>Size M</option>
-                                        <option>Size L</option>
-                                        <option>Size XL</option>
+                                    <select id="product-size-<%= product._id %>" class="js-select2" name="size">
+                                        <% product.stock.forEach(item => { %>
+                                            <option value="<%= item.size %>"><%= item.size %></option>
+                                        <% }) %>
                                     </select>
                                     <div class="dropDownSelect2"></div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- <div class="flex-w flex-r-m p-b-10">
-                            <div class="size-203 flex-c-m respon6">
-                                Color
-                            </div>
-
-                            <div class="size-204 respon6-next">
-                                <div class="rs1-select2 bor8 bg0">
-                                    <select class="js-select2" name="time">
-                                        <option>Choose an option</option>
-                                        <option>Red</option>
-                                        <option>Blue</option>
-                                        <option>White</option>
-                                        <option>Grey</option>
-                                    </select>
-                                    <div class="dropDownSelect2"></div>
-                                </div>
-                            </div>
-                        </div> -->
-
+                    
                         <div class="flex-w flex-r-m p-b-10">
                             <div class="size-204 flex-w flex-m respon6-next">
                                 <div class="wrap-num-product flex-w m-r-20 m-tb-10">
                                     <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
                                         <i class="fs-16 zmdi zmdi-minus"></i>
                                     </div>
-
-                                    <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product" value="1">
-
+                    
+                                    <input id="product-quantity-<%= product._id %>" min="1" class="mtext-104 cl3 txt-center num-product" type="number" name="num-product" value="1">
+                    
                                     <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
                                         <i class="fs-16 zmdi zmdi-plus"></i>
                                     </div>
                                 </div>
-
-                                <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" onclick="addToCart('<%= product._id %>')"
-                                    >
+                    
+                                <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" 
+                                    onclick="addToCart('<%= product._id %>')">
                                     Add to cart
                                 </button>
+                    
                                 <div class="flex-m bor9 p-r-10 m-r-11 m-l-15">
-                                    <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" onclick="addToWishlist('<%= product._id %>')" data-tooltip="Add to Wishlist">
+                                    <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" 
+                                        onclick="addToWishlist('<%= product._id %>')" data-tooltip="Add to Wishlist">
                                         <i class="zmdi zmdi-favorite"></i>
                                     </a>
                                 </div>
                             </div>
-                        </div>	
+                        </div>  
                     </div>
+                    
 
                     <!--  -->
                     <!-- <div class="flex-w flex-m p-l-100 p-t-40 respon7">
@@ -539,45 +521,57 @@
     }
 
     async function addToCart(productId) {
-        try {
-            const response = await fetch("/addToCart", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ productId: productId })
-            });
+    try {
+        // Get the selected size
+        const size = document.querySelector(`#product-size-${productId}`).value;
 
-            const data = await response.json();
+        // Get the quantity
+        const quantity = document.querySelector(`#product-quantity-${productId}`).value;
 
-            if (data.status) {
-                Swal.fire({
-                    title: "Added to cart",
-                    text: data.message,
-                    icon: "success",
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            } else {
-                Swal.fire({
-                    title: "Warning",
-                    text: data.message,
-                    icon: "info",
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            }
-        } catch (error) {
+        // Send the data to the server
+        const response = await fetch("/addToCart", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ 
+                productId: productId, 
+                size: size, 
+                quantity: parseInt(quantity, 10) 
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.status) {
             Swal.fire({
-                title: "Error",
-                text: "There was an error adding the product to your cart",
-                icon: "error",
-                timer: 2000,
+                title: "Added to cart",
+                text: data.message,
+                icon: "success",
+                timer: 1500,
                 showConfirmButton: false
             });
-            console.error("Error in adding to cart:", error);
+        } else {
+            Swal.fire({
+                title: "Warning",
+                text: data.message,
+                icon: "info",
+                timer: 1500,
+                showConfirmButton: false
+            });
         }
+    } catch (error) {
+        Swal.fire({
+            title: "Error",
+            text: "There was an error adding the product to your cart",
+            icon: "error",
+            timer: 2000,
+            showConfirmButton: false
+        });
+        console.error("Error in adding to cart:", error);
     }
+}
+
 
 
     
