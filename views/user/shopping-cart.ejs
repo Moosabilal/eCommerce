@@ -166,30 +166,31 @@ div.wrap-table-shopping-cart {
 										</td>
 										<td class="column-4">
 											<div class="wrap-num-product flex-w m-l-auto m-r-0">
-												<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-													<i class="fs-16 zmdi zmdi-minus" 
-														onclick="return decQuantity('<%= item.stock[0]._id %>', '<%= product._id %>')"></i>
+												<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"  onclick="return decQuantity('<%= item.stock[0].size %>', '<%= product._id %>')">
+													<i class="fs-16 zmdi zmdi-minus" ></i>
 												</div>
 												<input 
 													class="mtext-104 cl3 txt-center num-product" 
-													min="1"
+													min="1" 
+													max="<%= item.stock[0].quantity %>" 
 													type="number" 
 													data-id="<%= product._id %>" 
-													data-stock-id="<%= item.stock[0]._id %>" 
+													data-size="<%= item.stock[0].size %>" 
 													data-price="<%= product.salePrice %>" 
 													value="<%= item.stock[0].quantity %>"
-													oninput="if (this.value < 1) this.value = 1;"  >
-												<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-													<i class="fs-16 zmdi zmdi-plus" 
-														onclick="return incQuantity('<%= item.stock[0]._id %>', '<%= product._id %>')"></i>
+													oninput="if (this.value < 1) this.value = 1; if (this.value > this.max) this.value = this.max;" >
+												<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="return incQuantity('<%= item.stock[0].size %>', '<%= product._id %>')">
+													<i class="fs-16 zmdi zmdi-plus" ></i>
 												</div>
 											</div>
+											
 										</td>
 										
-										<td class="column-5 total-price" 
-										data-id="<%= product._id %>" 
-										data-stock-id="<%= item.stock[0]._id %>">
-										₹<%= item.totalPrice %></td>
+										
+										
+										
+										<td class="column-5 total-price" data-id="<%= product._id %>" data-size="<%= item.stock[0].size %>">
+											₹<%= item.totalPrice %></td>
 										<td class="column-6">
 											<button class="btn-remove" onclick="return removeFromCart('<%= product._id %>', event)">Remove</button>
 										</td>
@@ -333,9 +334,9 @@ div.wrap-table-shopping-cart {
 		}
 
 
-		async function decQuantity(stockId, productId) {
+		async function decQuantity(stockSize, productId) {
     try {
-        const quantityInput = document.querySelector(`input[data-id="${productId}"][data-stock-id="${stockId}"]`);
+        const quantityInput = document.querySelector(`input[data-id="${productId}"][data-size="${stockSize}"]`);
 
         if (quantityInput) {
             const currentQuantity = parseInt(quantityInput.value, 10);
@@ -348,9 +349,9 @@ div.wrap-table-shopping-cart {
             const response = await fetch('/decreaseQuantity', {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ stockId }) 
+                body: JSON.stringify({ productId, stockSize }),
             });
 
             const data = await response.json();
@@ -359,10 +360,11 @@ div.wrap-table-shopping-cart {
                 const newQuantity = currentQuantity - 1;
                 quantityInput.value = newQuantity;
 
-                const pricePerUnit = parseFloat(quantityInput.dataset.price); 
+                // Update the total price dynamically
+                const pricePerUnit = parseFloat(quantityInput.dataset.price);
                 const updatedTotalPrice = newQuantity * pricePerUnit;
 
-                const totalPriceElement = document.querySelector(`.total-price[data-id="${productId}"][data-stock-id="${stockId}"]`);
+                const totalPriceElement = document.querySelector(`.total-price[data-id="${productId}"][data-size="${stockSize}"]`);
                 if (totalPriceElement) {
                     totalPriceElement.textContent = `₹${updatedTotalPrice}`;
                 }
@@ -376,38 +378,46 @@ div.wrap-table-shopping-cart {
     }
 }
 
-
-
-
-
-
-
-
-async function incQuantity(stockId, productId) {
+async function incQuantity(stockSize, productId) {
     try {
-        const quantityInput = document.querySelector(`input[data-id="${productId}"][data-stock-id="${stockId}"]`);
+        const quantityInput = document.querySelector(`input[data-id="${productId}"][data-size="${stockSize}"]`);
 
         if (quantityInput) {
             const currentQuantity = parseInt(quantityInput.value, 10);
 
-            const response = await fetch('/increaseQuantity', {
+            const response = await fetch(`/getProductStock/${productId}/${stockSize}`, { method: "GET" });
+            const stockData = await response.json();
+
+            if (!stockData.status) {
+                Swal.fire("Error", stockData.message, "error");
+                return;
+            }
+
+            const maxQuantity = stockData.availableStock;
+            if (currentQuantity >= maxQuantity) {
+                Swal.fire("Error", "Cannot exceed available stock", "error");
+                return;
+            }
+
+            const incrementResponse = await fetch('/increaseQuantity', {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ stockId }) 
+                body: JSON.stringify({ productId, stockSize }),
             });
 
-            const data = await response.json();
+            const data = await incrementResponse.json();
 
             if (data.status) {
-                const newQuantity = currentQuantity + 1; 
+                const newQuantity = currentQuantity + 1;
                 quantityInput.value = newQuantity;
 
-                const pricePerUnit = parseFloat(quantityInput.dataset.price); 
+                // Update the total price dynamically
+                const pricePerUnit = parseFloat(quantityInput.dataset.price);
                 const updatedTotalPrice = newQuantity * pricePerUnit;
 
-                const totalPriceElement = document.querySelector(`.total-price[data-id="${productId}"][data-stock-id="${stockId}"]`);
+                const totalPriceElement = document.querySelector(`.total-price[data-id="${productId}"][data-size="${stockSize}"]`);
                 if (totalPriceElement) {
                     totalPriceElement.textContent = `₹${updatedTotalPrice}`;
                 }
@@ -420,6 +430,10 @@ async function incQuantity(stockId, productId) {
         Swal.fire("Error", "An unexpected error occurred", "error");
     }
 }
+
+
+
+
 
 
 

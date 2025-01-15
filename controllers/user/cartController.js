@@ -127,46 +127,37 @@ const removeProduct = async (req, res) => {
 
 const decreaseQuantity = async (req, res) => {
     try {
-        const { stockId } = req.body; 
+        const { productId, stockSize } = req.body;
         const userId = req.session.user;
 
         const userCart = await Cart.findOne({ userId });
-
         if (!userCart) {
             return res.status(404).json({ status: false, message: "Cart not found" });
         }
 
         let itemFound = false;
-        userCart.items.forEach(item => {
-            const stockIndex = item.stock.findIndex(stock => stock._id.toString() === stockId);
+        for (const item of userCart.items) {
+            const stockIndex = item.stock.findIndex(stock => stock.size === stockSize);
             if (stockIndex !== -1) {
                 itemFound = true;
 
-                if (item.stock[stockIndex].quantity === 1) {
-                    return res.status(400).json({
-                        status: false,
-                        message: "Minimum quantity should be 1"
-                    });
+                if (item.stock[stockIndex].quantity <= 1) {
+                    return res.status(400).json({ status: false, message: "Quantity cannot be less than 1" });
                 }
 
                 item.stock[stockIndex].quantity -= 1;
-                item.totalPrice = item.stock.reduce((total, stock) => {
-                    return total + stock.quantity * item.price;
-                }, 0);
+                item.totalPrice = item.stock.reduce((total, stock) => total + stock.quantity * item.price, 0);
+                break;
             }
-        });
+        }
 
         if (!itemFound) {
             return res.status(404).json({ status: false, message: "Item or size not found in cart" });
         }
-        console.log(userCart.items)
+
         await userCart.save();
 
-        return res.status(200).json({
-            status: true,
-            message: "Quantity decreased",
-            updatedCart: userCart 
-        });
+        return res.status(200).json({ status: true, message: "Quantity decreased" });
     } catch (error) {
         console.error("Error in decreaseQuantity:", error);
         return res.status(500).json({ status: false, message: "Server Error" });
@@ -174,29 +165,46 @@ const decreaseQuantity = async (req, res) => {
 };
 
 
+
 const increaseQuantity = async (req, res) => {
     try {
-        const { stockId } = req.body; 
+        const { productId, stockSize } = req.body;
         const userId = req.session.user;
 
-        const userCart = await Cart.findOne({ userId });
+        if (!productId || !stockSize || !userId) {
+            return res.status(400).json({ status: false, message: "Invalid input" });
+        }
 
+        const userCart = await Cart.findOne({ userId });
         if (!userCart) {
             return res.status(404).json({ status: false, message: "Cart not found" });
         }
 
         let itemFound = false;
-        userCart.items.forEach(item => {
-            const stockIndex = item.stock.findIndex(stock => stock._id.toString() === stockId);
+        for (const item of userCart.items) {
+            const stockIndex = item.stock.findIndex(stock => stock.size === stockSize);
             if (stockIndex !== -1) {
                 itemFound = true;
 
+                const product = await Product.findById(productId);
+                if (!product) {
+                    return res.status(404).json({ status: false, message: "Product not found" });
+                }
+
+                const productStock = product.stock.find(stock => stock.size === stockSize);
+                if (!productStock) {
+                    return res.status(404).json({ status: false, message: "Stock size not found in product" });
+                }
+
+                if (item.stock[stockIndex].quantity >= productStock.quantity) {
+                    return res.status(400).json({ status: false, message: "Cannot exceed available stock" });
+                }
+
                 item.stock[stockIndex].quantity += 1;
-                item.totalPrice = item.stock.reduce((total, stock) => {
-                    return total + stock.quantity * item.price;
-                }, 0);
+                item.totalPrice = item.stock.reduce((total, stock) => total + stock.quantity * item.price, 0);
+                break;
             }
-        });
+        }
 
         if (!itemFound) {
             return res.status(404).json({ status: false, message: "Item or size not found in cart" });
@@ -204,16 +212,48 @@ const increaseQuantity = async (req, res) => {
 
         await userCart.save();
 
-        return res.status(200).json({
-            status: true,
-            message: "Quantity increased",
-            updatedCart: userCart 
-        });
+        return res.status(200).json({ status: true, message: "Quantity increased" });
     } catch (error) {
         console.error("Error in increaseQuantity:", error);
         return res.status(500).json({ status: false, message: "Server Error" });
     }
 };
+
+
+
+
+const getProductStock = async (req, res) => {
+    try {
+        const { productId, stockSize } = req.params;
+        console.log(productId, stockSize)
+
+        if (!productId || !stockSize) {
+            return res.status(400).json({ status: false, message: "Invalid input" });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ status: false, message: "Product not found" });
+        }
+
+        const productStock = product.stock.find(stock => stock.size === stockSize);
+        if (!productStock) {
+            return res.status(404).json({ status: false, message: "Stock size not found in product" });
+        }
+        console.log(productStock)
+
+        return res.status(200).json({
+            status: true,
+            availableStock: productStock.quantity
+        });
+    } catch (error) {
+        console.error("Error in getProductStock:", error);
+        return res.status(500).json({ status: false, message: "Server Error" });
+    }
+};
+
+
+
 
 
 
@@ -231,4 +271,5 @@ module.exports = {
     removeProduct,
     decreaseQuantity,
     increaseQuantity,
+    getProductStock,
 }
