@@ -33,21 +33,24 @@ const loadHomepage = async (req,res)=>{
         
         const user = req.session.user;
         const userData = await User.findOne({_id:user});
-        
+        let findProducts = await Product.find({ isBlocked:false}).sort({createdAt:-1}).lean();
+
 
         const categories = await Category.find({isListed:true});
             let productData = await Product.find({
                 isBlocked:false,
                 category:{$in:categories.map(category=>category._id)},
                 // quantity:{$gt:0}
-            })
-            productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn));
+            }).sort({createdAt:-1}).lean();
             productData = productData.slice(0,4);
         if(user){
-            const userData = await User.findOne({_id:user});
+            const uniqueColors = await Product.find({isBlocked:false}).distinct('color');
+
             res.render("home",{
                 user:userData|| null,
-                products:productData
+                products:productData,
+                category:categories,
+                colors:uniqueColors
             })
           
         }else{
@@ -268,6 +271,7 @@ const loadShoppingPage = async (req, res) => {
         });
         const totalPages = Math.ceil(totalProducts/limit);
         const categoriesWithIds = categories.map((category)=>({_id:category._id,name:category.name}));
+        const uniqueColors = await Product.find({isBlocked:false}).distinct('color');
         res.render('shop',{
             user:userData,
             category:categoriesWithIds,
@@ -275,6 +279,7 @@ const loadShoppingPage = async (req, res) => {
             totalProducts:totalProducts,
             totalPages:totalPages,
             currentPage:page,
+            colors:uniqueColors
         });
         
     } catch (error) {
@@ -307,6 +312,7 @@ const filterProduct = async (req, res) => {
             .lean();
 
         const categories = await Category.find({ isListed: true });
+        const uniqueColors = await Product.find({isBlocked:false}).distinct('color');
 
         let userData = null;
         if (userId) {
@@ -327,6 +333,7 @@ const filterProduct = async (req, res) => {
             totalPages: Math.ceil(totalProducts / itemsPerPage),
             currentPage: page,
             selectedCategory: categoryId || null,
+            colors:uniqueColors
         });
     } catch (error) {
         console.error("Error in filterProduct:", error);
@@ -355,17 +362,210 @@ const filterByPrice = async (req, res) => {
         let totalPages = Math.ceil(findProducts.length/itemsPerPage);
         const currentProduct = findProducts.slice(startIndex,endIndex);
         req.session.findProducts = findProducts;
+        const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
 
         res.render("shop",{
             user:userData,
             products:currentProduct,
             category:categories,
             totalPages,
-            currentPage
+            currentPage,
+            colors:uniqueColors
         })
     } catch (error) {
         console.log(error)
         req.redirect("/pageNotFound")
+    }
+}
+
+const filterByLtoHPrice = async (req,res)=>{
+    try {
+        const user = req.session.user;
+        const userData = await User.findOne({_id:user});
+        const categories = await Category.find({ isListed: true }).lean();
+        let findProducts = await Product.find({ isBlocked:false}).sort({salePrice:1}).lean();
+        let itemsPerPage =  10;
+        let currentPage = parseInt(req.query.page) || 1;
+        let startIndex = (currentPage-1)*itemsPerPage;
+        let endIndex = startIndex + itemsPerPage;
+        let totalPages = Math.ceil(findProducts.length/itemsPerPage);
+        const currentProduct = findProducts.slice(startIndex,endIndex);
+        req.session.findProducts = findProducts;
+        const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
+
+        res.render("shop",{
+            user:userData,
+            products:currentProduct,
+            category:categories,
+            totalPages,
+            currentPage,
+            colors:uniqueColors
+            
+        })
+    } catch (error) {
+        console.log("error in filter",error)
+        req.redirect("/pageNotFound")
+        
+    }
+}
+
+const filterByHtoLPrice = async (req,res)=>{
+    try {
+        const user = req.session.user;
+        const userData = await User.findOne({_id:user});
+        const categories = await Category.find({ isListed: true }).lean();
+        let findProducts = await Product.find({ isBlocked:false}).sort({salePrice:-1}).lean();
+        let itemsPerPage =  10;
+        let currentPage = parseInt(req.query.page) || 1;
+        let startIndex = (currentPage-1)*itemsPerPage;
+        let endIndex = startIndex + itemsPerPage;
+        let totalPages = Math.ceil(findProducts.length/itemsPerPage);
+        const currentProduct = findProducts.slice(startIndex,endIndex);
+        req.session.findProducts = findProducts;
+        const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
+
+        res.render("shop",{
+            user:userData,
+            products:currentProduct,
+            category:categories,
+            totalPages,
+            currentPage,
+            colors:uniqueColors
+
+            })
+
+    } catch (error) {
+        console.log("error in filter",error)
+        req.redirect("/pageNotFound")
+        
+    }
+}
+
+const filterByNewProduct = async (req,res)=>{
+    try {
+        const user = req.session.user;
+        const userData = await User.findOne({_id:user});
+        const categories = await Category.find({ isListed: true }).lean();
+        let findProducts = await Product.find({ isBlocked:false}).sort({createdAt:-1}).lean();
+        let itemsPerPage =  10;
+        let currentPage = parseInt(req.query.page) || 1;
+        let startIndex = (currentPage-1)*itemsPerPage;
+        let endIndex = startIndex + itemsPerPage;
+        let totalPages = Math.ceil(findProducts.length/itemsPerPage);
+        const currentProduct = findProducts.slice(startIndex,endIndex);
+        req.session.findProducts = findProducts;
+        const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
+
+        res.render("shop",{
+            user:userData,
+            products:currentProduct,
+            category:categories,
+            totalPages,
+            currentPage,
+            colors:uniqueColors
+
+        })
+    } catch (error) {
+        console.log("error in filter",error)
+        req.redirect("/pageNotFound")
+        
+    }
+}
+
+const filterByColor = async (req,res)=>{
+    try {
+        const color = req.query.color;
+        const user = req.session.user;
+        console.log("user",user)
+        const userData = await User.findOne({_id:user});
+        console.log("userData",userData)
+        const categories = await Category.find({ isListed: true }).lean();
+        console.log("categories",categories)
+        let findProducts = await Product.find({ isBlocked:false,color :color}).lean();
+        console.log("products",findProducts)
+        let itemsPerPage =  10;
+        let currentPage = parseInt(req.query.page) || 1;
+        let startIndex = (currentPage-1)*itemsPerPage;
+        let endIndex = startIndex + itemsPerPage;
+        let totalPages = Math.ceil(findProducts.length/itemsPerPage);
+        const currentProduct = findProducts.slice(startIndex,endIndex);
+        req.session.findProducts = findProducts;
+        const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
+
+        res.render("shop",{
+            user:userData,
+            products:currentProduct,
+            category:categories,
+            totalPages,
+            currentPage,
+            colors:uniqueColors
+        })
+    } catch (error) {
+        console.log("error in filter",error)
+        req.redirect("/pageNotFound")
+        
+    }
+}
+
+
+const filterByAtoZ = async (req,res)=>{
+    try {
+        const user = req.session.user;
+        const userData = await User.findOne({_id:user});
+        const categories = await Category.find({ isListed: true }).lean();
+        let findProducts = await Product.find({ isBlocked:false}).sort({productName:1}).lean();
+        let itemsPerPage =  10;
+        let currentPage = parseInt(req.query.page) || 1;
+        let startIndex = (currentPage-1)*itemsPerPage;
+        let endIndex = startIndex + itemsPerPage;
+        let totalPages = Math.ceil(findProducts.length/itemsPerPage);
+        const currentProduct = findProducts.slice(startIndex,endIndex);
+        req.session.findProducts = findProducts;
+        const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
+
+        res.render("shop",{
+            user:userData,
+            products:currentProduct,
+            category:categories,
+            totalPages,
+            currentPage,
+            colors:uniqueColors
+        })
+    } catch (error) {
+        console.log("error in filter",error)
+        req.redirect("/pageNotFound")
+        
+    }
+}
+
+const filterByZtoA = async (req,res)=>{
+    try {
+        const user = req.session.user;
+        const userData = await User.findOne({_id:user});
+        const categories = await Category.find({ isListed: true }).lean();
+        let findProducts = await Product.find({ isBlocked:false}).sort({productName:-1}).lean();
+        let itemsPerPage =  10;
+        let currentPage = parseInt(req.query.page) || 1;
+        let startIndex = (currentPage-1)*itemsPerPage;
+        let endIndex = startIndex + itemsPerPage;
+        let totalPages = Math.ceil(findProducts.length/itemsPerPage);
+        const currentProduct = findProducts.slice(startIndex,endIndex);
+        req.session.findProducts = findProducts;
+        const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
+
+        res.render("shop",{
+            user:userData,
+            products:currentProduct,
+            category:categories,
+            totalPages,
+            currentPage,
+            colors:uniqueColors
+        })
+
+    } catch (error) {
+    console.log("error in filter",error)
+    req.redirect("/pageNotFound")
+        
     }
 }
 
@@ -396,6 +596,8 @@ const searchProducts = async (req,res)=>{
         let endIndex = startIndex + itemsPerPage;
         let totalPages = Math.ceil(searchResult.length/itemsPerPage);
         const currentProduct = searchResult.slice(startIndex,endIndex);
+        const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
+
 
         res.render("shop",{
             user:userData,
@@ -403,7 +605,8 @@ const searchProducts = async (req,res)=>{
             category:categories,
             totalPages,
             currentPage,
-            count:searchResult.length
+            count:searchResult.length,
+            colors:uniqueColors
         })
 
 
@@ -431,5 +634,11 @@ module.exports={
     filterProduct,
     filterByPrice,
     searchProducts,
+    filterByLtoHPrice,
+    filterByHtoLPrice,
+    filterByNewProduct,
+    filterByColor,
+    filterByAtoZ,
+    filterByZtoA,
     
 }

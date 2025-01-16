@@ -6,7 +6,7 @@ const env = require('dotenv').config();
 const session = require("express-session")
 
 function generateOtp(){
-    const digits = "1234567890";
+    const digit                                                                                                                                                                                                                                                                                                                                                                                                                               s = "1234567890";
     let otp = "";
     for(let i = 0; i < 6; i++){
         otp += digits[Math.floor(Math.random()*10)];
@@ -390,6 +390,7 @@ const postAddAddress = async (req,res)=>{
 
 const editAddress = async (req,res)=>{
     try {
+        console.log(req.query.id)
         const addressId = req.query.id;
         const user = req.session.user;
         const currentAddress = await Address.findOne({

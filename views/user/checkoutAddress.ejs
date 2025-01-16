@@ -1,0 +1,23 @@
+<%- include('../../views/partials/user/header') %>
+
+<div class="container mt-4">
+    <h3>Edit Address</h3>
+    <form action="/update-address/<%= address._id %>" method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= address.name %>" required>
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label">Phone</label>
+            <input type="text" class="form-control" id="phone" name="phone" value="<%= address.phone %>" required>
+        </div>
+        <div class="mb-3">
+            <label for="address" class="form-label">Address</label>
+            <textarea class="form-control" id="address" name="address" rows="3" required><%= address.address %></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Update Address</button>
+        <a href="/" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<%- include('../../views/partials/user/footer') %>

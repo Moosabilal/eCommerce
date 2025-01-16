@@ -1,0 +1,230 @@
+<%- include('../../views/partials/user/header') %>
+<style>
+    body {
+        height: auto;
+    }
+    div.card-header {
+        background-color: #7c7d7e;
+        color: white;
+    }
+</style>
+<div class="container my-5">
+    <form action="placeOrder" method="post">
+    <h1 class="text-center mb-4">Checkout</h1>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Customer Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-5 d-flex">
+                            <label class="form-label mb-0 mr-2">Name :</label>
+                            <span><%= user.name %></span>
+                        </div>
+                        <div class="col-md-12 mb-5 d-flex">
+                            <label class="form-label mb-0 mr-2">Email :</label>
+                            <span><%= user.email %></span>
+                        </div>
+                        <div class="col-md-12 mb-5 d-flex">
+                            <label class="form-label mb-0 mr-2">Phone :</label>
+                            <span><%= user.phone %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Shipping Address</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <label for="address-select" class="form-label fw-bold">Delivery Address</label>
+                        <div class="input-group">
+                            <select class="form-select" name="time" id="address-select" onchange="displayAddressDetails()">
+                                <% if (userAddress && userAddress.address.length > 0) { %>
+                                    <% userAddress.address.forEach((adrs) => { %>
+                                        <option
+                                            data-id="<%= adrs.id %>"
+                                            value="<%= adrs.addressType %>" 
+                                            data-name="<%= adrs.name %>"
+                                            data-city="<%= adrs.city %>"
+                                            data-landmark="<%= adrs.landMark %>"
+                                            data-state="<%= adrs.state %>"
+                                            data-pincode="<%= adrs.pincode %>"
+                                            data-phone="<%= adrs.phone %>"
+                                            data-alt-phone="<%= adrs.altPhone %>"
+                                        >
+                                            <%= adrs.addressType %>
+                                        </option>
+                                    <% }) %>
+                                <% } else { %>
+                                    <option disabled selected>No addresses available</option>
+                                <% } %>
+                            </select>
+                            <a href="/addAddress"><button class="btn" style="background-color: #7c7d7e;" type="button" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                                <i class="bi bi-plus-circle"></i> Add New
+                            </button></a>
+                        </div>
+                        <div class="form-text text-muted mt-1">Select an address or add a new one.</div>
+
+                        <div id="address-details" class="mt-4">
+                            <div class="card">
+                                <div class="card-header text-white">
+                                    <h5 class="card-title mb-0">Selected Address Details</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted">Please select an address to see the details.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Shipping Method</h2>
+        </div>
+        <div class="card-body">
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="shipping" value="standard" id="standard" checked>
+                <label class="form-check-label" for="standard">
+                    Standard Shipping (3-5 business days) - &#8377;5
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="shipping" value="express" id="express">
+                <label class="form-check-label" for="express">
+                    Express Shipping (1-2 business days) - &#8377;15
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Order Summary</h2>
+        </div>
+        <div class="card-body">
+            <% cart.items.forEach(item => { %>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <img src="uploads/product-images/<%= item.productId.productImage[0]%>" alt="<%= item.productId.productName %>" class="img-fluid" style="width: 100px; height: 120px;">
+                    
+                    <div>
+                        <span><%= item.productId.productName %> (Quantity: <%= item.stock[0].quantity %>)</span>
+                    </div>     
+                    <span>&#8377;<%= item.totalPrice %></span>
+                </div>
+            <% }); %>
+        
+            <hr style="background-color: black;">
+            <div class="d-flex justify-content-between">
+                <span>Subtotal</span>
+                <span >&#8377;<%= totalPrice %></span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Shipping</span>
+                <span id="shipping-cost">&#8377;5</span>
+            </div>
+            <!-- <div class="d-flex justify-content-between">
+                <span>Discount</span>
+                <span id="discount">&#8377;10</span>
+            </div> -->
+            <hr>
+            <div class="d-flex justify-content-between fw-bold">
+                <span>Total</span>
+                <span id="total">&#8377;<%= (totalPrice + 5 - 10) %></span>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Payment Method</h2>
+        </div>
+        <div class="card-body">
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="payment" value="card" id="card" checked>
+                <label class="form-check-label" for="card">Credit/Debit Card</label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="payment" value="upi" id="upi">
+                <label class="form-check-label" for="upi">UPI / Google Pay</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="payment" value="cod" id="cod">
+                <label class="form-check-label" for="cod">Cash on Delivery</label>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-success w-100 py-3" type="submit">Place Order</button>
+</form>
+</div>
+
+<%- include('../../views/partials/user/footer') %>
+<script>
+    function displayAddressDetails() {
+        const selectElement = document.getElementById('address-select');
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+
+        const addressId = selectedOption.getAttribute('data-id');
+        const name = selectedOption.getAttribute('data-name');
+        const city = selectedOption.getAttribute('data-city');
+        const landmark = selectedOption.getAttribute('data-landmark');
+        const state = selectedOption.getAttribute('data-state');
+        const pincode = selectedOption.getAttribute('data-pincode');
+        const phone = selectedOption.getAttribute('data-phone');
+        const altPhone = selectedOption.getAttribute('data-alt-phone');
+        const detailsContainer = document.getElementById('address-details');
+        detailsContainer.innerHTML = `
+            <div class="card">
+                <div class="card-header text-white">
+                    <h5 class="card-title mb-0">Selected Address Details</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> ${name}</p>
+                    <p><strong>City:</strong> ${city}</p>
+                    <p><strong>Landmark:</strong> ${landmark}</p>
+                    <p><strong>State:</strong> ${state}</p>
+                    <p><strong>Pincode:</strong> <span class="badge bg-secondary">${pincode}</span></p>
+                    <p><strong>Phone:</strong> ${phone}</p>
+                    <p><strong>Alt Phone:</strong> ${altPhone}</p>
+                    <a href="/editAddress?id=${addressId}" class="btn btn-secondary" style="width:20%;">Edit</a>
+                </div>
+            </div>`;
+    }
+    document.addEventListener('DOMContentLoaded', displayAddressDetails);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const shippingOptions = document.querySelectorAll('input[name="shipping"]');
+        const shippingCostElement = document.getElementById('shipping-cost');
+        const totalElement = document.getElementById('total');
+
+        const subtotal = parseFloat('<%= totalPrice %>'); 
+        
+
+        function updateShippingCost() {
+            const selectedOption = document.querySelector('input[name="shipping"]:checked');
+            const shippingCost = selectedOption.value === 'standard' ? 5 : 15;
+
+            shippingCostElement.innerHTML = `&#8377;${shippingCost}`;
+            const finalTotal = subtotal + shippingCost;
+            totalElement.innerHTML = `&#8377;${finalTotal}`;
+        }
+        shippingOptions.forEach(option => {
+            option.addEventListener('change', updateShippingCost);
+        });
+
+        updateShippingCost();
+    });
+
+
+  
+</script>

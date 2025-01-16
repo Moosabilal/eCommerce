@@ -10,6 +10,7 @@ const profileController = require("../controllers/user/profileController");
 const productController = require("../controllers/user/productController")
 const wishlistController = require("../controllers/user/wishlistController");
 const cartController = require("../controllers/user/cartController")
+const orderController = require("../controllers/user/orderController")
 // const { userAuth, adminAuth } = require("../middlewares/auth");
 
 
@@ -38,6 +39,12 @@ router.get('/',userAuth,userController.loadHomepage);
 router.get("/shop",userAuth,userController.loadShoppingPage);
 router.get("/filter",userAuth,userController.filterProduct);
 router.get('/filterPrice',userAuth,userController.filterByPrice);
+router.get('/filterLtoHPrice',userAuth,userController.filterByLtoHPrice);
+router.get('/filterHtoLPrice',userAuth,userController.filterByHtoLPrice);
+router.get('/filterByNew',userAuth,userController.filterByNewProduct);
+router.get('/filterByColor',userAuth,userController.filterByColor);
+router.get('/filterByA-Z',userAuth,userController.filterByAtoZ);
+router.get('/filterByZ-A',userAuth,userController.filterByZtoA);
 router.post("/search",userAuth,userController.searchProducts)
 
 //profile management
@@ -87,7 +94,12 @@ router.post("/decreaseQuantity", userAuth, cartController.decreaseQuantity);
 router.post("/increaseQuantity", userAuth, cartController.increaseQuantity);
 router.get("/getProductStock/:productId/:stockSize", userAuth, cartController.getProductStock);
 
+//checkout management
+router.get("/checkout",userAuth,cartController.checkoutPage);
 
-
+//order management
+router.post("/placeOrder",userAuth,orderController.PostPlaceOrder);
+// router.get("/orderDetails",userAuth,orderController.getOrderDetails);
+// router.get("/orderHistory",userAuth,orderController.getOrderHistory);
 
 module.exports=router;

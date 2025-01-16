@@ -1,6 +1,7 @@
 const Cart = require("../../models/cartSchema");
 const Product = require("../../models/productSchema");
-const User = require("../../models/userSchema")
+const User = require("../../models/userSchema");
+const Address = require("../../models/addressSchema");
 
 const getCart = async (req, res) => {
     try {
@@ -8,21 +9,29 @@ const getCart = async (req, res) => {
         const userData = await User.findOne({ _id: userId });
         const userCart = await Cart.findOne({ userId: userId });
         
+        
         if (!userCart || !userCart.items.length) {
             return res.render('shopping-cart', {
                 user: userData,
                 cart: null,
+                totalPrice: 0,
+                
             });
         }
         
         const productIds = userCart.items.map((item) => item.productId);
         const products = await Product.find({ _id: { $in: productIds } });
+        const userAddress = await Address.findOne({userId: userId});
 
+        const totalPrice = userCart.items.reduce((total, item) => total + item.totalPrice, 0);
         
         res.render('shopping-cart', {
             user: userData,
             cart: userCart,
-            products: products,  
+            products: products,
+            totalPrice: totalPrice,  
+            userAddress: userAddress
+           
         });
     } catch (error) {
         console.log("Error in getCart", error);
@@ -254,7 +263,33 @@ const getProductStock = async (req, res) => {
 
 
 
+const checkoutPage = async (req, res)=>{
+    try {
+        const user = req.session.user;
+        const userData = await User.findOne({ _id: user });
+        const userCart = await Cart.findOne({ userId: user }).populate('items.productId');
+        if (!userCart) {
+            return res.status(404).json({ status: false, message: "Cart not found"});
+        }
+        const productIds = userCart.items.map((item) => item.productId);
+        const products = await Product.find({ _id: { $in: productIds } });
+        const address = await Address.findOne({userId: user});
+        const totalPrice = userCart.items.reduce((total, item) => total + item.totalPrice, 0);
+        res.render('checkout',{
+            user: userData,
+            cart: userCart,
+            products: products,
+            totalPrice: totalPrice,
+            userAddress: address
+        });
+            
 
+    } catch (error) {
+        console.log("Error in checkoutPage", error);
+        res.redirect("/pageNotFound");
+        
+    }
+}
 
 
 
@@ -272,4 +307,5 @@ module.exports = {
     decreaseQuantity,
     increaseQuantity,
     getProductStock,
+    checkoutPage,
 }
