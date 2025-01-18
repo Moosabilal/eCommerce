@@ -1,0 +1,158 @@
+<%- include('../../views/partials/admin/header') %>
+<style>
+    div.container.my-4{
+            margin-left: 16%;
+            width: 83%;
+             max-width: 100%;
+        }
+    @media (max-width: 768px) {
+        div.container.my-4{
+            margin-left: 0%;
+            width: 95%;
+        }
+    }
+        
+</style>
+<div class="container my-4" >
+  <h2 class="text-center mb-4">Order Management</h2>
+  <p class="text-muted text-center mb-4">Manage and track all customer orders here. You can view details, update the order status, or delete orders.</p>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
+      <thead class="thead-dark">
+        <tr>
+          <th>Order ID</th>
+          <th>Customer Name</th>
+          <th>Amount (₹)</th>
+          <th>Payment Method</th>
+          <th>Address</th>
+          <th>Shipping</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Example Row -->
+         <% for (let i = 0; i < orders.length; i++) { %>
+        <tr>
+          <td><%= orders[i]._id %></td>
+          <td><%= orders[i].userId.name%></td>
+          <td><%= orders[i].finalAmount %></td>
+          <td><%= orders[i].paymentMethod %></td>
+          <td><%= orders[i].parentAddress.addressType %>,<%= orders[i].parentAddress.name %>,<%= orders[i].parentAddress.city %>, <%= orders[i].parentAddress.landMark %>, <%= orders[i].parentAddress.state %>, <%= orders[i].parentAddress.pincode %>, <%= orders[i].parentAddress.phone %>, <%= orders[i].parentAddress.altPhone %></td>
+          <td><%= orders[i].shipping %></td>
+          <td><%= new Date(orders[i].createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+            <td>
+            <select class="form-select form-select-sm status-select" data-order-id="<%= orders[i]._id %>">
+              <% ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'].forEach(status => { %>
+              <option value="<%= status %>" <%= orders[i].status === status ? 'selected' : '' %>><%= status %></option>
+              <% }) %>
+            </select>
+            </td>
+          <td>
+            <button class="btn btn-danger btn-sm delete-order" data-order-id="<%= orders[i]._id %>">
+              <i class="fas fa-trash-alt"></i> Delete
+            </button>
+          </td>
+        </tr>
+        <% } %>
+        <!-- Add more rows dynamically using backend or JavaScript -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../../views/partials/admin/footer') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Status update logic
+    document.querySelectorAll('.status-select').forEach(select => {
+      select.addEventListener('change', function () {
+        const orderId = this.getAttribute('data-order-id');
+        const newStatus = this.value;
+        Swal.fire({
+          title: 'Update Status?',
+          text: `Are you sure you want to update the status to "${newStatus}" for Order ID: ${orderId}?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, update it!',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            console.log(orderId,newStatus)
+
+            fetch('/admin/statusSelection', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ orderId: orderId, status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire('Updated!', `Order status updated to "${newStatus}".`, 'success');
+              } else {
+                Swal.fire('Error!', 'There was an error updating the status.', 'error');
+                this.value = this.dataset.previousValue || 'Pending';
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire('Error!', 'There was an error updating the status.', 'error');
+              this.value = this.dataset.previousValue || 'Pending';
+            });
+          } else {
+            this.value = this.dataset.previousValue || 'Pending';
+          }
+        });
+      });
+
+      select.addEventListener('focus', function () {
+        this.dataset.previousValue = this.value;
+      });
+    });
+
+    // Delete logic
+    document.querySelectorAll('.delete-order').forEach(button => {
+      button.addEventListener('click', function () {
+      const orderId = this.getAttribute('data-order-id');
+      Swal.fire({
+        title: 'Are you sure?',
+        text: `Do you want to delete order ${orderId}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+      }).then((result) => {
+        if (result.isConfirmed) {
+        fetch('/admin/deleteOrder', {
+          method: 'POST',
+          headers: {
+          'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ orderId: orderId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+          Swal.fire('Deleted!', `Order ${orderId} has been deleted.`, 'success');
+          this.closest('tr').remove();
+          } else {
+          Swal.fire('Error!', 'There was an error deleting the order.', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          Swal.fire('Error!', 'There was an error deleting the order.', 'error');
+        });
+        }
+      });
+      });
+    });
+  });
+</script>

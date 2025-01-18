@@ -99,7 +99,7 @@ router.get("/checkout",userAuth,cartController.checkoutPage);
 
 //order management
 router.post("/placeOrder",userAuth,orderController.PostPlaceOrder);
-// router.get("/orderDetails",userAuth,orderController.getOrderDetails);
-// router.get("/orderHistory",userAuth,orderController.getOrderHistory);
+router.get("/orderHistory",userAuth,orderController.getOrderHistory);
+router.post("/cancelOrder",userAuth,orderController.cancelOrder)
 
 module.exports=router;

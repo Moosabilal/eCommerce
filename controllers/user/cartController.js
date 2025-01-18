@@ -274,6 +274,10 @@ const checkoutPage = async (req, res)=>{
         const productIds = userCart.items.map((item) => item.productId);
         const products = await Product.find({ _id: { $in: productIds } });
         const address = await Address.findOne({userId: user});
+        if (!address) {
+            return res.status(200).json({ status: false, message: "Address not found"
+                });
+                }
         const totalPrice = userCart.items.reduce((total, item) => total + item.totalPrice, 0);
         res.render('checkout',{
             user: userData,

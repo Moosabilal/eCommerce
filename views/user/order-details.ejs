@@ -1,0 +1,162 @@
+<%- include('../../views/partials/user/header') %>
+<%- include('../../views/partials/user/profile-sidebar') %>
+<style>
+  .order-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem auto;
+    max-width: 90%;
+  }
+
+  .order-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    width: 300px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .order-card h5 {
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .order-card p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .order-card .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+  }
+
+  .order-card .status {
+    font-weight: bold;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    color: #fff;
+  }
+
+  .status.Pending {
+    background-color: #ffc107;
+  }
+
+  .status.Processing {
+    background-color: #17a2b8;
+  }
+
+  .status.Shipped {
+    background-color: #007bff;
+  }
+
+  .status.Delivered {
+    background-color: #28a745;
+  }
+
+  .status.Cancelled {
+    background-color: #dc3545;
+  }
+</style>
+
+<div class="container " >
+  
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg" style="margin-left: 10%;">
+      <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+        Home
+        <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+      </a>
+  
+      <span class="stext-109 cl4">
+        My Orders
+      </span>
+    </div>
+ 
+
+  <h2 class="text-center mb-4">Order Management</h2>
+
+  <div class="order-container">
+    <% if(orders && orders.length>0){ %>
+    <% orders.forEach(order => { %>
+      <div class="order-card">
+        <h5>Order ID: <%= order._id %></h5>
+        <p><strong>Amount:</strong> ₹<%= order.finalAmount %></p>
+        <p><strong>Payment:</strong> <%= order.paymentMethod %></p>
+        <p><strong>Address:</strong> 
+          <% if (order.addressId && order.addressId.address) { %>
+            <%= order.addressId.address[0].city %>, <%= order.addressId.address[0].state %>, <%= order.addressId.address[0].pincode %>
+          <% } else { %>
+            Address not available
+          <% } %>
+        </p>
+        <p><strong>Date:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></p>
+        <div class="actions">
+          <span class="status <%= order.status %>"><%= order.status %></span>
+          <button class="btn btn-danger btn-sm cancel-order" data-order-id="<%= order._id %>">
+            Cancel
+          </button>
+        </div>
+      </div>
+    <% }) %>
+    <% }else{ %> 
+      <div class="no-orders">
+        <h5>No orders found</h5>
+        <p>It seems like you haven’t placed any orders yet.</p>
+    </div>
+      <% } %>
+  </div>
+</div>
+
+<%- include('../../views/partials/admin/footer') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Cancel order logic
+    document.querySelectorAll('.cancel-order').forEach(button => {
+      button.addEventListener('click', function () {
+        const orderId = this.getAttribute('data-order-id');
+        Swal.fire({
+          title: 'Cancel Order?',
+          text: `Are you sure you want to cancel order ID: ${orderId}?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, cancel it!',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch("/cancelOrder", {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ orderId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire('Cancelled!', `Order ${orderId} has been cancelled.`, 'success');
+                // Optionally, you can remove the cancelled order from the DOM
+                button.closest('.order-card').remove();
+              } else {
+                console.log(data)
+                Swal.fire('Error!', 'There was a problem cancelling your order. Please try again.', 'error');
+              }
+            })
+            .catch(error => {
+              console.error(error.message)
+              Swal.fire('Error!', 'There was a problem cancelling your order. Please try again.', 'error');
+            });
+          }
+        });
+      });
+    });
+  });
+</script>
+<%- include('../../views/partials/user/footer') %>

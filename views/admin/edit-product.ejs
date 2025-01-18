@@ -127,8 +127,9 @@
                 <div class="col-md-6 col-12 mb-3">
                     <label for="category" class="form-label">Category</label>
                     <select class="form-select" name="category" id="category" required>
-                        <% for(let i = 0 ; i < cat.length ; i++) { %>
-                        <option value="<%= cat[i].name %>"><%= cat[i].name %></option>
+                        <option value="<%= cat.name %> " selected><%= cat.name %></option>
+                        <% for(let i = 0 ; i < categories.length ; i++) { %>
+                        <option value="<%= categories[i].name %>"><%= categories[i].name %></option>
                         <% } %>
                     </select>
                     <div id="category-error" class="error-message"></div>

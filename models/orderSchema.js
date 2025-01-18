@@ -8,11 +8,19 @@ const orderSchema = new Schema({
         default:()=>uuidv4(),
         unique: true
     },
+    userId : {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        },
     orderItems:[{
-        product: {
+        productId: {
             type:Schema.Types.ObjectId,
             ref:'Product',
             required:true
+        },
+        size:{
+            type: String,
+            required: true
         },
         quantity: {
             type: Number,
@@ -34,13 +42,29 @@ const orderSchema = new Schema({
         type: Number,
         required: true
     },
-    address: {
+    paymentMethod:{
+        type: String,
+        required: true,
+        enum: ['COD', 'card', 'UPI']
+    },
+    addressId: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Address',
         required: true
     },
-    invoiceDate: {
-        type: Date,
+    parentAddressId:{
+        type: Schema.Types.ObjectId,
+        ref: 'Address',
+
+    },
+    // invoiceDate: {
+    //     type: Date,
+    //     default: Date.now,
+    // },
+    shipping:{
+        type: String,
+        required: true,
+        enum: ['standard', 'express']
     },
     status: {
         type: String,

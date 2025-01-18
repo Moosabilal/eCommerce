@@ -124,7 +124,7 @@
                         <%= product.description %>
                     </p>
                     <p class="stext-102 cl3 p-t-23" style="color: rgb(66, 4, 124);">
-                        <span class="icon">
+                        <!-- <span class="icon">
                             <i class="fa fa-shield-alt cl2 m-r-10"></i>
                             1 Year Brand Warranty
                         </span>
@@ -133,7 +133,7 @@
                             <i class="fa fa-undo cl2 m-r-10"></i>
                             30 Days Return Policy
                         </span>
-                        <br>
+                        <br> -->
                         <span class="icon">
                             <i class="fa fa-money-bill-wave cl2 m-r-10"></i>
                             Cash on Delivery available
@@ -150,15 +150,20 @@
                     
                             <div class="size-204 respon6-next">
                                 <div class="rs1-select2 bor8 bg0">
-                                    <select id="product-size-<%= product._id %>" class="js-select2" name="size">
-                                        <% product.stock.forEach(item => { %>
-                                            <option value="<%= item.size %>"><%= item.size %></option>
-                                        <% }) %>
-                                    </select>
-                                    <div class="dropDownSelect2"></div>
+                                  <select
+                                    id="product-size-<%= product._id %>"
+                                    class="js-select2"
+                                    name="size"
+                                    onchange="updateAvailability('<%= product._id %>')"
+                                  >
+                                    <% product.stock.forEach((item, index) => { %>
+                                      <option value="<%= item.size %>" <%= index === 0 ? 'selected' : '' %>><%= item.size %></option>
+                                    <% }) %>
+                                  </select>
+                                  <div class="dropDownSelect2"></div>
                                 </div>
+                              </div>
                             </div>
-                        </div>
                     
                         <div class="flex-w flex-r-m p-b-10">
                             <div class="size-204 flex-w flex-m respon6-next">
@@ -166,13 +171,15 @@
                                     <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
                                         <i class="fs-16 zmdi zmdi-minus"></i>
                                     </div>
-                    
-                                    <input id="product-quantity-<%= product._id %>" min="1" class="mtext-104 cl3 txt-center num-product" type="number" name="num-product" value="1">
-                    
+
+                                    <input id="product-quantity-<%= product._id %>" min="1" max="10" class="mtext-104 cl3 txt-center num-product" type="number" name="num-product" value="1">
+
                                     <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
                                         <i class="fs-16 zmdi zmdi-plus"></i>
                                     </div>
                                 </div>
+
+                                    
                     
                                 <button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail" 
                                     onclick="addToCart('<%= product._id %>')">
@@ -210,13 +217,13 @@
                             <i class="fa fa-google-plus"></i>
                         </a>
                     </div> -->
-                    <div class="flex-w flex-m p-l-100 p-t-15 respon7">
+                    <!-- <div class="flex-w flex-m p-l-100 p-t-15 respon7">
                         <div class="flex-m bor9 p-r-10 m-r-11">
                             <P>
                                 Stock Code: <span style="color: rgb(70, 184, 219);"> FWM15VKT</span>
                             </P>
                         </div>
-                    </div>
+                    </div> -->
                     <div class="flex-w flex-m p-l-100 p-t-15 respon7">
                         <div class="flex-m bor9 p-r-10 m-r-11">
                             <P>
@@ -226,46 +233,44 @@
                     </div>
                     <div class="flex-w flex-m p-l-100 p-t-15 respon7">
                         <div class="flex-m bor9 p-r-10 m-r-11">
-                            <P>
-                                Availability:<span style="color: rgb(70, 184, 219);">20</span>
-                            </P>
+                          <p>
+                            Availability: <span id="availability-<%= product._id %>" style="color: rgb(70, 184, 219);"></span>
+                          </p>
                         </div>
-                    </div>
+                      </div>
 
                 </div>
             </div>
         </div>
 
-        <div class="bor10 m-t-50 p-t-43 p-b-40">
-            <!-- Tab01 -->
+        <!-- <div class="bor10 m-t-50 p-t-43 p-b-40">
+            Tab01
             <div class="tab01">
-                <!-- Nav tabs -->
+                Nav tabs
                 <ul class="nav nav-tabs" role="tablist">
-                    <!-- <li class="nav-item p-b-10">
+                    <li class="nav-item p-b-10">
                         <a class="nav-link active" data-toggle="tab" href="#description" role="tab">Description</a>
-                    </li> -->
+                    </li>
 
                     <li class="nav-item p-b-10">
                         <a class="nav-link" data-toggle="tab" href="#information" role="tab">Additional information</a>
                     </li>
 
                     <li class="nav-item p-b-10">
-                        <a class="nav-link" data-toggle="tab" href="#reviews" role="tab">Reviews (1)</a>
+                        <a class="nav-link " data-toggle="tab" href="#reviews" role="tab">Reviews (1)</a>
                     </li>
-                </ul>
+                </ul> -->
 
                 <!-- Tab panes -->
-                <div class="tab-content p-t-43">
-                    <!-- - -->
-                    <!-- <div class="tab-pane fade show active" id="description" role="tabpanel">
+                <!-- <div class="tab-content p-t-43">
+                    <div class="tab-pane fade show active" id="description" role="tabpanel">
                         <div class="how-pos2 p-lr-15-md">
                             <p class="stext-102 cl6">
                                 <%= product.description %>
                             </p>
                         </div>
-                    </div> -->
+                    </div>
 
-                    <!-- - -->
                     <div class="tab-pane fade show active" id="information" role="tabpanel">
                         <div class="row">
                             <div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
@@ -324,12 +329,11 @@
                         </div>
                     </div>
 
-                    <!-- - -->
                     <div class="tab-pane fade" id="reviews" role="tabpanel">
                         <div class="row">
                             <div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
                                 <div class="p-b-30 m-lr-15-sm">
-                                    <!-- Review -->
+                                     Review
                                     <div class="flex-w flex-t p-b-68">
                                         <div class="wrap-pic-s size-109 bor0 of-hidden m-r-18 m-t-6">
                                             <img src="images/avatar-01.jpg" alt="AVATAR">
@@ -356,7 +360,6 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Add review -->
                                     <form class="w-full">
                                         <h5 class="mtext-108 cl2 p-b-7">
                                             Add a review
@@ -406,18 +409,18 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                </div> -->
+            <!-- </div>
+        </div> -->
     </div>
 
     <div class="bg6 flex-c-m flex-w size-302 m-t-73 p-tb-15">
-        <span class="stext-107 cl6 p-lr-25">
+        <!-- <span class="stext-107 cl6 p-lr-25">
             SKU: JAK-01
-        </span>
+        </span> -->
 
         <span class="stext-107 cl6 p-lr-25">
-            Categories: Jacket, Men
+            Categories: <%= category.name %>
         </span>
     </div>
 </section>
@@ -522,13 +525,8 @@
 
     async function addToCart(productId) {
     try {
-        // Get the selected size
         const size = document.querySelector(`#product-size-${productId}`).value;
-
-        // Get the quantity
         const quantity = document.querySelector(`#product-quantity-${productId}`).value;
-
-        // Send the data to the server
         const response = await fetch("/addToCart", {
             method: "POST",
             headers: {
@@ -572,11 +570,86 @@
     }
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    // Set initial availability when the page loads
+    initializeAvailability('<%= product._id %>');
 
+    // Function to initialize availability on page load
+    function initializeAvailability(productId) {
+      const sizeSelect = document.getElementById(`product-size-${productId}`);
+      const selectedSize = sizeSelect.value;
 
+      // Parse the stock data passed from the backend
+      const stockData = <%- JSON.stringify(product.stock) %>;
+
+      // Find the quantity for the default selected size
+      const selectedStock = stockData.find(item => item.size === selectedSize);
+
+      const availabilitySpan = document.getElementById(`availability-${productId}`);
+      if (selectedStock && selectedStock.quantity > 0) {
+        availabilitySpan.textContent = selectedStock.quantity;
+      } else {
+        availabilitySpan.textContent = "Out of stock";
+      }
+    }
+  });
+
+  // Function to update availability dynamically on size selection
+  function updateAvailability(productId) {
+    const sizeSelect = document.getElementById(`product-size-${productId}`);
+    const selectedSize = sizeSelect.value;
+
+    const stockData = <%- JSON.stringify(product.stock) %>;
+
+    const selectedStock = stockData.find(item => item.size === selectedSize);
+
+    const availabilitySpan = document.getElementById(`availability-${productId}`);
+    if (selectedStock && selectedStock.quantity > 0) {
+      availabilitySpan.textContent = selectedStock.quantity;
+    } else {
+      availabilitySpan.textContent = "Out of stock";
+    }
+  }
+
+                                        
     
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    const quantityInput = document.querySelector(`#product-quantity-<%= product._id %>`);
+    const btnNumProductUp = document.querySelector('.btn-num-product-up');
+    const btnNumProductDown = document.querySelector('.btn-num-product-down');
+
+    btnNumProductUp.addEventListener('click', function() {
+        let currentValue = parseInt(quantityInput.value, 10);
+        if (currentValue > 10) {
+            quantityInput.value = 10;
+            Swal.fire({
+                title: "Max Quantity Reached",
+                text: "You can only add up to 10 items.",
+                icon: "info",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    });
+
+    quantityInput.addEventListener('input', function() {
+        let currentValue = parseInt(quantityInput.value, 10);
+        if (currentValue > 10) {
+            quantityInput.value = 10;
+            Swal.fire({
+                title: "Max Quantity Reached",
+                text: "You can only add up to 10 items.",
+                icon: "info",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    });
+                                    
+
+
     const containers = document.querySelectorAll('.img-zoom-container');
     
     containers.forEach(container => {

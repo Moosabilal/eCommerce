@@ -6,10 +6,11 @@ const env = require('dotenv').config();
 const session = require("express-session")
 
 function generateOtp(){
-    const digit                                                                                                                                                                                                                                                                                                                                                                                                                               s = "1234567890";
+    const digits = "1234567890";
     let otp = "";
     for(let i = 0; i < 6; i++){
         otp += digits[Math.floor(Math.random()*10)];
+        return;
     }
     return otp;
 }
@@ -144,8 +145,17 @@ const postNewPassword = async (req,res)=>{
 const userProfile = async (req,res)=>{
     try {
         const userId = req.session.user;
+        console.log(userId)
         const userData = await User.findById(userId);
         const addressData = await Address.findOne({userId:userId});
+        if(!addressData){
+            res.render("profile",{
+                user:userData,
+                userAddress:null,
+                count:null
+            });
+            return;
+        }
         const count = addressData.address.length;
         res.render("profile",{
             user:userData,

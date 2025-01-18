@@ -13,7 +13,7 @@ const getProductAddPage = async (req, res) => {
             cat: category // Pass the fetched categories to the view
         })
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -99,7 +99,7 @@ const getAllProducts = async (req,res)=>{
         }
 
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -165,7 +165,7 @@ const blockProduct = async (req,res)=>{
         await Product.updateOne({_id:id},{$set:{isBlocked:true}});
         res.redirect("/admin/products");
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -175,21 +175,24 @@ const unBlockProduct = async (req,res)=>{
         await Product.updateOne({_id:id},{$set:{isBlocked:false}});
         res.redirect("/admin/products")
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
 const getEditProduct = async (req,res)=>{
     try {
+        console.log('hello')
         const id = req.query.id;
         const product = await Product.findOne({_id:id});
-        const category = await Category.find({});
+        const category = await Category.findOne({_id:product.category});
+        const categories = await Category.find({});
         res.render("edit-product",{
             product:product,
-            cat:category
+            cat:category,
+            categories:categories
         })
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -221,41 +224,31 @@ const editProduct = async (req,res)=>{
             category:categoryId._id,
             regularPrice:data.regularPrice,
             salePrice:data.salePrice,
-            // stock:[{
-            //     size:data.size,
-            //     quantity:data.quantity
-            // }],
+
             color:data.color
         }
-        console.log("first error")
-        // Check if the size already exists in the stock array
-        const size = data.size;      // Get the size from the form
-        const quantity = data.quantity;  // Get the quantity from the form
+        const size = data.size;      
+        const quantity = data.quantity;  
 
-        // Check if the size already exists in the stock array
         const existingSize = product.stock.find((item) => item.size === size);
 
         if (existingSize) {
-            // Size exists, update the quantity
             existingSize.quantity += Number(quantity);
         } else {
-            // Size does not exist, add a new size and quantity
             product.stock.push({ size: size, quantity: quantity });
         }
 
-        // Push the updated stock array to updateFields
         updateFields.stock = product.stock;
 
         if(req.files.length>0){
             updateFields.$push = {productImage:{$each:images}};
         }
-        console.log("updateFields",updateFields)
         
         await Product.findByIdAndUpdate(id,updateFields,{new:true});
         res.redirect("/admin/products");
     } catch (error) {
         console.error(error)
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -274,7 +267,7 @@ const deleteSingleImage = async (req,res)=>{
         res.send({status:true})
 
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 

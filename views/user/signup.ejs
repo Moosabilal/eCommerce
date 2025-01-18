@@ -6,7 +6,35 @@
     <title>Signup Page</title>
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="/css/signup.css">
+    <style>
+        .password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-container input {
+  flex: 1;
+  padding-right: 40px; /* Add space for the icon */
+}
+
+.password-container .toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #999;
+  font-size: 1.2rem;
+}
+
+.password-container .toggle-password:hover {
+  color: #333;
+}
+
+
+    </style>
 </head>
 <body>
     <div class="background"></div>
@@ -31,12 +59,24 @@
             <div id="error3" class="error-message"></div>
 
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-            <div id="error4" class="error-message"></div>
+<div class="password-container">
+  <input type="password" id="password" name="password" placeholder="Enter your password" required>
+  <span class="toggle-password" data-target="password">
+    <i class="fas fa-eye"></i>
+  </span>
+</div>
+<div id="error4" class="error-message"></div>
 
-            <label for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
-            <div id="error5" class="error-message"></div>
+<label for="confirmPassword">Confirm Password</label>
+<div class="password-container">
+  <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+  <span class="toggle-password" data-target="confirmPassword">
+    <i class="fas fa-eye"></i>
+  </span>
+</div>
+<div id="error5" class="error-message"></div>
+
+            
             <%if(locals.message && message.length>0){%>
                 <div class="alert alert-danger text-center">
                     <%=message%>
@@ -160,7 +200,30 @@
             })
         })
    
-   
+        document.addEventListener('DOMContentLoaded', () => {
+      const togglePasswordIcons = document.querySelectorAll('.toggle-password');
+
+      togglePasswordIcons.forEach(icon => {
+        const iconElement = icon.querySelector('i');
+        iconElement.classList.remove('fa-eye');
+        iconElement.classList.add('fa-eye-slash');
+
+        icon.addEventListener('click', function () {
+          const targetInput = document.getElementById(this.dataset.target);
+
+          if (targetInput.type === 'password') {
+        targetInput.type = 'text';
+        iconElement.classList.remove('fa-eye-slash');
+        iconElement.classList.add('fa-eye');
+          } else {
+        targetInput.type = 'password';
+        iconElement.classList.remove('fa-eye');
+        iconElement.classList.add('fa-eye-slash');
+          }
+        });
+      });
+    });
+
    
    
    </script>
