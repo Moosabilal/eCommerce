@@ -201,11 +201,13 @@ const editProduct = async (req,res)=>{
         const id = req.params.id;
         const product = await Product.findOne({_id:id});
         const data = req.body;
+        console.log("datacategory",data)
         const existingProduct = await Product.findOne({
             productName:data.productName,
             _id:{$ne:id}
         })
-        const categoryId = await Category.findOne({name:data.category});
+        console.log("existing products",existingProduct)
+        const categoryId = await Category.find({name:data.category});
 
         
         if(existingProduct){
@@ -218,6 +220,7 @@ const editProduct = async (req,res)=>{
                 images.push(req.files[i].filename);
             }
         }
+        console.log("categoryId",categoryId)
         const updateFields = {
             productName:data.productName,
             description:data.description,
@@ -231,7 +234,7 @@ const editProduct = async (req,res)=>{
         const quantity = data.quantity;  
 
         const existingSize = product.stock.find((item) => item.size === size);
-
+        console.log("exisstingsize",existingSize)
         if (existingSize) {
             existingSize.quantity += Number(quantity);
         } else {
@@ -239,7 +242,7 @@ const editProduct = async (req,res)=>{
         }
 
         updateFields.stock = product.stock;
-
+        console.log("file length",req.files.length)
         if(req.files.length>0){
             updateFields.$push = {productImage:{$each:images}};
         }

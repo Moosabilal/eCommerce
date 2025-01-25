@@ -1,0 +1,159 @@
+<%- include('../../views/partials/user/header') %>
+<%- include('../../views/partials/user/profile-sidebar') %>
+
+<style>
+    .main-content {
+        background-color: rgb(211, 218, 211);
+        margin-left: 16.4%;
+        padding: 40px 30px;
+        margin-top: 0px;
+        border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .main-content {
+            margin-left: 0;
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="main-content" style="padding: 20px;">
+    <div class="container mb-4">
+        <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+            <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+                Home
+                <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+            </a>
+            <a href="/userProfile" class="stext-109 cl8 hov-cl1 trans-04">
+                Profile
+                <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+            </a>
+            <span class="stext-109 cl4">
+                My Wallet
+            </span>
+        </div>
+    </div>
+
+    <h1 class="text-center mb-4">Wallet</h1>
+    <div class="wallet-balance card shadow-sm p-4 mb-4 text-center" style="background: linear-gradient(135deg, #ffffff 0%, #d6cfcd 100%); color: white; border: none;">
+        <img src="uploads\product-images\wallet.webp" alt="Wallet Image" style="width: 150px; height: auto; margin-top: 20px; margin-bottom: 10px; margin-left: 44%; filter: grayscale(100%);">
+
+        <h4>Your Wallet Balance</h4>
+        <p class="balance-amount" style="font-size: 2rem; font-weight: bold;">₹<span id="walletBalance"><%= wallet.balance %></span></p>
+    </div>
+
+    <div class="transaction-history card shadow-sm p-4">
+        <h4>Transaction History</h4>
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>OrderId</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="transactionHistory">
+                <% wallet.transactions.forEach(function(transaction) { %>
+                    <tr>
+                        <td><%= new Date(transaction.date).toLocaleDateString() %></td>
+                        <td><%= new Date(transaction.date).toLocaleTimeString() %></td>
+                        <td><%= transaction.transactionType %></td>
+                        <td><%= transaction.orderId ? 'Order ID: ' + transaction.orderId : 'N/A' %></td>
+                        <td>₹<%= transaction.amount.toFixed(2) %></td>
+                        <td><%= transaction.status %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="add-balance card shadow-sm p-4 mt-4">
+        <h4>Add Amount to Wallet</h4>
+        <div class="input-group mb-3">
+            <input type="number" class="form-control" id="addAmount" placeholder="Enter amount" aria-label="Enter amount">
+            <div class="input-group-append">
+                <button class="btn btn-success" id="addAmountButton" onclick="return addAmountToWallet()">Add Amount</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../../views/partials/user/footer') %>
+
+<script>
+  async function addAmountToWallet() {
+    try {
+        const addAmount = document.getElementById('addAmount').value;
+
+        if (!addAmount || isNaN(addAmount) || addAmount <= 0) {
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Please enter a valid amount.",
+                icon: "error",
+                timer: 1500,
+            });
+            return;
+        }
+
+        const response = await fetch('/add-amount-to-wallet', {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ addAmount }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Update wallet balance
+            document.getElementById('walletBalance').textContent = data.balance.toFixed(2);
+
+            // Update transaction history dynamically
+            const transactionHistory = document.getElementById('transactionHistory');
+            const newRow = document.createElement('tr');
+
+            const transactionDate = new Date(data.transaction.date);
+
+            newRow.innerHTML = `
+                <td>${transactionDate.toLocaleDateString()}</td>
+                <td>${transactionDate.toLocaleTimeString()}</td>
+                <td>${data.transaction.transactionType}</td>
+                <td>${data.transaction.orderId || 'N/A'}</td>
+                <td>₹${data.transaction.amount.toFixed(2)}</td>
+                <td>${data.transaction.status}</td>
+            `;
+
+            // Prepend the new transaction row to the table
+            transactionHistory.prepend(newRow);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Amount Added',
+                text: data.message,
+                timer: 1500,
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message,
+                timer: 1500,
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            title: "Error",
+            text: "An error occurred. Please try again.",
+            icon: "error",
+            timer: 1500,
+        });
+    }
+}
+
+</script>
+

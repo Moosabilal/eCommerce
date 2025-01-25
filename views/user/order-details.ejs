@@ -1,48 +1,89 @@
+
 <%- include('../../views/partials/user/header') %>
 <%- include('../../views/partials/user/profile-sidebar') %>
+
 <style>
+   .main-content {
+    background-color: rgb(230, 244, 230);
+    margin-left: 16.4%;
+    padding: 40px 30px;
+    margin-top: 0px;
+    border-radius: 8px;
+  }
   .order-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
     margin: 2rem auto;
     max-width: 90%;
   }
 
-  .order-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 1rem;
-    width: 300px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  .order-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.details {
+  flex: 1;
+  margin-left: 1rem;
+}
+
+  .order-row .details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    margin-left: 1rem;
   }
 
-  .order-card h5 {
-    margin-bottom: 0.5rem;
+  .order-row h5 {
+    margin: 0;
     color: #333;
+    font-size: 1rem;
   }
 
-  .order-card p {
-    margin: 0.5rem 0;
+  .order-row p {
+    margin: 0;
     font-size: 0.9rem;
     color: #555;
   }
 
-  .order-card .actions {
+  .priceDetails {
+  flex: 1;
+  margin-left: 1rem;
+}
+
+
+
+  .order-row .actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
   }
 
-  .order-card .status {
+  .order-row .status {
     font-weight: bold;
-    padding: 0.2rem 0.5rem;
+    padding: 0.3rem 0.6rem;
     border-radius: 4px;
     color: #fff;
   }
+  .status {
+  font-weight: bold;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  color: #fff;
+}
 
   .status.Pending {
     background-color: #ffc107;
@@ -63,64 +104,120 @@
   .status.Cancelled {
     background-color: #dc3545;
   }
+  div.priceDetails{
+    margin-right: 25%;
+  }
+  @media (max-width: 768px) {
+    .main-content {
+      margin-left: 0;
+      padding: 20px;
+    }
+  }
 </style>
 
-<div class="container " >
-  
-    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg" style="margin-left: 10%;">
-      <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
-        Home
-        <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-      </a>
-  
-      <span class="stext-109 cl4">
-        My Orders
-      </span>
-    </div>
- 
+<div class="main-content">
+  <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg" style="margin-left: 10%;">
+    <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+      Home
+      <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+    </a>
+    <span class="stext-109 cl4">
+      My Orders
+    </span>
+  </div>
 
   <h2 class="text-center mb-4">Order Management</h2>
 
   <div class="order-container">
-    <% if(orders && orders.length>0){ %>
-    <% orders.forEach(order => { %>
-      <div class="order-card">
-        <h5>Order ID: <%= order._id %></h5>
-        <p><strong>Amount:</strong> ₹<%= order.finalAmount %></p>
-        <p><strong>Payment:</strong> <%= order.paymentMethod %></p>
-        <p><strong>Address:</strong> 
-          <% if (order.addressId && order.addressId.address) { %>
-            <%= order.addressId.address[0].city %>, <%= order.addressId.address[0].state %>, <%= order.addressId.address[0].pincode %>
-          <% } else { %>
-            Address not available
-          <% } %>
-        </p>
-        <p><strong>Date:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></p>
-        <div class="actions">
-          <span class="status <%= order.status %>"><%= order.status %></span>
-          <button class="btn btn-danger btn-sm cancel-order" data-order-id="<%= order._id %>">
-            Cancel
-          </button>
+    <% if (orders && orders.length > 0) { %>
+      <% 
+        // Group products by orderId
+        const ordersGrouped = {};
+        orders.forEach(order => {
+          if (!ordersGrouped[order._id]) {
+            ordersGrouped[order._id] = [];
+          }
+          ordersGrouped[order._id].push(order);
+        });
+      %>
+      
+      <% for (const orderId in ordersGrouped) { 
+        const orderGroup = ordersGrouped[orderId]; 
+        const order = orderGroup[0]; // Assuming all items have the same orderId
+      %>
+        <a href="/orderedProducts?parentAddressId=<%= order.parentAddressId %>&orderId=<%=order._id%>" style="text-decoration: none;">
+        <div class="order-row">
+        
+          <!-- Left Side: Images -->
+          <div class="order-row-left">
+            <% orderGroup.forEach(product => { %>
+              <img src="uploads/product-images/<%= product.productDetails.productImage[0] %>" alt="Product Image" style="width: 100px; height: auto; border-radius: 8px; margin-bottom: 10px;">
+            <% }); %>
+          </div>
+
+          
+
+          <!-- Right Side: Price, Status, and Actions -->
+          <div class="order-row-left m-l-50">
+            <% orderGroup.forEach(product => { %>
+              <p><strong>Product Name:</strong> <%= product.productDetails.productName %></p>
+              <p><strong>Price:</strong> ₹<%= product.orderItems.price %></p>
+              <p><strong>Quantity:</strong> <%= product.orderItems.quantity %></p>
+              <p><strong>Total:</strong><span class="text-primary"> ₹<%= product.orderItems.totalPrice %></span></p>
+            <% }); %>
+          </div>
+
+          <!-- Middle: Order Info -->
+          <div class="details">
+            <h5>Order ID: <span class="text-primary"><%= order.orderId %></span></h5>
+            <p><strong>finalAmount:</strong><span class="text-primary"><%= order.finalAmount %></span>
+            <p><strong>Address Type:</strong>
+              <% if(addressData){ %>
+                <% addressData.forEach(address => { %>
+                  <% if (address.address._id.toString() === order.parentAddressId.toString()) { %>
+                    <%= address.address.addressType %>
+                  <% } %>
+                <% }); %>
+              <% } else { %>
+                <p>No Data Found</p>
+              <% } %>
+            </p>
+            <p><strong>Date:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></p>
+          </div>
+          
+          <div class="actions">
+            <p><strong>Status :&nbsp;</strong><span class="status <%= order.status %>"><%= order.status %></span></p>
+            <button class="btn btn-danger btn-sm cancel-order" data-order-id="<%= order._id %>" data-order-quantity="<%= order.orderItems.quantity %>" data-product-id="<%= order.orderItems.productId %>" data-product-size="<%= order.orderItems.size %>">
+              Cancel
+            </button>
+          </div>
+        
         </div>
-      </div>
-    <% }) %>
-    <% }else{ %> 
+      </a>
+      <% } %>
+
+    <% } else { %>
       <div class="no-orders">
         <h5>No orders found</h5>
         <p>It seems like you haven’t placed any orders yet.</p>
-    </div>
-      <% } %>
+      </div>
+    <% } %>
   </div>
+
 </div>
 
-<%- include('../../views/partials/admin/footer') %>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     // Cancel order logic
     document.querySelectorAll('.cancel-order').forEach(button => {
       button.addEventListener('click', function () {
+        event.preventDefault();
+
         const orderId = this.getAttribute('data-order-id');
+        const productId = this.getAttribute('data-product-id');
+        const orderQuantity = this.getAttribute('data-order-quantity');
+        const orderSize = this.getAttribute('data-product-size');
         Swal.fire({
           title: 'Cancel Order?',
           text: `Are you sure you want to cancel order ID: ${orderId}?`,
@@ -136,21 +233,21 @@
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ orderId }),
+              body: JSON.stringify({ orderId, productId, orderQuantity, orderSize }),
             })
             .then(response => response.json())
             .then(data => {
               if (data.success) {
                 Swal.fire('Cancelled!', `Order ${orderId} has been cancelled.`, 'success');
-                // Optionally, you can remove the cancelled order from the DOM
-                button.closest('.order-card').remove();
+                const statusElement = button.closest('.order-row').querySelector('.status');
+                statusElement.textContent = 'Cancelled';
+                statusElement.className = 'status Cancelled';
               } else {
-                console.log(data)
-                Swal.fire('Error!', 'There was a problem cancelling your order. Please try again.', 'error');
+                Swal.fire('Sorry!', data.message, 'warning');
               }
             })
             .catch(error => {
-              console.error(error.message)
+              console.error(error.message);
               Swal.fire('Error!', 'There was a problem cancelling your order. Please try again.', 'error');
             });
           }

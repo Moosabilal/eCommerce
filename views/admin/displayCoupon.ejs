@@ -1,0 +1,102 @@
+
+<%- include('../../views/partials/admin/header') %>
+
+
+  <div class="container mt-5" style="margin-left: 17%;width: 80%;">
+    <h2 class="text-center mb-4">Coupons List</h2>
+    <table class="table table-bordered table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Coupon Name</th>
+          <th>Coupon Code</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Offer Price</th>
+          <th>Minimum Price</th>
+          <th>List</th>
+
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if(coupons.length>0){ %>
+      <% for(let i = 0 ; i < coupons.length ; i++){ %>
+            <tr> 
+              <td><%= coupons[i].name %></td>
+              <td><%= coupons[i].couponCode %></td>
+              <td><%= new Date(coupons[i].createdOn).toLocaleDateString('en-US') %></td>
+              <td><%= new Date(coupons[i].expireOn).toLocaleDateString('en-US') %></td>
+              <td><%= coupons[i].offerPrice %></td>
+              <td><%= coupons[i].minimumPrice %></td>
+              <td><%= coupons[i].isList %></td>
+
+              <td>
+                <a href="/admin/editCoupon?id=<%= coupons[i]._id %>" class="btn btn-sm btn-warning">Edit</a>
+                <button type="submit" class="btn btn-sm btn-danger" onclick="confirmDelete('<%= coupons[i]._id %>')">Delete</button>
+              </td>
+            </tr>
+            <% } } else { %>
+        
+          <tr>
+            <td colspan="6" class="text-center">No coupons found</td>
+          </tr>
+          <% } %>
+  
+      </tbody>
+    </table>
+    <div class="text-end">
+      <a href="/admin/addCoupon" class="btn btn-primary">Add New Coupon</a>
+    </div>
+  </div>
+
+
+  <%- include('../../views/partials/admin/footer') %>
+
+  <script>
+    function confirmDelete(couponId) {
+   Swal.fire({
+     title: "Are you sure?",
+     text: "You won't be able to revert this!",
+     icon: "warning",
+     showCancelButton: true,
+     confirmButtonColor: "#d33",
+     cancelButtonColor: "#3085d6",
+     confirmButtonText: "Yes, delete it!",
+   }).then((result) => {
+     if (result.isConfirmed) {
+       deleteCoupon(couponId);
+     }
+   });
+ }
+
+
+function deleteCoupon(couponId) {
+    fetch(`/admin/deleteCoupon?id=${couponId}`, {
+        method: "GET",
+    })
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error("Failed to delete the coupon.");
+            }
+        })
+        .then(() => {
+            Swal.fire({
+                icon: "success",
+                title: "Deleted!",
+                text: "The coupon has been deleted.",
+                confirmButtonText: "OK",
+            }).then(() => {
+                window.location.reload();
+            });
+        })
+        .catch(() => {
+            Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: "Failed to delete the coupon. Please try again.",
+            });
+        });
+}
+  </script>

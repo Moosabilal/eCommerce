@@ -45,7 +45,7 @@ const orderSchema = new Schema({
     paymentMethod:{
         type: String,
         required: true,
-        enum: ['COD', 'card', 'UPI']
+        enum: ['COD', 'Card', 'UPI']
     },
     addressId: {
         type: Schema.Types.ObjectId,
@@ -65,6 +65,14 @@ const orderSchema = new Schema({
         type: String,
         required: true,
         enum: ['standard', 'express']
+    },
+    discount:{
+        type:Number,
+        default:0
+    },
+    tax:{
+        type:Number,
+        default:0
     },
     status: {
         type: String,

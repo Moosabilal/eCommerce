@@ -1,11 +1,15 @@
 const mongoose = require('mongoose');
 const {Schema} = mongoose;
 
-const couponSchema = new mognoose.Schema({  
+const couponSchema = new mongoose.Schema({  
     name: {
         type: String, 
         required: true
     },
+    couponCode : {
+        type: String,
+        required: true
+        },
     createdOn: {
         type: Date,
         default: Date.now,
@@ -23,7 +27,7 @@ const couponSchema = new mognoose.Schema({
         type: Number,
         required: true
     },
-    islist: {
+    isList: {
         type: Boolean,
         default: true
     },

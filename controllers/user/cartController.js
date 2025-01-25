@@ -2,6 +2,8 @@ const Cart = require("../../models/cartSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const Address = require("../../models/addressSchema");
+const Coupon = require('../../models/couponSchema');
+const { updateSearchIndex } = require("../../models/walletSchema");
 
 const getCart = async (req, res) => {
     try {
@@ -279,8 +281,12 @@ const checkoutPage = async (req, res)=>{
                 });
                 }
         const totalPrice = userCart.items.reduce((total, item) => total + item.totalPrice, 0);
-        res.render('checkout',{
+        const coupons = await Coupon.find();
+        const availableCoupon = await Coupon.find({ isList: true, expireOn: { $gte: new Date() } });
+        console.log(availableCoupon)
+            res.render('checkout',{
             user: userData,
+            coupons:coupons,
             cart: userCart,
             products: products,
             totalPrice: totalPrice,
@@ -301,6 +307,7 @@ const checkoutPage = async (req, res)=>{
 
 
 
+
     
     
 
@@ -312,4 +319,5 @@ module.exports = {
     increaseQuantity,
     getProductStock,
     checkoutPage,
+    
 }

@@ -1,405 +1,153 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout</title>
-    <style>
-        :root {
-            --primary-color: #3b82f6;
-            --success-color: #22c55e;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-500: #6b7280;
-            --gray-700: #374151;
-        }
+<%- include('../../views/partials/admin/header') %>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<style>
+  .main-content {
+    padding: 40px 20px;
+    background-color: #f8f9fa;
+  }
+  .form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+  }
+  .btn {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn:hover {
+    background-color: #0056b3;
+  }
+  .table-container {
+    margin: 20px auto;
+    max-width: 90%;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table th, .table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+  }
+  .table th {
+    background-color: #e9ecef;
+    font-weight: bold;
+  }
+  .table-actions button {
+    margin-right: 5px;
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .table-actions button.edit {
+    background-color: #28a745;
+  }
+  .table-actions button:hover {
+    opacity: 0.9;
+  }
+</style>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.5;
-            background-color: #f9fafb;
-            color: var(--gray-700);
-        }
+<div class="main-content">
+  <!-- Add Coupon Form -->
+  <div class="form-container">
+    <h2>Add Coupon</h2>
+    <form action="/admin/add-coupon" method="POST">
+      <div class="form-group">
+        <label for="couponName">Coupon Name</label>
+        <input type="text" id="couponName" name="couponName" required>
+      </div>
+      <div class="form-group">
+        <label for="startDate">Start Date</label>
+        <input type="date" id="startDate" name="startDate" required>
+      </div>
+      <div class="form-group">
+        <label for="endDate">End Date</label>
+        <input type="date" id="endDate" name="endDate" required>
+      </div>
+      <div class="form-group">
+        <label for="offerPrice">Offer Price</label>
+        <input type="number" id="offerPrice" name="offerPrice" required>
+      </div>
+      <div class="form-group">
+        <label for="minimumPrice">Minimum Price</label>
+        <input type="number" id="minimumPrice" name="minimumPrice" required>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn">Add Coupon</button>
+      </div>
+    </form>
+  </div>
 
-        .container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
+  <!-- Display Coupons -->
+  <div class="table-container">
+    <h2 class="text-center">Manage Coupons</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Coupon Name</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Offer Price</th>
+          <th>Minimum Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% coupons.forEach(coupon => { %>
+          <tr>
+            <td><%= coupon.couponName %></td>
+            <td><%= new Date(coupon.startDate).toLocaleDateString() %></td>
+            <td><%= new Date(coupon.endDate).toLocaleDateString() %></td>
+            <td>₹<%= coupon.offerPrice %></td>
+            <td>₹<%= coupon.minimumPrice %></td>
+            <td class="table-actions">
+              <!-- Edit Button -->
+              <form action="/admin/edit-coupon/<%= coupon._id %>" method="GET" style="display: inline;">
+                <button type="submit" class="edit">Edit</button>
+              </form>
+              <!-- Delete Button -->
+              <form action="/admin/delete-coupon/<%= coupon._id %>" method="POST" style="display: inline;">
+                <button type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: var(--gray-700);
-            font-size: 2rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--gray-700);
-        }
-
-        .customer-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .info-item label {
-            display: block;
-            font-size: 0.875rem;
-            color: var(--gray-500);
-            margin-bottom: 0.25rem;
-        }
-
-        .info-item span {
-            font-weight: 500;
-            color: var(--gray-700);
-        }
-
-        .shipping-option {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            border: 1px solid var(--gray-200);
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            cursor: pointer;
-        }
-
-        .shipping-option:hover {
-            background-color: var(--gray-100);
-        }
-
-        .shipping-option input[type="radio"] {
-            margin-right: 1rem;
-        }
-
-        .shipping-details {
-            flex: 1;
-        }
-
-        .shipping-name {
-            font-weight: 500;
-        }
-
-        .shipping-description {
-            font-size: 0.875rem;
-            color: var(--gray-500);
-        }
-
-        .shipping-price {
-            font-weight: 500;
-        }
-
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .order-item:last-child {
-            border-bottom: none;
-        }
-
-        .item-details h4 {
-            font-weight: 500;
-        }
-
-        .item-details p {
-            font-size: 0.875rem;
-            color: var(--gray-500);
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-        }
-
-        .total-row {
-            font-weight: 600;
-            font-size: 1.125rem;
-            border-top: 1px solid var(--gray-200);
-            padding-top: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        .payment-methods {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .payment-option {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .promo-section {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .promo-section input {
-            flex: 1;
-            padding: 0.5rem;
-            border: 1px solid var(--gray-200);
-            border-radius: 0.25rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #2563eb;
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-            width: 100%;
-            padding: 1rem;
-            font-size: 1.125rem;
-        }
-
-        .btn-success:hover {
-            background-color: #16a34a;
-        }
-
-        .feedback {
-            margin-top: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        .feedback.success {
-            color: var(--success-color);
-        }
-
-        .feedback.error {
-            color: #ef4444;
-        }
-
-        @media (max-width: 640px) {
-            .container {
-                margin: 1rem auto;
-            }
-
-            .card {
-                padding: 1rem;
-            }
-
-            .customer-info {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Checkout</h1>
-
-        <!-- Customer Information -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Customer Information</h2>
-            </div>
-            <div class="customer-info">
-                <div class="info-item">
-                    <label>Name</label>
-                    <span>John Doe</span>
-                </div>
-                <div class="info-item">
-                    <label>Email</label>
-                    <span>john.doe@example.com</span>
-                </div>
-                <div class="info-item">
-                    <label>Phone</label>
-                    <span>123-456-7890</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Shipping Options -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Shipping Method</h2>
-            </div>
-            <div class="shipping-options">
-                <label class="shipping-option">
-                    <input type="radio" name="shipping" value="standard" checked>
-                    <div class="shipping-details">
-                        <div class="shipping-name">Standard Shipping</div>
-                        <div class="shipping-description">3-5 business days</div>
-                    </div>
-                    <div class="shipping-price">$5</div>
-                </label>
-                <label class="shipping-option">
-                    <input type="radio" name="shipping" value="express">
-                    <div class="shipping-details">
-                        <div class="shipping-name">Express Shipping</div>
-                        <div class="shipping-description">1-2 business days</div>
-                    </div>
-                    <div class="shipping-price">$15</div>
-                </label>
-            </div>
-        </div>
-
-        <!-- Order Summary -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Order Summary</h2>
-            </div>
-            <div class="order-items">
-                <div class="order-item">
-                    <div class="item-details">
-                        <h4>Product 1</h4>
-                        <p>Quantity: 2</p>
-                    </div>
-                    <div class="item-price">$40</div>
-                </div>
-                <div class="order-item">
-                    <div class="item-details">
-                        <h4>Product 2</h4>
-                        <p>Quantity: 1</p>
-                    </div>
-                    <div class="item-price">$15</div>
-                </div>
-            </div>
-            <div class="order-summary">
-                <div class="summary-row">
-                    <span>Subtotal</span>
-                    <span>$55</span>
-                </div>
-                <div class="summary-row">
-                    <span>Shipping</span>
-                    <span id="shipping-cost">$5</span>
-                </div>
-                <div class="summary-row">
-                    <span>Discount</span>
-                    <span id="discount">$0</span>
-                </div>
-                <div class="summary-row total-row">
-                    <span>Total</span>
-                    <span id="total">$60</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payment Methods -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Payment Method</h2>
-            </div>
-            <div class="payment-methods">
-                <label class="payment-option">
-                    <input type="radio" name="payment" value="card" checked>
-                    <span>Credit/Debit Card</span>
-                </label>
-                <label class="payment-option">
-                    <input type="radio" name="payment" value="upi">
-                    <span>UPI / Google Pay</span>
-                </label>
-                <label class="payment-option">
-                    <input type="radio" name="payment" value="cod">
-                    <span>Cash on Delivery</span>
-                </label>
-            </div>
-        </div>
-
-        <!-- Promo Code -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Promo Code</h2>
-            </div>
-            <div class="promo-section">
-                <input type="text" id="promo-code" placeholder="Enter promo code">
-                <button class="btn btn-primary" onclick="applyPromoCode()">Apply</button>
-            </div>
-            <div id="promo-feedback" class="feedback"></div>
-        </div>
-
-        <!-- Place Order Button -->
-        <button class="btn btn-success" onclick="placeOrder()">Place Order</button>
-    </div>
-
-    <script>
-        function calculateTotal() {
-            const shippingMethod = document.querySelector('input[name="shipping"]:checked').value;
-            const shippingCost = shippingMethod === 'standard' ? 5 : 15;
-            const discount = parseFloat(document.getElementById('discount').textContent.replace('$', ''));
-            const subtotal = 55; // Fixed subtotal for this example
-
-            document.getElementById('shipping-cost').textContent = `$${shippingCost}`;
-            document.getElementById('total').textContent = `$${subtotal + shippingCost - discount}`;
-        }
-
-        function applyPromoCode() {
-            const promoCode = document.getElementById('promo-code').value.trim();
-            const feedback = document.getElementById('promo-feedback');
-            
-            if (promoCode.toUpperCase() === 'DISCOUNT10') {
-                document.getElementById('discount').textContent = '$10';
-                feedback.textContent = 'Promo code applied successfully!';
-                feedback.className = 'feedback success';
-            } else {
-                document.getElementById('discount').textContent = '$0';
-                feedback.textContent = 'Invalid promo code.';
-                feedback.className = 'feedback error';
-            }
-            
-            calculateTotal();
-        }
-
-        function placeOrder() {
-            alert('Order placed successfully!');
-        }
-
-        // Add event listeners
-        document.querySelectorAll('input[name="shipping"]').forEach(radio => {
-            radio.addEventListener('change', calculateTotal);
-        });
-
-        // Initial calculation
-        calculateTotal();
-    </script>
-</body>
-</html>
+<%- include('../../views/partials/admin/footer') %>

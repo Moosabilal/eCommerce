@@ -7,7 +7,26 @@
         background-color: #7c7d7e;
         color: white;
     }
+    div.couponCode{
+        margin-top: -18%;
+    }
+    
+    @media (max-width: 768px) {
+        div.coupon {
+            margin-top: 0;
+        }
+        .size-117 {
+    width: 246px;
+    height: 45px;
+}
+div.couponCode{
+        margin-top: 0%;
+    }
+    
+    }
 </style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <div class="container my-5">
     <form action="/placeOrder" method="post" id="orderForm">
         <h1 class="text-center mb-4">Checkout</h1>
@@ -36,6 +55,9 @@
                     </div>
                 </div>
             </div>
+
+            
+
 
             <div class="col-md-6 mb-4">
                 <div class="card">
@@ -87,7 +109,57 @@
                     </div>
                 </div>
             </div>
+            <div class="couponCode col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="h5 mb-0">Available Coupons</h2>
+                    </div>
+                    <div class="card-body">
+                        <% if (coupons.length > 0) { %>
+                            <ul class="list-group">
+                                <% coupons.forEach(coupon => { %>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>Coupon Code &nbsp;:&nbsp; <span class="text-primary"><%= coupon.couponCode %></span> &nbsp;&nbsp;&nbsp; Offer Price &nbsp;:&nbsp;<span class="text-primary"> &#8377;<%= coupon.offerPrice %> off</span></span>
+                                    </li>
+                                <% }); %>
+                            </ul>
+                        <% } else { %>
+                            <p>No available coupons</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
         </div>
+
+
+        <div class="row">
+
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="h5 mb-0">Enter Coupon Code</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
+                                <div class="flex-w flex-m m-r-20 m-tb-5">
+                                    <input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5 text-center" type="text" name="coupon" id="coupon" placeholder="Coupon Code" style="border: 2px solid grey; border-radius: 30px;">
+                                        
+                                    <div class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5 m-l-200" id="applyCouponButton">
+                                        Apply coupon
+                                    </div>
+                                    <div class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5" id="cancelCouponButton">
+                                        Cancel
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+
 
         <div class="card mb-4">
             <div class="card-header">
@@ -134,6 +206,14 @@
                     <span>Shipping</span>
                     <span id="shipping-cost">&#8377;5</span>
                 </div>
+                <div class="d-flex justify-content-between">
+                    <span>Discount</span>
+                    <p>&#8377;<span id="discount">0</span></p>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Tax</span>
+                    <p><span id="tax" value="5">5</span>%</p>
+                </div>
                 <hr>
                 <div class="d-flex justify-content-between fw-bold">
                     <span>Total</span>
@@ -148,11 +228,11 @@
             <div class="card-body">
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="radio" name="payment" value="card" id="card" checked>
-                    <label class="form-check-label" for="card">Credit/Debit Card</label>
+                    <label class="form-check-label" for="card">Wallet</label>
                 </div>
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="radio" name="payment" value="UPI" id="upi">
-                    <label class="form-check-label" for="upi">UPI / Google Pay</label>
+                    <label class="form-check-label" for="upi">RazorPay</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="payment" value="COD" id="cod">
@@ -161,11 +241,13 @@
             </div>
         </div>
         <input type="hidden" id="parentAddressId" name="parentAddressId" value="<%=userAddress._id%>">
-        <script>console.log(userAddress._id)</script>
         <input type="hidden" id="finalAmount" name="finalAmount" value="">
         <input type="hidden" name="addressId" id="addressId" value="">
         <input type="hidden" id="subtotal" name="subtotal" value="<%= totalPrice %>">
         <input type="hidden" id="shippingValue" name="shippingValue" value="">
+        <input type="hidden" id="discountValue" name="discountValue" value="20">
+        <input type="hidden" id="taxValue" name="taxValue" value="5">
+        <input type="hidden" id="couponCode" name="couponCode" value="">
         <button class="btn btn-success w-100 py-3" type="button" id="placeOrderButton">Place Order</button>
     </form>
 </div>
@@ -237,17 +319,19 @@
         const totalElement = document.getElementById('total');
         const orderForm = document.getElementById('orderForm');
         const finalAmount = document.getElementById('finalAmount');
+        const discount = document.getElementById('discount').textContent.trim();
+        const tax = document.getElementById('tax').textContent
         const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
 
         const subtotal = parseFloat('<%= totalPrice %>'); 
-
+        const confirmTax = subtotal * (tax / 100);
         function updateShippingCost() {
             const selectedOption = document.querySelector('input[name="shipping"]:checked');
             const shippingCost = selectedOption.value === 'standard' ? 5 : 15;
 
             shippingCostElement.innerHTML = `&#8377;${shippingCost}`;
             document.getElementById('shipping-cost').value = shippingCost;
-            const finalTotal = subtotal + shippingCost;
+            const finalTotal = ((subtotal + shippingCost) - discount) + confirmTax;
             totalElement.innerHTML = `&#8377;${finalTotal}`;
             finalAmount.value = finalTotal;
         }
@@ -258,48 +342,221 @@
 
         updateShippingCost();
 
-        // Add event listener to the Place Order button
         const placeOrderButton = document.getElementById('placeOrderButton');
 
         placeOrderButton.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent the form submission
+            e.preventDefault(); 
 
-            // Get selected shipping and payment method
             const selectedShippingOption = document.querySelector('input[name="shipping"]:checked').nextElementSibling.textContent;
             const selectedPaymentMethod = document.querySelector('input[name="payment"]:checked').nextElementSibling.textContent;
             const selectedAddress = document.querySelector('#address-details .card-body').innerText;
 
-            // Get the selected address ID
             const addressId = document.getElementById('addressId').value;
 
-            // Populate modal with the details
             document.getElementById('confirm-subtotal').innerText = subtotal;
             document.getElementById('confirm-shipping').innerText = selectedShippingOption.includes('Standard') ? '5' : '15';
             document.getElementById('confirm-total').innerText = totalElement.innerText.replace('₹', '');
             document.getElementById('confirm-address').innerText = selectedAddress || 'No address selected';
             document.getElementById('confirm-payment').innerText = selectedPaymentMethod;
 
-            // Update hidden fields for submission
             document.getElementById('shippingValue').value = selectedShippingOption.includes('Standard') ? 5 : 15;
             document.getElementById('addressId').value = addressId;
 
-            // Show the confirmation modal
+
+            var discountElement = document.getElementById('discount');
+            var taxElement = document.getElementById('tax');
+            var discountInput = document.getElementById('discountValue');
+            var taxInput = document.getElementById('taxValue');
+
+            function updateValues() {
+                discountInput.value = discountElement.textContent;
+                taxInput.value = taxElement.textContent;
+            }
+
+            updateValues();
+
             confirmationModal.show();
         });
 
-        // Confirm order and submit form
         document.getElementById('confirm-order').addEventListener('click', () => {
-            // Show SweetAlert message
-            Swal.fire({
-                title: 'Order Placed Successfully!',
-                text: 'Your order has been placed successfully.',
-                icon: 'success',
-                showConfirmButton:false,
-                timer:1500
-            }).then(() => {
-                // Submit the form after confirmation
-                orderForm.submit();
-            });
+            const selectedPaymentMethod = document.querySelector('input[name="payment"]:checked').value;
+            if (selectedPaymentMethod === 'UPI') {
+                fetch('/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: finalAmount.value, currency: 'INR' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const options = {
+                            key: '<%= process.env.RAZORPAY_KEY_ID %>', 
+                            amount: data.amount,
+                            currency: 'INR',
+                            name: 'Sample Store',
+                            description: 'Test Transaction',
+                            order_id: data.orderId,
+                            handler: function (response) {
+                                
+                                fetch('/verify-payment', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(response),
+                                })
+                                .then(res => res.json())
+                                .then(result => {
+                                    if (result.success) {
+                                        Swal.fire({
+                                            title: 'Payment Successful!',
+                                            text: 'Your payment has been successfully processed.',
+                                            icon: 'success',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        }).then(() => {
+                                            orderForm.submit();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Payment Verification Failed!',
+                                            text: 'There was an issue verifying your payment. Please try again.',
+                                            icon: 'error',
+                                            showConfirmButton: true
+                                        });
+                                    }
+                                });
+                            },
+                            prefill: {
+                                name: '<%= user.name %>',
+                                email: '<%= user.email %>',
+                                contact: '<%= user.phone %>',
+                            },
+                            theme: {
+                                color: '#3399cc',
+                            },
+                        };
+
+                        const rzp = new Razorpay(options);
+                        rzp.open();
+                    } else {
+                        Swal.fire({
+                            title: 'Failed to create order.',
+                            text: 'There was an issue creating your order. Please try again.',
+                            icon: 'error',
+                            showConfirmButton: true
+                        });
+                    }
+                });
+
+            } else if (selectedPaymentMethod === 'Card'){
+                fetch('/order-by-wallet',{
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ amount: finalAmount.value})
+            })
+            .then((response)=> response.json())
+            .then((data)=>{
+                if (data.success) {
+                                        Swal.fire({
+                                            title: 'Payment Successful!',
+                                            text: 'Your payment has been successfully processed.',
+                                            icon: 'success',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        }).then(() => {
+                                            orderForm.submit();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Payment Verification Failed!',
+                                            text: 'There was an issue verifying your payment. Please try again.',
+                                            icon: 'error',
+                                            showConfirmButton: true
+                                        });
+                                    }
+            })
+
+            } else {
+                Swal.fire({
+                    title: 'Order Placed Successfully!',
+                    text: 'Your order has been placed successfully.',
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    orderForm.submit();
+                });
+            }
         });
     });
+
+
+
+   document.getElementById('applyCouponButton').addEventListener('click', () => {
+                                        const couponCode = document.getElementById('coupon').value;
+                                        fetch('/applyCoupon', {
+                                            method: 'put',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({ coupon: couponCode })
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                Swal.fire({
+                                                    title: 'Coupon Applied!',
+                                                    text: `Discount: ₹${data.discount}`,
+                                                    icon: 'success',
+                                                    showConfirmButton: false,
+                                                    timer: 1500
+                                                });
+                                                document.getElementById('discount').textContent = data.discount;
+                                                updateShippingCost();
+                                            } else {
+                                                Swal.fire({
+                                                    title: 'Invalid Coupon',
+                                                    text: data.message || 'The coupon code you entered is invalid.',
+                                                    icon: 'error',
+                                                    showConfirmButton: true
+                                                });
+                                            }
+                                        });
+                                    });
+
+
+                                    document.getElementById('cancelCouponButton').addEventListener('click', () => {
+                                    const couponCode = document.getElementById('coupon').value;
+                                    fetch('/cancelCoupon', {
+                                        method: 'put',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ coupon: couponCode })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            Swal.fire({
+                                                title: 'Coupon Cancelled!',
+                                                text: 'The coupon has been successfully cancelled.',
+                                                icon: 'success',
+                                                showConfirmButton: false,
+                                                timer: 1500
+                                            });
+                                            document.getElementById('discount').textContent = '0';
+                                            updateShippingCost();
+                                        } else {
+                                            Swal.fire({
+                                                title: 'Failed to Cancel Coupon',
+                                                text: data.message || 'There was an issue cancelling the coupon. Please try again.',
+                                                icon: 'error',
+                                                showConfirmButton: true
+                                            });
+                                        }
+                                    });
+                                });
+      
+
 </script>

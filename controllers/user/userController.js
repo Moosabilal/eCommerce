@@ -260,10 +260,10 @@ const loadShoppingPage = async (req, res) => {
         const limit = 12;
         const skip = (page - 1) * limit;
         const products = await Product.find({
-            isBlocked:false,
-            category:{$in:categoryIds},
-            
-        }).sort({createdOn:-1}).skip(skip).limit(limit)
+            isBlocked: false,
+            category: { $in: categoryIds },
+            'stock.quantity': { $gt: 0 }
+        }).sort({ createdOn: -1 }).skip(skip).limit(limit);
         const totalProducts = await Product.countDocuments({
             isBlocked:false,
             category:{$in:categoryIds},

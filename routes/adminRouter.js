@@ -6,6 +6,8 @@ const customerController = require('../controllers/admin/customerController')
 const categoryController = require('../controllers/admin/categoryController')
 const productController = require('../controllers/admin/productController');
 const orderController = require('../controllers/admin/orderController');
+const couponController = require('../controllers/admin/couponController')
+
 const multer = require('multer'); 
 // const { userAuth, adminAuth } = require("../middlewares/auth");
 const {isAuthenticated, isLogin} = require('../middlewares/adminAuthentication')
@@ -34,7 +36,7 @@ router.get('/logout',adminController.logout);
 
 router.get('/users',isAuthenticated,customerController.customerInfo)
 router.get('/blockCustomer',isAuthenticated,customerController.customerBlocked)
-router.get('/unblockCustomer',isAuthenticated,customerController.customerUnBlocked)
+router.get('/unblockCustomer',customerController.customerUnBlocked)
 //category
 router.get("/category",isAuthenticated,categoryController.categoryInfo)
 router.post("/addCategory",isAuthenticated,categoryController.addCategory)
@@ -60,6 +62,14 @@ router.post("/deleteImage",isAuthenticated,productController.deleteSingleImage)
 router.get("/orders",isAuthenticated,orderController.getOrders)
 router.post('/statusSelection',isAuthenticated,orderController.statusSelection);
 router.post('/deleteOrder',isAuthenticated,orderController.deleteOrder)
+
+//coupon management
+router.get('/displayCoupon',isAuthenticated,couponController.showCouponDetails)
+router.get('/addCoupon',isAuthenticated,couponController.addCoupon)
+router.post('/getAddCoupon',isAuthenticated,couponController.createCoupon)
+router.get('/editCoupon',isAuthenticated,couponController.editCoupon)
+router.post('/updateCoupon',isAuthenticated,couponController.updateCoupon)
+router.get("/deleteCoupon",isAuthenticated,couponController.deleteCoupon)
 
 
 module.exports = router;

@@ -204,24 +204,21 @@
       const togglePasswordIcons = document.querySelectorAll('.toggle-password');
 
       togglePasswordIcons.forEach(icon => {
-        const iconElement = icon.querySelector('i');
+    icon.addEventListener('click', function () {
+      const targetInput = document.getElementById(this.dataset.target);
+      const iconElement = this.querySelector('i');
+
+      if (targetInput.type === 'password') {
+        targetInput.type = 'text';
         iconElement.classList.remove('fa-eye');
         iconElement.classList.add('fa-eye-slash');
-
-        icon.addEventListener('click', function () {
-          const targetInput = document.getElementById(this.dataset.target);
-
-          if (targetInput.type === 'password') {
-        targetInput.type = 'text';
+      } else {
+        targetInput.type = 'password';
         iconElement.classList.remove('fa-eye-slash');
         iconElement.classList.add('fa-eye');
-          } else {
-        targetInput.type = 'password';
-        iconElement.classList.remove('fa-eye');
-        iconElement.classList.add('fa-eye-slash');
-          }
-        });
-      });
+      }
+    });
+  });
     });
 
    
