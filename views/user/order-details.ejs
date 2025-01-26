@@ -104,6 +104,10 @@
   .status.Cancelled {
     background-color: #dc3545;
   }
+
+  .status.Returned {
+    background-color: #6c757d;
+  }
   div.priceDetails{
     margin-right: 25%;
   }
@@ -187,6 +191,9 @@
           
           <div class="actions">
             <p><strong>Status :&nbsp;</strong><span class="status <%= order.status %>"><%= order.status %></span></p>
+            <button class="btn btn-danger btn-sm return-order" data-order-id="<%= order._id %>" data-order-quantity="<%= order.orderItems.quantity %>" data-product-id="<%= order.orderItems.productId %>" data-product-size="<%= order.orderItems.size %>">
+              Return
+            </button>
             <button class="btn btn-danger btn-sm cancel-order" data-order-id="<%= order._id %>" data-order-quantity="<%= order.orderItems.quantity %>" data-product-id="<%= order.orderItems.productId %>" data-product-size="<%= order.orderItems.size %>">
               Cancel
             </button>
@@ -254,6 +261,53 @@
         });
       });
     });
+
+    //return order
+    document.querySelectorAll('.return-order').forEach(button => {
+      button.addEventListener('click', function () {
+        event.preventDefault();
+
+        const orderId = this.getAttribute('data-order-id');
+        const productId = this.getAttribute('data-product-id');
+        const orderQuantity = this.getAttribute('data-order-quantity');
+        const orderSize = this.getAttribute('data-product-size');
+        Swal.fire({
+          title: 'Return Order?',
+          text: `Are you sure you want to Return order ID: ${orderId}?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, Return it!',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch("/returnOrder", {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ orderId, productId, orderQuantity, orderSize }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire('Returned!', `Order ${orderId} has been Returned.`, 'success');
+                const statusElement = button.closest('.order-row').querySelector('.status');
+                statusElement.textContent = 'Returned';
+                statusElement.className = 'status Returned';
+              } else {
+                Swal.fire('Sorry!', data.message, 'warning');
+              }
+            })
+            .catch(error => {
+              console.error(error.message);
+              Swal.fire('Error!', 'There was a problem Returning your order. Please try again.', 'error');
+            });
+          }
+        });
+      });
+    });
+
   });
 </script>
 <%- include('../../views/partials/user/footer') %>

@@ -6,7 +6,6 @@ const loadWishlit = async (req, res)=>{
         const userId = req.session.user;
         const user = await User.findById(userId);
         const products = await Product.find({_id:{$in:user.wishlist}}).populate('category');
-        console.log(products)
         res.render("wishlist",{
             user,
             wishlist:products,

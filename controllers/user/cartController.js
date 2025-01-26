@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const Address = require("../../models/addressSchema");
 const Coupon = require('../../models/couponSchema');
+const Wallet = require('../../models/walletSchema')
 const { updateSearchIndex } = require("../../models/walletSchema");
 
 const getCart = async (req, res) => {
@@ -26,7 +27,7 @@ const getCart = async (req, res) => {
         const userAddress = await Address.findOne({userId: userId});
 
         const totalPrice = userCart.items.reduce((total, item) => total + item.totalPrice, 0);
-        
+        console.log(products)
         res.render('shopping-cart', {
             user: userData,
             cart: userCart,
@@ -251,7 +252,6 @@ const getProductStock = async (req, res) => {
         if (!productStock) {
             return res.status(404).json({ status: false, message: "Stock size not found in product" });
         }
-        console.log(productStock)
 
         return res.status(200).json({
             status: true,
@@ -282,15 +282,19 @@ const checkoutPage = async (req, res)=>{
                 }
         const totalPrice = userCart.items.reduce((total, item) => total + item.totalPrice, 0);
         const coupons = await Coupon.find();
+        const wallet = await Wallet.findOne({userId: user});
+        console.log("wallet",wallet)
         const availableCoupon = await Coupon.find({ isList: true, expireOn: { $gte: new Date() } });
         console.log(availableCoupon)
             res.render('checkout',{
             user: userData,
             coupons:coupons,
             cart: userCart,
+            wallet:wallet,
             products: products,
             totalPrice: totalPrice,
-            userAddress: address
+            userAddress: address,
+        
         });
             
 

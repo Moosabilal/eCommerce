@@ -14,33 +14,37 @@ const getOrders = async (req, res) => {
         const addressDetails = await Address.aggregate([
             { $unwind: "$address" },
             {
-                $lookup: {
-                    from: "orders",
-                    localField: "address._id",
-                    foreignField: "parentAddressId",
-                    as: "matchedOrders"
-                }
+            $lookup: {
+                from: "orders",
+                localField: "address._id",
+                foreignField: "parentAddressId",
+                as: "matchedOrders"
+            }
             },
             { $unwind: "$matchedOrders" },
             {
-                $project: {
-                    _id: 0,
-                    userId: "$userId",
-                    parentAddress: "$address",
-                    orderId: "$matchedOrders._id"
-                }
+            $project: {
+                _id: 0,
+                userId: "$userId",
+                parentAddress: "$address",
+                orderId: "$matchedOrders._id",
+                uniqueOrderId: "$matchedOrders.orderId",
             }
+            },
+            {$sort:{createdOn:-1 }}
         ]);
 
         const enrichedOrders = orders.map(order => {
             const parentAddress = addressDetails.find(
-                addr => addr.orderId.toString() === order._id.toString()
+            addr => addr.orderId.toString() === order._id.toString()
             );
             return {
-                ...order.toObject(),
-                parentAddress: parentAddress ? parentAddress.parentAddress : null,
+            ...order.toObject(),
+            parentAddress: parentAddress ? parentAddress.parentAddress : null,
             };
         });
+
+        enrichedOrders.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
 
         res.render('orderDetails', {
             orders: enrichedOrders,

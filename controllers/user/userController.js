@@ -2,6 +2,7 @@
 const User = require('../../models/userSchema');
 const Category = require("../../models/categorySchema")
 const Product = require("../../models/productSchema")
+const Wallet = require('../../models/walletSchema')
 const env = require('dotenv').config();
 const nodeMailer = require('nodemailer')
 const bcrypt = require('bcrypt')
@@ -30,7 +31,6 @@ const pageNotFound = async (req,res)=>{
 
 const loadHomepage = async (req,res)=>{
     try {
-        
         const user = req.session.user;
         const userData = await User.findOne({_id:user});
         let findProducts = await Product.find({ isBlocked:false}).sort({createdAt:-1}).lean();
@@ -40,11 +40,19 @@ const loadHomepage = async (req,res)=>{
             let productData = await Product.find({
                 isBlocked:false,
                 category:{$in:categories.map(category=>category._id)},
-                // quantity:{$gt:0}
+                'stock.quantity': { $gt: 0 }
             }).sort({createdAt:-1}).lean();
             productData = productData.slice(0,4);
         if(user){
             const uniqueColors = await Product.find({isBlocked:false}).distinct('color');
+            const transactions = []; 
+            
+            const newWallet = new Wallet({
+                userId:user,
+                balance: 0,
+                transactions
+            });
+            await newWallet.save();
 
             res.render("home",{
                 user:userData|| null,
@@ -298,7 +306,7 @@ const filterProduct = async (req, res) => {
 
         const query = {
             isBlocked: false,
-            // quantity: { $gt: 0 },
+            'stock.quantity': { $gt: 0 }
         };
         if (findCategory) {
             query.category = findCategory._id; 
@@ -350,7 +358,7 @@ const filterByPrice = async (req, res) => {
         let findProducts = await Product.find({
             salePrice:{$gt:req.query.gt,$lt:req.query.lt},
             isBlocked:false,
-            // quantity:{$gt:0}
+            'stock.quantity': { $gt: 0 }
         }).lean();
 
         findProducts.sort((a,b)=>new Date(b.createdOn) - new Date(a.createdOn));
@@ -374,7 +382,7 @@ const filterByPrice = async (req, res) => {
         })
     } catch (error) {
         console.log(error)
-        req.redirect("/pageNotFound")
+        res.redirect("/pageNotFound")
     }
 }
 
@@ -383,7 +391,7 @@ const filterByLtoHPrice = async (req,res)=>{
         const user = req.session.user;
         const userData = await User.findOne({_id:user});
         const categories = await Category.find({ isListed: true }).lean();
-        let findProducts = await Product.find({ isBlocked:false}).sort({salePrice:1}).lean();
+        let findProducts = await Product.find({ isBlocked:false,'stock.quantity': { $gt: 0 }}).sort({salePrice:1}).lean();
         let itemsPerPage =  10;
         let currentPage = parseInt(req.query.page) || 1;
         let startIndex = (currentPage-1)*itemsPerPage;
@@ -403,8 +411,8 @@ const filterByLtoHPrice = async (req,res)=>{
             
         })
     } catch (error) {
-        console.log("error in filter",error)
-        req.redirect("/pageNotFound")
+        console.error("error in filter",error)
+        res.redirect("/pageNotFound")
         
     }
 }
@@ -414,7 +422,7 @@ const filterByHtoLPrice = async (req,res)=>{
         const user = req.session.user;
         const userData = await User.findOne({_id:user});
         const categories = await Category.find({ isListed: true }).lean();
-        let findProducts = await Product.find({ isBlocked:false}).sort({salePrice:-1}).lean();
+        let findProducts = await Product.find({ isBlocked:false,'stock.quantity': { $gt: 0 }}).sort({salePrice:-1}).lean();
         let itemsPerPage =  10;
         let currentPage = parseInt(req.query.page) || 1;
         let startIndex = (currentPage-1)*itemsPerPage;
@@ -436,7 +444,7 @@ const filterByHtoLPrice = async (req,res)=>{
 
     } catch (error) {
         console.log("error in filter",error)
-        req.redirect("/pageNotFound")
+        res.redirect("/pageNotFound")
         
     }
 }
@@ -446,7 +454,7 @@ const filterByNewProduct = async (req,res)=>{
         const user = req.session.user;
         const userData = await User.findOne({_id:user});
         const categories = await Category.find({ isListed: true }).lean();
-        let findProducts = await Product.find({ isBlocked:false}).sort({createdAt:-1}).lean();
+        let findProducts = await Product.find({ isBlocked:false, 'stock.quantity': { $gt: 0 }}).sort({createdAt:-1}).lean();
         let itemsPerPage =  10;
         let currentPage = parseInt(req.query.page) || 1;
         let startIndex = (currentPage-1)*itemsPerPage;
@@ -454,7 +462,7 @@ const filterByNewProduct = async (req,res)=>{
         let totalPages = Math.ceil(findProducts.length/itemsPerPage);
         const currentProduct = findProducts.slice(startIndex,endIndex);
         req.session.findProducts = findProducts;
-        const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
+        const uniqueColors = await Product.find({ isBlocked: false, 'stock.quantity': { $gt: 0 } }).distinct('color');
 
         res.render("shop",{
             user:userData,
@@ -467,7 +475,7 @@ const filterByNewProduct = async (req,res)=>{
         })
     } catch (error) {
         console.log("error in filter",error)
-        req.redirect("/pageNotFound")
+        res.redirect("/pageNotFound")
         
     }
 }
@@ -481,7 +489,7 @@ const filterByColor = async (req,res)=>{
         console.log("userData",userData)
         const categories = await Category.find({ isListed: true }).lean();
         console.log("categories",categories)
-        let findProducts = await Product.find({ isBlocked:false,color :color}).lean();
+        let findProducts = await Product.find({ isBlocked:false,color :color,'stock.quantity': { $gt: 0 }}).lean();
         console.log("products",findProducts)
         let itemsPerPage =  10;
         let currentPage = parseInt(req.query.page) || 1;
@@ -502,7 +510,7 @@ const filterByColor = async (req,res)=>{
         })
     } catch (error) {
         console.log("error in filter",error)
-        req.redirect("/pageNotFound")
+        res.redirect("/pageNotFound")
         
     }
 }
@@ -513,7 +521,7 @@ const filterByAtoZ = async (req,res)=>{
         const user = req.session.user;
         const userData = await User.findOne({_id:user});
         const categories = await Category.find({ isListed: true }).lean();
-        let findProducts = await Product.find({ isBlocked:false}).sort({productName:1}).lean();
+        let findProducts = await Product.find({ isBlocked:false,'stock.quantity': { $gt: 0 }}).sort({productName:1}).lean();
         let itemsPerPage =  10;
         let currentPage = parseInt(req.query.page) || 1;
         let startIndex = (currentPage-1)*itemsPerPage;
@@ -533,7 +541,7 @@ const filterByAtoZ = async (req,res)=>{
         })
     } catch (error) {
         console.log("error in filter",error)
-        req.redirect("/pageNotFound")
+        res.redirect("/pageNotFound")
         
     }
 }
@@ -543,7 +551,7 @@ const filterByZtoA = async (req,res)=>{
         const user = req.session.user;
         const userData = await User.findOne({_id:user});
         const categories = await Category.find({ isListed: true }).lean();
-        let findProducts = await Product.find({ isBlocked:false}).sort({productName:-1}).lean();
+        let findProducts = await Product.find({ isBlocked:false,'stock.quantity': { $gt: 0 }}).sort({productName:-1}).lean();
         let itemsPerPage =  10;
         let currentPage = parseInt(req.query.page) || 1;
         let startIndex = (currentPage-1)*itemsPerPage;
@@ -564,7 +572,7 @@ const filterByZtoA = async (req,res)=>{
 
     } catch (error) {
     console.log("error in filter",error)
-    req.redirect("/pageNotFound")
+    res.redirect("/pageNotFound")
         
     }
 }
@@ -584,7 +592,7 @@ const searchProducts = async (req,res)=>{
             searchResult = await Product.find({
                 productName:{$regex:".*"+search+".*",$options:"i"},
                 isBlocked:false,
-                // quantity:{$gt:0},
+                'stock.quantity': { $gt: 0 },
                 category:{$in:categoryIds}  
             })
         }

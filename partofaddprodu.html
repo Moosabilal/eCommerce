@@ -1,153 +1,147 @@
-<%- include('../../views/partials/admin/header') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Sales Report</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .report-table {
+            margin-top: 20px;
+        }
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+        .header-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="header-text text-center mb-4">Sales Report</h1>
 
-<style>
-  .main-content {
-    padding: 40px 20px;
-    background-color: #f8f9fa;
-  }
-  .form-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  .form-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .form-group {
-    margin-bottom: 15px;
-  }
-  .form-group label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: block;
-  }
-  .form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-  }
-  .btn {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .btn:hover {
-    background-color: #0056b3;
-  }
-  .table-container {
-    margin: 20px auto;
-    max-width: 90%;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .table th, .table td {
-    padding: 10px;
-    text-align: left;
-    border: 1px solid #dee2e6;
-  }
-  .table th {
-    background-color: #e9ecef;
-    font-weight: bold;
-  }
-  .table-actions button {
-    margin-right: 5px;
-    background-color: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .table-actions button.edit {
-    background-color: #28a745;
-  }
-  .table-actions button:hover {
-    opacity: 0.9;
-  }
-</style>
+        <!-- Filter Form -->
+        <form method="GET" action="/sales-report">
+            <div class="form-row align-items-center">
+                <div class="col-auto">
+                    <label for="period">Select Period:</label>
+                    <select id="period" name="period" class="form-control">
+                        <option value="day">1 Day</option>
+                        <option value="week">1 Week</option>
+                        <option value="month">1 Month</option>
+                        <option value="custom">Custom Date Range</option>
+                    </select>
+                </div>
+                <div class="col-auto" id="custom-date-range" style="display:none;">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-custom mt-4">Generate Report</button>
+                </div>
+            </div>
+        </form>
 
-<div class="main-content">
-  <!-- Add Coupon Form -->
-  <div class="form-container">
-    <h2>Add Coupon</h2>
-    <form action="/admin/add-coupon" method="POST">
-      <div class="form-group">
-        <label for="couponName">Coupon Name</label>
-        <input type="text" id="couponName" name="couponName" required>
-      </div>
-      <div class="form-group">
-        <label for="startDate">Start Date</label>
-        <input type="date" id="startDate" name="startDate" required>
-      </div>
-      <div class="form-group">
-        <label for="endDate">End Date</label>
-        <input type="date" id="endDate" name="endDate" required>
-      </div>
-      <div class="form-group">
-        <label for="offerPrice">Offer Price</label>
-        <input type="number" id="offerPrice" name="offerPrice" required>
-      </div>
-      <div class="form-group">
-        <label for="minimumPrice">Minimum Price</label>
-        <input type="number" id="minimumPrice" name="minimumPrice" required>
-      </div>
-      <div class="text-center">
-        <button type="submit" class="btn">Add Coupon</button>
-      </div>
-    </form>
-  </div>
+        <!-- Sales Report Table -->
+        <div class="report-table">
+            <h3 class="text-center">Report Details</h3>
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Metric</th>
+                        <th scope="col">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Total Sales</td>
+                        <td id="total-sales">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Total Orders</td>
+                        <td id="total-orders">0</td>
+                    </tr>
+                    <tr>
+                        <td>Total Discount</td>
+                        <td id="total-discount">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td>Total Coupons Used</td>
+                        <td id="total-coupons">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-  <!-- Display Coupons -->
-  <div class="table-container">
-    <h2 class="text-center">Manage Coupons</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Coupon Name</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Offer Price</th>
-          <th>Minimum Price</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% coupons.forEach(coupon => { %>
-          <tr>
-            <td><%= coupon.couponName %></td>
-            <td><%= new Date(coupon.startDate).toLocaleDateString() %></td>
-            <td><%= new Date(coupon.endDate).toLocaleDateString() %></td>
-            <td>₹<%= coupon.offerPrice %></td>
-            <td>₹<%= coupon.minimumPrice %></td>
-            <td class="table-actions">
-              <!-- Edit Button -->
-              <form action="/admin/edit-coupon/<%= coupon._id %>" method="GET" style="display: inline;">
-                <button type="submit" class="edit">Edit</button>
-              </form>
-              <!-- Delete Button -->
-              <form action="/admin/delete-coupon/<%= coupon._id %>" method="POST" style="display: inline;">
-                <button type="submit">Delete</button>
-              </form>
-            </td>
-          </tr>
-        <% }); %>
-      </tbody>
-    </table>
-  </div>
-</div>
+        <!-- Download Buttons -->
+        <div class="text-center mt-4">
+            <button id="download-pdf" class="btn btn-custom" onclick="downloadPDF()">Download PDF <i class="fas fa-download"></i></button>
+            <button id="download-excel" class="btn btn-success ml-3" onclick="downloadExcel()">Download Excel <i class="fas fa-file-excel"></i></button>
+        </div>
+    </div>
 
-<%- include('../../views/partials/admin/footer') %>
+    <!-- Bootstrap and Custom Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle the custom date range input fields based on period selection
+        document.getElementById('period').addEventListener('change', function(e) {
+            const customDateRange = document.getElementById('custom-date-range');
+            if (e.target.value === 'custom') {
+                customDateRange.style.display = 'block';
+            } else {
+                customDateRange.style.display = 'none';
+            }
+        });
+
+        // Fetch and display the sales report data
+        async function fetchSalesReport() {
+            const period = document.getElementById('period').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            const response = await fetch(`/sales-report?period=${period}&startDate=${startDate}&endDate=${endDate}`);
+            const data = await response.json();
+            document.getElementById('total-sales').innerText = `$${data.totalSales}`;
+            document.getElementById('total-orders').innerText = data.totalOrders;
+            document.getElementById('total-discount').innerText = `$${data.totalDiscount}`;
+            document.getElementById('total-coupons').innerText = data.totalCoupons;
+        }
+
+        // Function to download the report as PDF
+        function downloadPDF() {
+            const period = document.getElementById('period').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            window.location.href = `/download-sales-report-pdf?period=${period}&startDate=${startDate}&endDate=${endDate}`;
+        }
+
+        // Function to download the report as Excel
+        function downloadExcel() {
+            const period = document.getElementById('period').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            window.location.href = `/download-sales-report-excel?period=${period}&startDate=${startDate}&endDate=${endDate}`;
+        }
+
+        // Automatically fetch sales report on page load (if applicable)
+        document.addEventListener("DOMContentLoaded", fetchSalesReport);
+    </script>
+</body>
+</html>

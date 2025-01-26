@@ -42,15 +42,20 @@
       margin-right: 10px;
     }
     .header {
-      background-color: #343a40;
-      color: #fff;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-left: 250px;
-      height: 70px;
-    }
+  background-color: #343a40;
+  color: #fff;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+  position: fixed; /* Makes the header fixed */
+  top: 0;
+  left: 250px; /* Matches the sidebar's width */
+  right: 0;
+  z-index: 1100; /* Ensures it stays above other content */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds subtle shadow for better visibility */
+}
     .header .website-name {
       margin-left: 20px; 
       font-size: 24px;
@@ -58,6 +63,7 @@
       margin-top: 15px;
     }
     .content {
+      margin-top: 70px;
       flex-grow: 1;
       padding: 20px;
       background-color: #f8f9fa;
@@ -120,8 +126,9 @@
     <a href="/admin/addProducts"><i class="fas fa-clipboard-list"></i> add Product</a>
     <a href="/admin/products"><i class="fas fa-cogs"></i> Products</a>
     <a href="/admin/displayCoupon"><i class="fas fa-gift"></i> Coupons</a>
-    <!--<a href="admin/banner"><i class="fas fa-image"></i> Banners</a> -->
     <a href="/admin/orders"><i class="fas fa-box"></i> Orders</a>
+    <a href="/admin/sales-report"><i class="fas fa-image"></i> Sales Report</a>
+
   </div>
 
 

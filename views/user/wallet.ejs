@@ -57,6 +57,7 @@
                 </tr>
             </thead>
             <tbody id="transactionHistory">
+                <% if (wallet.transactions.length >= 0) { %>
                 <% wallet.transactions.forEach(function(transaction) { %>
                     <tr>
                         <td><%= new Date(transaction.date).toLocaleDateString() %></td>
@@ -67,6 +68,11 @@
                         <td><%= transaction.status %></td>
                     </tr>
                 <% }); %>
+                    <% } else { %>
+                <tr>
+                    <td colspan="6" class="text-center">No transactions found</td>
+                </tr>
+            <% } %>
             </tbody>
         </table>
     </div>

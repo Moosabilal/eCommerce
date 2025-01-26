@@ -1,0 +1,246 @@
+
+<%-include('../../views/partials/admin/header')  %>
+
+    <style>
+        
+        .report-table {
+            margin-top: 20px;
+        }
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+        .header-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+    </style>
+
+    <div class="content">
+        <h1 class="header-text text-center mb-4">Sales Report</h1>
+
+        <div class="container-fluid mt-4">
+          
+            <!-- Summary Cards -->
+            <div class="row">
+              <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Total Sales</h5>
+                    <p class="card-text">₹<span id="totalSales"><%= totalSales %></span></p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <div class="card text-white bg-warning mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Total Orders</h5>
+                    <p class="card-text"><span id="totalOrders"><%= totalOrders %></span> Orders</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Total Discount</h5>
+                    <p class="card-text">₹<span id="totalProfit"><%= totalDiscountPrice %></span></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Total Coupon Used</h5>
+                    <p class="card-text">₹<span id="totalProfit"><%= totalDiscountCount %></span></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card text-white bg-danger mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Customers</h5>
+                    <p class="card-text"><span id="totalCustomers"><%= totalUser %></span> Customers</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            </div>
+    
+        <!-- Filter Form -->
+        
+            <div class="form-row align-items-center justify-content-between">
+                <form method="GET" action="/filter-report">
+    <div class="col-auto">
+        <label for="period">Select Period:</label>
+        <select id="period" name="period" class="form-control">
+            <option value="day">1 Day</option>
+            <option value="week">1 Week</option>
+            <option value="month">1 Month</option>
+            <option value="year">1 Year</option>
+            <option value="custom">Custom Date Range</option>
+        </select>
+    </div>
+    <div class="col-auto" id="custom-date-range" style="display:none;">
+        <div class="d-flex flex-column">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" name="startDate" class="form-control mb-2">
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" name="endDate" class="form-control">
+        </div>
+    </div>
+    <div class=" col-auto">
+        <button type="button" class="btn btn-custom mt-4" onclick="applyFilter()">Apply Change</button>
+    </div>
+</form>
+<div class="d-flex justify-content-end mt-4">
+    <button id="download-pdf" class="btn btn-custom" onclick="downloadPDF()">Download PDF <i class="fas fa-download"></i></button>
+    <button id="download-excel" class="btn btn-success ml-3" onclick="downloadExcel()">Download Excel <i class="fas fa-file-excel"></i></button>
+</div>
+ </div>
+        
+       
+    
+     
+            
+              
+    
+        <!-- Sales Report Table -->
+        <div class="report-table mt-4">
+            <h3 class="text-center">Report Details</h3>
+            <table class="table table-hover table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Sales Count</th>
+                        <th scope="col">Order Amount (in &#8377;)</th>
+                        <th scope="col">Coupon Applied</th>
+                        <th scope="col">Discount</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.map((order)=>{ %>
+                    <tr>
+                        <td class="order-id"><%= order.orderId.slice(-6) %></td>
+                        <td class="cust-name"><%= order.customerName %></td>
+                        <td class="order-sales"><%= order.salesCount %></td>
+                        <td class="order-amount"><%= order.orderAmount %></td>
+                        <td class="order-coupon"><%= order.discount?'Yes':'No' %></td>
+                        <td class="order-discount"><%= order.discount %></td>
+                        <td class="order-status"><%= order.status %></td>
+                    </tr>
+                    <% }); %>
+                    
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    
+    <%-include('../../views/partials/admin/footer')  %>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.26/jspdf.plugin.autotable.min.js"></script>
+    
+    <script>
+        document.getElementById('period').addEventListener('change', function(e) {
+            const customDateRange = document.getElementById('custom-date-range');
+            if (e.target.value === 'custom') {
+                customDateRange.style.display = 'block';
+            } else {
+                customDateRange.style.display = 'none';
+            }
+        });
+
+    async function applyFilter() {
+        const period = document.getElementById('period').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        try {
+            const response = await fetch('/admin/filter-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ period, startDate, endDate }),
+            });
+
+            const data = await response.json();
+
+            // Update the summary cards
+            // document.getElementById('totalSales').innerText = `₹${data.totalSales}`;
+            // document.getElementById('totalOrders').innerText = data.totalOrders;
+            // document.getElementById('totalProfit').innerText = `₹${data.totalDiscountPrice}`;
+            // document.getElementById('totalCustomers').innerText = data.totalUser;
+
+            const tableBody = document.querySelector('tbody');
+            tableBody.innerHTML = '';
+            data.orders.forEach((order) => {
+                const row = `
+                    <tr>
+                        <td class="order-id">${order.orderId.slice(-6)}</td>
+                        <td class="cust-name">${order.customerName}</td>
+                        <td class="order-sales">${order.salesCount}</td>
+                        <td class="order-amount">${order.orderAmount}</td>
+                        <td class="order-coupon">${order.discount ? 'Yes' : 'No'}</td>
+                        <td class="order-discount">${order.discount}</td>
+                        <td class="order-status">${order.status}</td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        } catch (error) {
+            console.error('Error fetching report:', error);
+            alert('Failed to fetch report. Please try again.');
+        }
+    }
+
+    async function downloadPDF() {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Sales Report", 14, 10);
+
+        const tableBody = [];
+        const rows = document.querySelectorAll("tbody tr");
+        rows.forEach((row) => {
+            const columns = row.querySelectorAll("td");
+            const rowData = Array.from(columns).map((col) => col.innerText);
+            tableBody.push(rowData);
+        });
+
+        const tableHeaders = [
+            "Order ID",
+            "Customer",
+            "Sales Count",
+            "Order Amount",
+            "Coupon Applied",
+            "Discount",
+            "Status",
+        ];
+
+        doc.autoTable({
+            head: [tableHeaders],
+            body: tableBody,
+            startY: 20,
+        });
+        doc.save("sales_report.pdf");
+    } catch (error) {
+        console.error("Error generating PDF:", error);
+        alert("Failed to generate PDF. Please try again.");
+    }
+}
+
+
+</script>
+

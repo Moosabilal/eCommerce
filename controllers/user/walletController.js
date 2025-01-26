@@ -5,7 +5,19 @@ const getWallet = async (req, res) => {
     try {
         const user = req.session.user;
         const userData = await User.findById(user);
-        const wallet = await Wallet.findOne({ user: user._id });
+        let wallet = await Wallet.findOne({ userId: user });
+        if(!wallet){
+            const transactions = []; 
+
+            const newWallet = new Wallet({
+                userId:user,
+                balance: 0,
+                transactions
+            });
+
+            // Save the new wallet to the database
+            wallet = await newWallet.save();
+        }
 
         if (wallet) {
             wallet.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));

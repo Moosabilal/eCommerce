@@ -1,4 +1,4 @@
-
+const { v4: uuidv4 } = require('uuid'); // Import UUID for unique order ID generation
 const mongoose = require('mongoose')
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
@@ -17,7 +17,6 @@ const razorpay = new Razorpay({
 
 const PostPlaceOrder = async (req, res) => {
     try {
-        console.log("form fronend",req.body)
         const {addressId, shipping, payment, parentAddressId, finalAmount, subtotal, shippingValue, discountValue, taxValue} = req.body;
 
         const user = req.session.user;
@@ -25,8 +24,14 @@ const PostPlaceOrder = async (req, res) => {
         if (!cart) {
             return res.status(404).send("Cart not found");
         }
-        findProduct = cart.items.map(product => product.productId);
+        const findProduct = cart.items.map(product => product.productId);
         const products = await Product.find({ _id: { $in: findProduct } });
+        if(payment == "Card"){
+            const wallet = await Wallet.findOne({ userId: user });
+            if (!wallet) {
+                return res.status(404).json({success:false,message:"wallet not Found"});
+            }
+
         const orderItems = cart.items.map((item)=>{
             return{
                 productId:item.productId._id,
@@ -53,7 +58,57 @@ const PostPlaceOrder = async (req, res) => {
         })
             
         await newOrder.save();
-        let findSize = cart.items.map((item) => item.stock[0].size);
+
+        const findOrderId = await Order.findOne({ userId: user }).sort({createdOn:-1});
+        const orderId = findOrderId.orderId;
+        console.log("orderId",orderId)
+        
+            console.log("balance",finalAmount)
+            console.log("walletsdf",wallet.balance)
+
+            wallet.balance -= finalAmount;
+            wallet.balance = wallet.balance.toFixed(2);
+            console.log("wallet",wallet.balance)
+            wallet.transactions.push({
+                transactionType: 'Debit',
+                amount: finalAmount,
+                status: 'Success',
+                orderId: orderId,
+                date: new Date()
+            });
+            await wallet.save();
+
+
+    }else{
+        const orderItems = cart.items.map((item)=>{
+            return{
+                productId:item.productId._id,
+                size:item.stock[0].size,
+                quantity:item.stock[0].quantity,
+                price:item.price,
+                totalPrice:item.totalPrice
+            }
+        })
+
+        const newOrder = new Order({
+            orderItems,
+            userId: user,
+            finalAmount: finalAmount,
+            paymentMethod: payment,
+            addressId: parentAddressId,
+            parentAddressId:addressId[1],
+            shipping: shipping,
+            discount:discountValue,
+            tax:taxValue,
+            status: 'Pending'
+
+
+        })
+            
+        await newOrder.save();
+
+    }
+    let findSize = cart.items.map((item) => item.stock[0].size);
         products.forEach((product) => {
             product.stock.forEach((stock) => {
                 if (findSize.includes(stock.size)) {
@@ -69,6 +124,8 @@ const PostPlaceOrder = async (req, res) => {
         cart.items = [];
         await cart.save();
         res.redirect('/shop');
+
+                                  
     } catch (error) {
         console.error("Error creating order:", error);
         res.redirect('pageNotFound') 
@@ -142,6 +199,9 @@ const cancelOrder = async (req, res) => {
         }
         let orderIdValue = existingOrder.orderId; 
         console.log(orderIdValue)
+        if(existingOrder.status === "Pending" || existingOrder.status === "Processing" || existingOrder.status === "Shipped"){
+            return res.status(200).json({ success: false, message: "You can't cancel this order when it is in pending, processing or shipped" });
+        }
         if (existingOrder.status === "Cancelled") {
             return res.status(200).json({ success: false, message: "Order is already cancelled" });
         }
@@ -196,6 +256,80 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+
+const returnOrder = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId, productId, orderQuantity, orderSize } = req.body;
+
+        const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });
+        console.log("orders",existingOrder)
+
+        if (!existingOrder) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+        let orderIdValue = existingOrder.orderId; 
+        console.log(orderIdValue)
+        if(existingOrder.status === "Pending" || existingOrder.status === "Processing" || existingOrder.status === "Shipped"){
+            return res.status(200).json({ success: false, message: "You can't Return this order when it is in pending, processing or shipped" });
+        }
+
+        if (existingOrder.status === "Return Request") {
+            return res.status(200).json({ success: false, message: "Retrun request already sent wait for admin response" });
+        }
+        if (existingOrder.status === "Cancelled") {
+            return res.status(200).json({ success: false, message: "our order is already cancelled, courier will pickup soon" });
+        }
+
+        let refundAmount = existingOrder.finalAmount;
+        const wallet = await Wallet.findOneAndUpdate(
+            { userId: new mongoose.Types.ObjectId(userId) },
+            {
+                $inc: { balance: refundAmount },
+                $push: {
+                    transactions: {
+                        transactionType: "Credit",
+                        amount: refundAmount,
+                        status: "Success",
+                        date: new Date(),
+                        orderId:orderIdValue,
+                    },
+                },
+            },
+            {
+                new: true,
+                upsert: true,
+                setDefaultsOnInsert: false,
+                runValidators: true,
+            }
+        );
+
+        if (!wallet) {
+            return res.status(404).json({ success: false, message: "Failed to credit the amount to the wallet, Please contact the admin" });
+        }
+
+        existingOrder.status = "Returned";
+        await existingOrder.save();
+
+        if (existingOrder.nModified === 0) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        const product = await Product.updateOne(
+            { _id: new mongoose.Types.ObjectId(productId), "stock.size": orderSize },
+            { $inc: { "stock.$.quantity": orderQuantity } }
+        );
+
+        if (product.nModified === 0) {
+            return res.status(404).json({ success: false, message: "Product not found or size mismatch" });
+        }
+
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.log("Error when cancelling order", error);
+        res.redirect("/pageNotFound");
+    }
+};
 
 const orderedProductDetails = async (req,res)=>{
     try {
@@ -293,40 +427,41 @@ const verifyPayment = (req, res) => {
     }
 };
 
-const orderedByWallet = async (req, res) => {
+
+
+const checkWalletBalance = async (req, res) => {
     try {
         const userId = req.session.user;
-        console.log(req.body)
-        const totalAmount = req.body.amount;
-        const wallet = await Wallet.findOneAndUpdate(
-            { userId: new mongoose.Types.ObjectId(userId) },
-            {
-                $inc: { balance: refundAmount },
-                $push: {
-                    transactions: {
-                        transactionType: "Credit",
-                        amount: refundAmount,
-                        status: "Success",
-                        date: new Date(),
-                        orderId:orderIdValue,
-                    },
-                },
-            },
-        );
+        const { amount } = req.body;
+        console.log(amount)
+
+        const wallet = await Wallet.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+
+        if (!wallet) {
+            return res.status(404).json({ success: false, message: "Wallet not found" });
+        }
+
+        if (wallet.balance >= amount) {
+            return res.status(200).json({ success: true, balance: wallet.balance });
+        } else {
+            return res.status(200).json({ success: false, balance: wallet.balance });
+        }
     } catch (error) {
-        console.log("Error when rendering ordered product details",error)
-        res.redirect("/pageNotFound")
-        
+        console.error("Error checking wallet balance:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};
+
 
 
 module.exports = {
     PostPlaceOrder,
     getOrderHistory,
     cancelOrder,
+    returnOrder,
     orderedProductDetails,
     createOrder,
     verifyPayment,
-    orderedByWallet
+    checkWalletBalance
+
 };

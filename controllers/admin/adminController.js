@@ -1,4 +1,8 @@
 const User = require('../../models/userSchema');
+const Order = require('../../models/orderSchema');
+const Product = require('../../models/productSchema');
+const Cart = require('../../models/cartSchema');
+const Coupon = require('../../models/couponSchema')
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
@@ -31,7 +35,7 @@ const login = async (req,res)=>{
         }
     } catch (error) {
         console.log("login error",error);
-        return res.redirect('/pageerror')
+        return res.redirect('/admin/pageerror')
         
     }
 }
@@ -39,9 +43,48 @@ const login = async (req,res)=>{
 const loadDashboard = async (req,res)=>{
     if(req.session.admin){
         try {
+            console.log("hellolsljdfng")
+            const admin = await User.findOne({isAdmin:true});
+            Order.aggregate([
+                {
+                  $facet: {
+                    totalOrders: [{ $count: "totalOrders" }],
+                    totalDiscountPrice: [{ $group: { _id: null, totalDiscount: { $sum: "$discount" } } }],
+                    discountGreaterThanZero: [
+                      { $match: { discount: { $gt: 0 } } },
+                      { $count: "totalDiscountCount" }
+                    ],
+                    totalSales: [
+                      { $unwind: "$orderItems" },
+                      { $group: { _id: "$orderItems.productId" } },
+                      { $count: "totalSales" }
+                    ]
+                  }
+                },
+                {
+                  $project: {
+                    totalOrders: { $arrayElemAt: ["$totalOrders.totalOrders", 0] },
+                    totalDiscountPrice: { $arrayElemAt: ["$totalDiscountPrice.totalDiscount", 0] },
+                    totalDiscountCount: { $arrayElemAt: ["$discountGreaterThanZero.totalDiscountCount", 0] },
+                    totalSales: { $arrayElemAt: ["$totalSales.totalSales", 0] }
+                  }
+                }
+              ]).then(results => {
+                const totalOrders = results[0]?.totalOrders || 0;
+                const totalDiscountPrice = results[0]?.totalDiscountPrice || 0;
+                const totalDiscountCount = results[0]?.totalDiscountCount || 0;
+                const totalSales = results[0]?.totalSales || 0;
+
+                console.log("Total Orders:", totalOrders);
+  console.log("Total Discount Price:", totalDiscountPrice);
+  console.log("Total Discount Count (greater than 0):", totalDiscountCount);
+  console.log("Total Sales (unique product count):", totalSales);
+})
+            
+
             res.render("dashboard");
         } catch (error) {
-            res.redirect("/pageerror")
+            res.redirect("/admin/pageerror")
         }
     }   
 }
@@ -51,13 +94,13 @@ const logout = async (req,res)=>{
         req.session.destroy(err=>{
             if(err){
                 console.log("Error in destroying session:",err);
-                return res.redirect('/pageerror')
+                return res.redirect('/admin/pageerror')
             }
             res.redirect('/admin/login')
         })
     } catch (error) {
         console.log("Unexpected error during logout ; ",error)
-        res.redirect('/pageerror')
+        res.redirect('/admin/pageerror')
     }
 }
 

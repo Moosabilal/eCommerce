@@ -1,19 +1,6 @@
 <%- include('../../views/partials/admin/header') %>
-<style>
-    div.container.my-4{
-            margin-left: 16%;
-            width: 83%;
-             max-width: 100%;
-        }
-    @media (max-width: 768px) {
-        div.container.my-4{
-            margin-left: 0%;
-            width: 95%;
-        }
-    }
-        
-</style>
-<div class="container my-4" >
+
+<div class="content" >
   <h2 class="text-center mb-4">Order Management</h2>
   <p class="text-muted text-center mb-4">Manage and track all customer orders here. You can view details, update the order status, or delete orders.</p>
 
@@ -36,7 +23,7 @@
         <!-- Example Row -->
          <% for (let i = 0; i < orders.length; i++) { %>
         <tr>
-          <td><%= orders[i]._id %></td>
+          <td><%= orders[i].orderId %></td>
           <td><%= orders[i].userId.name%></td>
           <td><%= orders[i].finalAmount %></td>
           <td><%= orders[i].paymentMethod %></td>
