@@ -148,7 +148,7 @@ const removeProductOffer = async (req,res)=>{
         }
         const findProduct = await Product.findOne({_id:productId});
         const percentage = findProduct.productOffer;
-        findProduct.salePrice = findProduct.salePrice+Math.floor(findProduct.regularPrice*(percentage/100));
+        findProduct.salePrice = findProduct.salePrice+Math.ceil(findProduct.regularPrice*(percentage/100));
         findProduct.productOffer = 0;
         await findProduct.save();
         res.json({status:true})
@@ -201,14 +201,13 @@ const editProduct = async (req,res)=>{
         const id = req.params.id;
         const product = await Product.findOne({_id:id});
         const data = req.body;
-        console.log("datacategory",data)
+
         const existingProduct = await Product.findOne({
             productName:data.productName,
             _id:{$ne:id}
         })
-        console.log("existing products",existingProduct)
         const categoryId = await Category.find({name:data.category});
-
+        
         
         if(existingProduct){
             return res.status(400).json({error:"Product with this name already exists, Please try with another name"});
@@ -220,11 +219,10 @@ const editProduct = async (req,res)=>{
                 images.push(req.files[i].filename);
             }
         }
-        console.log("categoryId",categoryId)
         const updateFields = {
             productName:data.productName,
             description:data.description,
-            category:categoryId._id,
+            category:categoryId[0]._id,
             regularPrice:data.regularPrice,
             salePrice:data.salePrice,
 
@@ -234,7 +232,6 @@ const editProduct = async (req,res)=>{
         const quantity = data.quantity;  
 
         const existingSize = product.stock.find((item) => item.size === size);
-        console.log("exisstingsize",existingSize)
         if (existingSize) {
             existingSize.quantity += Number(quantity);
         } else {
@@ -242,7 +239,6 @@ const editProduct = async (req,res)=>{
         }
 
         updateFields.stock = product.stock;
-        console.log("file length",req.files.length)
         if(req.files.length>0){
             updateFields.$push = {productImage:{$each:images}};
         }

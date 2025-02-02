@@ -3,6 +3,7 @@ const Product = require('../../models/productSchema')
 const User = require('../../models/userSchema')
 const Cart = require('../../models/cartSchema')
 const Address = require('../../models/addressSchema')
+const mongoose = require('mongoose')
 
 
 const getOrders = async (req, res) => {
@@ -87,9 +88,73 @@ const deleteOrder = async (req, res) => {
     }
 }
 
+const orderedDetailsPage = async (req,res)=>{
+    try {
+        console.log(req.query)
+        const userId = req.session.user;
+        const size = req.query.size
+        const productId = req.query.productId
+        const parentAddressId = req.query.parentAddressId
+        const orderId = req.query.orderId
+        const userData = await User.findById(userId);
+        const addressDetails = await Address.aggregate([
+            {$match: {userId: new mongoose.Types.ObjectId(userId)} },
+            { $unwind:"$address"},
+            { $match: { "address._id": new mongoose.Types.ObjectId(parentAddressId) }}
+        ])
+
+        const orderDetails = await Order.aggregate([
+            { $match:{_id:new mongoose.Types.ObjectId(orderId)}},
+            { $unwind:"$orderItems"},
+            { $lookup:{
+                from: 'products',
+                localField: 'orderItems.productId',
+                foreignField: '_id',
+                as: 'productDetails'
+            }},
+            { $unwind:"$productDetails"},
+           
+            { $project:{
+                _id:1,
+                "parentAddressId":1,
+                "orderItems.size":1,
+                "orderItems.quantity":1,
+                "orderItems.productId":1,
+                "orderItems.price":1,
+                "orderItems.totalPrice":1,
+                "paymentMethod":1,
+                "finalAmount":1,
+                "parentAddressid":1,
+                "shipping":1,
+                "status":1,
+                "orderId":1,
+                "createdOn":1,
+                "paymentStatus":1,
+                "productDetails._id":1,
+                "productDetails.productName":1,
+                "productDetails.description":1,
+                "productDetails.productOffer":1,
+                "productDetails.color":1,
+                "productDetails.productImage":1,
+            }}
+        ])
+        res.render('orderedDetails',{
+            user:userData,
+            orderDetails:orderDetails,
+            addressDetails:addressDetails,
+            orderId:orderId
+        })
+    } catch (error) {
+        console.log("Error when rendering ordered product details",error)
+        res.redirect("/pageNotFound")
+        
+    }
+}
+
 module.exports = {
     getOrders,
     statusSelection,
     deleteOrder,
+    orderedDetailsPage,
 };
 

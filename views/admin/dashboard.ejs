@@ -2,6 +2,81 @@
  
  
 <%- include('../../views/partials/admin/header')%>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  integrity="sha512-Fo3rlrZj/k7ujTnHq6F1C7Xw5B1zJY5Dd2ZjHoxSmM6tF69+XyF1q/5pbZKTx7ryD+8Qe/j5YxN1njI9o+Ae0g=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
+
+<style>
+  /* Smaller card styling */
+  .card-custom-small {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card-custom-small:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  /* Gradient backgrounds */
+  .card-gradient-blue-small {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+  }
+  .card-gradient-warning-small {
+    background: linear-gradient(135deg, #f6d365, #fda085);
+    color: #fff;
+  }
+  .card-gradient-success-small {
+    background: linear-gradient(135deg, #89f7fe, #66a6ff);
+    color: #fff;
+  }
+  .card-gradient-danger-small {
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    color: #fff;
+  }
+  /* Icon and text sizing */
+  .card-icon-small {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+  }
+  .card-title-small {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  .card-text-small {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+  }
+  /* Adjust spacing in grid */
+  .row-small > [class*="col-"] {
+    padding: 0.5rem;
+  }
+
+  /* chart css */
+  body {
+    background: #f4f6f9;
+  }
+  .dashboard-card {
+    border-radius: 8px;
+    padding: 1rem;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+  }
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+  .list-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: .5rem;
+  }
+</style>
 <!-- Content Area -->
 <!-- Dashboard Content -->
 <div class="content">
@@ -9,78 +84,196 @@
       <h2 class="mb-4">Admin Dashboard</h2>
   
       <!-- Summary Cards -->
-      <div class="row">
-        <div class="col-md-4">
-          <div class="card text-white bg-primary mb-3">
-            <div class="card-body">
-              <h5 class="card-title">Total Sales</h5>
-              <p class="card-text">₹<span id="totalSales">1,20,000</span></p>
-            </div>
-          </div>
+      <div class="row row-small">
+  <div class="col-md-4 col-sm-6">
+    <div class="card card-custom-small card-gradient-blue-small">
+      <div class="card-body text-center p-2">
+        <div class="card-icon-small">
+          <i class="fas fa-dollar-sign"></i>
         </div>
-        
-        <div class="col-md-4">
-          <div class="card text-white bg-warning mb-3">
-            <div class="card-body">
-              <h5 class="card-title">Total Orders</h5>
-              <p class="card-text"><span id="totalOrders">350</span> Orders</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-white bg-success mb-3">
-            <div class="card-body">
-              <h5 class="card-title">Total Discount</h5>
-              <p class="card-text">₹<span id="totalProfit">45,000</span></p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-white bg-success mb-3">
-            <div class="card-body">
-              <h5 class="card-title">Total Coupon Used</h5>
-              <p class="card-text">₹<span id="totalProfit">45,000</span></p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-white bg-danger mb-3">
-            <div class="card-body">
-              <h5 class="card-title">Customers</h5>
-              <p class="card-text"><span id="totalCustomers">120</span> Customers</p>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Charts -->
-      <div class="row">
-        <div class="col-md-6">
-          <canvas id="salesChart"></canvas>
-        </div>
-        <div class="col-md-6">
-          <canvas id="ordersChart"></canvas>
-        </div>
+        <h5 class="card-title-small">Total Sales</h5>
+        <p class="card-text-small"><span id="totalSales"><%= totalSales %></span></p>
       </div>
     </div>
   </div>
   
-  <!-- Include Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <div class="col-md-4 col-sm-6">
+    <div class="card card-custom-small card-gradient-warning-small">
+      <div class="card-body text-center p-2">
+        <div class="card-icon-small">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <h5 class="card-title-small">Total Orders</h5>
+        <p class="card-text-small"><span id="totalOrders"><%= totalOrders %></span> Orders</p>
+      </div>
+    </div>
+  </div>
   
-  <script>
-    // Data for the Sales Chart
-    const salesChartCtx = document.getElementById('salesChart').getContext('2d');
-    const salesChart = new Chart(salesChartCtx, {
-      type: 'bar',
+  <div class="col-md-4 col-sm-6">
+    <div class="card card-custom-small card-gradient-success-small">
+      <div class="card-body text-center p-2">
+        <div class="card-icon-small">
+          <i class="fas fa-tags"></i>
+        </div>
+        <h5 class="card-title-small">Total Discount</h5>
+        <p class="card-text-small">₹<span id="totalProfit"><%= totalDiscountPrice %></span></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4 col-sm-6">
+    <div class="card card-custom-small card-gradient-success-small">
+      <div class="card-body text-center p-2">
+        <div class="card-icon-small">
+          <i class="fas fa-percentage"></i>
+        </div>
+        <h5 class="card-title-small">Total Coupon Used</h5>
+        <p class="card-text-small"><span id="totalProfit"><%= totalDiscountCount %></span></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4 col-sm-6">
+    <div class="card card-custom-small card-gradient-danger-small">
+      <div class="card-body text-center p-2">
+        <div class="card-icon-small">
+          <i class="fas fa-users"></i>
+        </div>
+        <h5 class="card-title-small">Customers</h5>
+        <p class="card-text-small"><span id="totalCustomers"><%= totalUser %></span> Customers</p>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+
+
+<div class="container-fluid">
+  <div class="dashboard-header text-center my-4">
+    <h1>Admin Dashboard</h1>
+  </div>
+  <div class="row">
+    <!-- Chart with Filter -->
+    <div class="col-md-8">
+      <div class="dashboard-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4>Sales Chart</h4>
+          <select id="chartFilter" class="form-control w-auto">
+            <option value="yearly">Yearly</option>
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
+          </select>
+        </div>
+        <canvas id="salesChart" height="200"></canvas>
+      </div>
+    </div>
+    <!-- Ledger Book Generator -->
+    <div class="col-md-4">
+      <div class="dashboard-card text-center">
+        <h4>Ledger Book</h4>
+        <p>Generate a detailed ledger report.</p>
+        <button id="generateLedger" class="btn btn-primary">
+          <i class="fas fa-file-alt"></i> Generate Ledger
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <!-- Best Selling Products -->
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <div class="list-title">Top 10 Best Selling Products</div>
+        <ul class="list-group">
+          <% mostSoldProduct.forEach(function(product, index) { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <%= index+1 %>. <%= product.productDetails.productName %>
+              <span class="badge badge-primary badge-pill"><%= product.count %></span>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Best Selling Categories -->
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <div class="list-title">Top 10 Best Selling Categories</div>
+        <ul class="list-group">
+          <% bestSellingCategory.forEach(function(category, index) { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <%= index+1 %>. <%= category.categoryDetails.name %>
+              <span class="badge badge-success badge-pill"><%= category.count %></span>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Best Selling Brands -->
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <div class="list-title">Top 10 Best Selling Brands</div>
+        <ul class="list-group">
+          <% bestSellingBrand.forEach(function(brand, index) { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <%= index+1 %>. <%= brand.brandName %>
+              <span class="badge badge-danger badge-pill"><%= brand.count %></span>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHq6F1C7Xw5B1zJY5Dd2ZjHoxSmM6tF69+XyF1q/5pbZKTx7ryD+8Qe/j5YxN1njI9o+Ae0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Chart.js initialization
+  let salesChart;
+const ctx = document.getElementById('salesChart').getContext('2d');
+
+async function fetchChartData(filterType) {
+  try {
+    const response = await fetch(`/admin/sales-data?filterType=${filterType}`); // Call backend API
+    const result = await response.json();
+    console.log(result);
+
+    return {
+      labels: result.labels,
+      data: result.data
+    };
+  } catch (error) {
+    console.error("Error fetching sales data:", error);
+    return { labels: [], data: [] };
+  }
+}
+
+async function updateChart(filterType) {
+  const chartData = await fetchChartData(filterType);
+
+  if (salesChart) {
+    salesChart.data.labels = chartData.labels;
+    salesChart.data.datasets[0].data = chartData.data;
+    salesChart.update();
+  } else {
+    salesChart = new Chart(ctx, {
+      type: 'line',
       data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+        labels: chartData.labels,
         datasets: [{
-          label: 'Monthly Sales (₹)',
-          data: [20000, 30000, 25000, 40000, 50000, 45000],
-          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          label: 'Sales',
+          data: chartData.data,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
           borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3
         }]
       },
       options: {
@@ -92,16 +285,67 @@
         }
       }
     });
+  }
+}
+
+// Initialize chart on page load with default filter (yearly)
+updateChart('yearly');
+
+// Handle filter change event
+document.getElementById('chartFilter').addEventListener('change', (e) => {
+  updateChart(e.target.value);
+});
+
+
+  // Ledger Book Generator (dummy implementation)
+  document.getElementById('generateLedger').addEventListener('click', async () => {
+    // You might call an endpoint to generate a ledger PDF/CSV and then trigger download
+    try {
+      // Replace URL with your ledger generation endpoint.
+      const response = await fetch('/admin/generate-ledger');
+      if(response.ok){
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'ledger.pdf'; // or ledger.csv
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        Swal.fire({
+          icon: 'success',
+          title: 'Ledger Generated!',
+          text: 'Your ledger book has been downloaded.'
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Failed to generate ledger. Try again later.'
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Something went wrong.'
+      });
+    }
+  });
+
+   
   
     // Data for the Orders Chart
     const ordersChartCtx = document.getElementById('ordersChart').getContext('2d');
     const ordersChart = new Chart(ordersChartCtx, {
       type: 'pie',
       data: {
-        labels: ['Electronics', 'Fashion', 'Groceries', 'Home Appliances', 'Books'],
+        labels: ['Women', 'Men', 'Shoes', 'Waches'],
         datasets: [{
           label: 'Category Orders',
-          data: [120, 90, 60, 80, 40],
+          data: [120, 90, 60, 80],
           backgroundColor: [
             'rgba(255, 99, 132, 0.7)',
             'rgba(54, 162, 235, 0.7)',
@@ -123,6 +367,27 @@
         responsive: true
       }
     });
+
+    document.getElementById('generateLedger').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/admin/generate-ledger');
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ledger.pdf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            Swal.fire('Success', 'Ledger downloaded!', 'success');
+        } else {
+            Swal.fire('Error', 'Failed to generate ledger', 'error');
+        }
+    } catch (error) {
+        Swal.fire('Error', 'Something went wrong', 'error');
+    }
+});
   </script>
   
  <%- include('../../views/partials/admin/footer')%>

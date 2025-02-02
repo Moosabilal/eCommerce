@@ -63,6 +63,8 @@ router.post("/deleteImage",isAuthenticated,productController.deleteSingleImage)
 router.get("/orders",isAuthenticated,orderController.getOrders)
 router.post('/statusSelection',isAuthenticated,orderController.statusSelection);
 router.post('/deleteOrder',isAuthenticated,orderController.deleteOrder)
+router.get('/orderedDetailsPage',isAuthenticated,orderController.orderedDetailsPage)
+
 
 //coupon management
 router.get('/displayCoupon',isAuthenticated,couponController.showCouponDetails)
@@ -75,5 +77,7 @@ router.get("/deleteCoupon",isAuthenticated,couponController.deleteCoupon)
 //sales Management
 router.get('/sales-report',isAuthenticated,salesController.getSales)
 router.post('/filter-report',isAuthenticated,salesController.filterSales)
+router.get('/sales-data',isAuthenticated,salesController.getSalesData)
+router.get('/generate-ledger',isAuthenticated,salesController.generateLedger)
 
 module.exports = router;

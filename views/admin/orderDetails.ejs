@@ -23,7 +23,8 @@
         <!-- Example Row -->
          <% for (let i = 0; i < orders.length; i++) { %>
         <tr>
-          <td><%= orders[i].orderId %></td>
+          
+          <td><a href="/admin/orderedDetailsPage?parentAddressId=<%= orders[i].parentAddress._id %>&orderId=<%=orders[i]._id%>" style="text-decoration: none;" ><%= orders[i].orderId %></a></td>
           <td><%= orders[i].userId.name%></td>
           <td><%= orders[i].finalAmount %></td>
           <td><%= orders[i].paymentMethod %></td>

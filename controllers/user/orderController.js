@@ -8,6 +8,9 @@ const Address = require('../../models/addressSchema')
 const Wallet = require('../../models/walletSchema')
 const Razorpay = require('razorpay')
 const crypto = require('crypto')
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
 
 
 const razorpay = new Razorpay({
@@ -15,14 +18,122 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET, // Replace with your test Key Secret
 });
 
+const generateInvoice = (order, res) => {
+    const doc = new PDFDocument({ size: 'A4', margin: 40 });
+
+    // Set response headers for PDF download
+    res.setHeader('Content-Disposition', `attachment; filename=invoice_${order.orderId}.pdf`);
+    res.setHeader('Content-Type', 'application/pdf');
+
+    doc.pipe(res);
+
+    // ---------- HEADER ----------
+    doc.image('public/images/logo.png', 50, 40, { width: 100 });    
+    doc.fillColor('#000').fontSize(20).font('Helvetica-Bold').text('INVOICE', 400, 50)
+    
+    doc.fontSize(10).text(`Invoice #: ${order.orderId}`, 400, 80);
+    doc.text(`Date: ${new Date(order.createdOn).toLocaleString()}`, 400, 105);
+    doc.moveDown(2);
+
+    // ---------- BILLING DETAILS ----------
+    doc.fillColor('#444').fontSize(14).font('Helvetica-Bold').text('Bill To:', 50, doc.y);
+    doc.fillColor('#000').fontSize(12).font('Helvetica');
+    doc.text(`Name: ${order.userId.name}`, 50);
+    doc.text(`Email: ${order.userId.email}`, 50);
+    doc.text(`Phone: ${order.userId.phone}`, 50);
+    doc.moveDown(1);
+
+    // ---------- ORDER TABLE HEADER ----------
+    const startX = 50, tableY = doc.y + 10;
+    const columnWidths = [30, 200, 50, 50, 80, 80]; // Column spacing
+
+    doc.fillColor('#fff').rect(startX, tableY, 500, 20).fill('#000'); // Header background
+    doc.fillColor('#fff').fontSize(12).font('Helvetica-Bold');
+    doc.text('No', startX + 5, tableY + 5);
+    doc.text('Item Description', startX + columnWidths[0] + 5, tableY + 5);
+    doc.text('Size', startX + columnWidths[0] + columnWidths[1] + 5, tableY + 5);
+    doc.text('Qty', startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + 5, tableY + 5);
+    doc.text('Price', startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3] + 5, tableY + 5);
+    doc.text('Total', startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3] + columnWidths[4] + 5, tableY + 5);
+    doc.fillColor('#000');
+
+    let rowY = tableY + 25;
+    doc.fontSize(11).font('Helvetica');
+
+    order.orderItems.forEach((item, index) => {
+        // Alternating row color
+        if (index % 2 === 0) {
+            doc.fillColor('#f5f5f5').rect(startX, rowY, 500, 20).fill();
+        }
+
+        doc.fillColor('#000');
+        doc.text(index + 1, startX + 5, rowY + 5);
+        doc.text(item.productId.productName || 'Product', startX + columnWidths[0] + 5, rowY + 5);
+        doc.text(item.size, startX + columnWidths[0] + columnWidths[1] + 5, rowY + 5);
+        doc.text(item.quantity.toString(), startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + 5, rowY + 5);
+        doc.text(`₹${item.price}`, startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3] + 5, rowY + 5);
+        doc.text(`₹${item.totalPrice}`, startX + columnWidths[0] + columnWidths[1] + columnWidths[2] + columnWidths[3] + columnWidths[4] + 5, rowY + 5);
+        rowY += 20;
+    });
+
+    doc.moveTo(startX, rowY).lineTo(550, rowY).stroke(); // Bottom border
+
+    // ---------- ORDER SUMMARY ----------
+    rowY += 15;
+    doc.fillColor('#222').fontSize(12).font('Helvetica-Bold');
+    doc.text('Subtotal:', 400, rowY);
+    doc.text('Tax (5%):', 400, rowY + 20);
+    doc.text('Discount:', 400, rowY + 40);
+    doc.text('Total Amount:', 400, rowY + 60);
+    
+    doc.fillColor('#000').fontSize(12).font('Helvetica');
+    doc.text(`₹${order.finalAmount - order.tax}`, 480, rowY);
+    doc.text(`₹${order.tax}`, 480, rowY + 20);
+    doc.text(`₹${order.discount}`, 480, rowY + 40);
+    doc.fontSize(14).font('Helvetica-Bold').text(`₹${order.finalAmount}`, 480, rowY + 60);
+
+    doc.moveDown(2);
+
+    // ---------- PAYMENT DETAILS ----------
+    doc.fillColor('#444').fontSize(14).font('Helvetica-Bold').text('Payment Information:', 50);
+    doc.fillColor('#000').fontSize(12).font('Helvetica');
+    doc.text(`Payment Method: ${order.paymentMethod}`, 50);
+    doc.text(`Payment Status: ${order.paymentStatus}`, 50);
+
+    if (order.paymentMethod === 'COD') {
+        doc.moveDown(1);
+        doc.fillColor('red').font('Helvetica-Bold').text('Cash on Delivery - Please have the exact amount ready.', 50); //⚠️
+        doc.fillColor('#000');
+    }
+
+    doc.moveDown(1);
+
+    // ---------- FOOTER ----------
+    doc.moveDown(1);
+    doc.fontSize(10).fillColor('#444').font('Helvetica-Bold').text('Terms & Conditions:', 50);
+    doc.fontSize(10).font('Helvetica').text('1. This is a system-generated invoice.', 50);
+    doc.text('2. Goods once sold are non-refundable.', 50);
+    doc.text('3. For support, contact our customer service.', 50);
+
+    doc.moveDown(2);
+    doc.fontSize(12).fillColor('#000').font('Helvetica-Bold').text('Thank you for shopping with us!', { align: 'center' });
+
+    doc.end();
+};
+
 const PostPlaceOrder = async (req, res) => {
     try {
-        const {addressId, shipping, payment, parentAddressId, finalAmount, subtotal, shippingValue, discountValue, taxValue} = req.body;
+        console.log("req.body",req.body)
+        const {addressId, shipping, payment, parentAddressId, finalAmount, subtotal, shippingValue, discountValue, taxValue, paymentMethod, paymentStatus, razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
         const user = req.session.user;
         const cart = await Cart.findOne({ userId: user }).populate('items.productId')
         if (!cart) {
             return res.status(404).send("Cart not found");
+        }
+        let couponApplied = false;
+        if (discountValue > 0) {
+            couponApplied = true;
         }
         const findProduct = cart.items.map(product => product.productId);
         const products = await Product.find({ _id: { $in: findProduct } });
@@ -47,12 +158,17 @@ const PostPlaceOrder = async (req, res) => {
             userId: user,
             finalAmount: finalAmount,
             paymentMethod: payment,
+            paymentStatus: 'Completed',
             addressId: parentAddressId,
             parentAddressId:addressId[1],
             shipping: shipping,
             discount:discountValue,
             tax:taxValue,
-            status: 'Pending'
+            status: 'Pending',
+            couponApplied: couponApplied,
+            razorpay_order_id: razorpay_order_id,
+            razorpay_payment_id: razorpay_payment_id,
+            razorpay_signature: razorpay_signature,
 
 
         })
@@ -61,7 +177,6 @@ const PostPlaceOrder = async (req, res) => {
 
         const findOrderId = await Order.findOne({ userId: user }).sort({createdOn:-1});
         const orderId = findOrderId.orderId;
-        console.log("orderId",orderId)
         
             console.log("balance",finalAmount)
             console.log("walletsdf",wallet.balance)
@@ -80,6 +195,8 @@ const PostPlaceOrder = async (req, res) => {
 
 
     }else{
+
+       
         const orderItems = cart.items.map((item)=>{
             return{
                 productId:item.productId._id,
@@ -95,12 +212,17 @@ const PostPlaceOrder = async (req, res) => {
             userId: user,
             finalAmount: finalAmount,
             paymentMethod: payment,
+            paymentStatus:paymentStatus,
             addressId: parentAddressId,
             parentAddressId:addressId[1],
             shipping: shipping,
             discount:discountValue,
             tax:taxValue,
-            status: 'Pending'
+            status: 'Pending',
+            couponApplied: couponApplied,
+            razorpay_order_id: razorpay_order_id,
+            razorpay_payment_id: razorpay_payment_id,
+            razorpay_signature: razorpay_signature,
 
 
         })
@@ -163,6 +285,10 @@ const getOrderHistory = async (req,res)=>{
                 "parentAddressid":1,
                 "shipping":1,
                 "status":1,
+                "paymentStatus":1,
+                "razorpay_order_id":1,
+                "razorpay_payment_id":1,
+                "razorpay_signature":1,
                 "orderId":1,
                 "createdOn":1,
                 "productDetails._id":1,
@@ -192,7 +318,6 @@ const cancelOrder = async (req, res) => {
         const { orderId, productId, orderQuantity, orderSize } = req.body;
 
         const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });
-        console.log("orders",existingOrder)
 
         if (!existingOrder) {
             return res.status(404).json({ success: false, message: "Order not found" });
@@ -221,12 +346,12 @@ const cancelOrder = async (req, res) => {
                     },
                 },
             },
-            {
-                new: true,
-                upsert: true,
-                setDefaultsOnInsert: false,
-                runValidators: true,
-            }
+            // {
+            //     new: true,
+            //     upsert: true,
+            //     setDefaultsOnInsert: false,
+            //     runValidators: true,
+            // }
         );
 
         if (!wallet) {
@@ -263,7 +388,6 @@ const returnOrder = async (req, res) => {
         const { orderId, productId, orderQuantity, orderSize } = req.body;
 
         const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });
-        console.log("orders",existingOrder)
 
         if (!existingOrder) {
             return res.status(404).json({ success: false, message: "Order not found" });
@@ -296,12 +420,12 @@ const returnOrder = async (req, res) => {
                     },
                 },
             },
-            {
-                new: true,
-                upsert: true,
-                setDefaultsOnInsert: false,
-                runValidators: true,
-            }
+            // {
+            //     new: true,
+            //     upsert: true,
+            //     setDefaultsOnInsert: false,
+            //     runValidators: true,
+            // }
         );
 
         if (!wallet) {
@@ -382,7 +506,8 @@ const orderedProductDetails = async (req,res)=>{
         res.render('orderProducts',{
             user:userData,
             orderDetails:orderDetails,
-            addressDetails:addressDetails
+            addressDetails:addressDetails,
+            orderId:orderId
         })
     } catch (error) {
         console.log("Error when rendering ordered product details",error)
@@ -395,35 +520,70 @@ const orderedProductDetails = async (req,res)=>{
 
 
 const createOrder = async (req, res) => {
-    const { amount, currency } = req.body; 
+    const { amount, currency } = req.body;
 
     try {
+        const amountInPaise = Math.round(parseFloat(amount) * 100);
+
         const options = {
-            amount: amount * 100, 
+            amount: amountInPaise,  
             currency: currency || 'INR',
             receipt: `receipt_${Date.now()}`, 
         };
 
         const order = await razorpay.orders.create(options);
-        res.status(200).json({ success: true, orderId: order.id, amount: order.amount });
+        console.log("order",order)
+
+        if (!order) {
+            return res.status(500).json({ success: false, message: "Error creating Razorpay order." });
+        }
+
+        res.status(200).json({
+            success: true,
+            orderId: order.id,
+            amount: order.amount,
+            order:order // This is already in paise
+        });
+
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error("Razorpay Order Creation Error: ", error);
+        res.status(500).json({ success: false, message: "Failed to create Razorpay order" });
     }
 };
 
-const verifyPayment = (req, res) => {
+const verifyPayment = async (req, res) => {
+    try {
+        
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    console.log("razorpaync",req.body);
 
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET) // Use your Key Secret
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET) 
         .update(body.toString())
         .digest('hex');
-
+        console.log("expectedSignature",expectedSignature)
+        console.log("razorpay_signature",razorpay_signature)
     if (expectedSignature === razorpay_signature) {
-        res.status(200).json({ success: true, message: 'Payment verified!' });
+        const order = await Order.findOne({ razorpay_order_id });
+            if (order) {
+
+            order.razorpay_payment_id = razorpay_payment_id;
+            order.razorpay_signature = razorpay_signature;
+            order.paymentStatus = "Completed";
+            await order.save();
+
+            return res.status(200).json({ success: true, message: "Payment verified and order updated" });
+            } else {
+                res.status(200).json({ success: true, message: 'Payment verified!' });
+
+            }
     } else {
         res.status(400).json({ success: false, message: 'Invalid signature!' });
+    }
+    } catch (error) {
+        console.error("Razorpay Payment Verification Error: ", error);
+        res.status(500).json({ success: false, message: "Failed to verify payment" });          
     }
 };
 
@@ -433,7 +593,6 @@ const checkWalletBalance = async (req, res) => {
     try {
         const userId = req.session.user;
         const { amount } = req.body;
-        console.log(amount)
 
         const wallet = await Wallet.findOne({ userId: new mongoose.Types.ObjectId(userId) });
 
@@ -452,6 +611,19 @@ const checkWalletBalance = async (req, res) => {
     }
 };
 
+const downloadInvoice  = async (req, res)=>{
+    try {
+        const order = await Order.findOne({ orderId: req.params.orderId }).populate('userId orderItems.productId userId.addressId');
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+
+
+        generateInvoice(order, res);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
 
 
 module.exports = {
@@ -462,6 +634,7 @@ module.exports = {
     orderedProductDetails,
     createOrder,
     verifyPayment,
-    checkWalletBalance
+    checkWalletBalance,
+    downloadInvoice,
 
 };

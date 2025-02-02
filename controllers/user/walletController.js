@@ -7,16 +7,7 @@ const getWallet = async (req, res) => {
         const userData = await User.findById(user);
         let wallet = await Wallet.findOne({ userId: user });
         if(!wallet){
-            const transactions = []; 
-
-            const newWallet = new Wallet({
-                userId:user,
-                balance: 0,
-                transactions
-            });
-
-            // Save the new wallet to the database
-            wallet = await newWallet.save();
+            res.redirect('/pageNotFound');
         }
 
         if (wallet) {

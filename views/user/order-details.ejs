@@ -108,6 +108,9 @@
   .status.Returned {
     background-color: #6c757d;
   }
+  .status.Completed {
+    background-color: #28a745;
+  }
   div.priceDetails{
     margin-right: 25%;
   }
@@ -135,7 +138,6 @@
   <div class="order-container">
     <% if (orders && orders.length > 0) { %>
       <% 
-        // Group products by orderId
         const ordersGrouped = {};
         orders.forEach(order => {
           if (!ordersGrouped[order._id]) {
@@ -149,32 +151,34 @@
         const orderGroup = ordersGrouped[orderId]; 
         const order = orderGroup[0]; // Assuming all items have the same orderId
       %>
-        <a href="/orderedProducts?parentAddressId=<%= order.parentAddressId %>&orderId=<%=order._id%>" style="text-decoration: none;">
         <div class="order-row">
-        
-          <!-- Left Side: Images -->
-          <div class="order-row-left">
+          <div class="col-md-5">
             <% orderGroup.forEach(product => { %>
-              <img src="uploads/product-images/<%= product.productDetails.productImage[0] %>" alt="Product Image" style="width: 100px; height: auto; border-radius: 8px; margin-bottom: 10px;">
+              <a href="/orderedProducts?parentAddressId=<%= order.parentAddressId %>&orderId=<%=order._id%>" style="text-decoration: none;">
+
+              <div class="row align-items-center mb-4"> 
+                <div class="col-md-4 text-center">
+                  <img src="uploads/product-images/<%= product.productDetails.productImage[0] %>" 
+                       alt="Product Image" 
+                       class="img-fluid rounded" 
+                       style="max-width: 100px;">
+                </div>
+                <div class="col-md-3" style="width: 60%;">
+                  <p class="mb-1"><strong>Product Name:</strong> <%= product.productDetails.productName %></p>
+                  <p class="mb-1"><strong>Price:</strong> ₹<%= product.orderItems.price %></p>
+                  <p class="mb-1"><strong>Quantity:</strong> <%= product.orderItems.quantity %></p>
+                  <p class="mb-1"><strong>Total:</strong> <span class="text-primary">₹<%= product.orderItems.totalPrice %></span></p>
+                </div>
+              </div>
+            </a>
             <% }); %>
           </div>
-
           
-
-          <!-- Right Side: Price, Status, and Actions -->
-          <div class="order-row-left m-l-50">
-            <% orderGroup.forEach(product => { %>
-              <p><strong>Product Name:</strong> <%= product.productDetails.productName %></p>
-              <p><strong>Price:</strong> ₹<%= product.orderItems.price %></p>
-              <p><strong>Quantity:</strong> <%= product.orderItems.quantity %></p>
-              <p><strong>Total:</strong><span class="text-primary"> ₹<%= product.orderItems.totalPrice %></span></p>
-            <% }); %>
-          </div>
-
-          <!-- Middle: Order Info -->
-          <div class="details">
+  
+          <!-- Order Info Section -->
+          <div class="col-md-4 details" style="width: 20%;">
             <h5>Order ID: <span class="text-primary"><%= order.orderId %></span></h5>
-            <p><strong>finalAmount:</strong><span class="text-primary"><%= order.finalAmount %></span>
+            <p><strong>finalAmount:</strong> <span class="text-primary">₹<%= order.finalAmount %></span></p>
             <p><strong>Address Type:</strong>
               <% if(addressData){ %>
                 <% addressData.forEach(address => { %>
@@ -187,22 +191,32 @@
               <% } %>
             </p>
             <p><strong>Date:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></p>
+            <% if(order.paymentStatus!=='Completed'){ %>
+              <button class="btn btn-primary w-50" onclick="payRazorpayAmount('<%= order.razorpay_order_id %>')">Pay Now</button>
+            <% } %>
           </div>
-          
-          <div class="actions">
-            <p><strong>Status :&nbsp;</strong><span class="status <%= order.status %>"><%= order.status %></span></p>
-            <button class="btn btn-danger btn-sm return-order" data-order-id="<%= order._id %>" data-order-quantity="<%= order.orderItems.quantity %>" data-product-id="<%= order.orderItems.productId %>" data-product-size="<%= order.orderItems.size %>">
-              Return
-            </button>
-            <button class="btn btn-danger btn-sm cancel-order" data-order-id="<%= order._id %>" data-order-quantity="<%= order.orderItems.quantity %>" data-product-id="<%= order.orderItems.productId %>" data-product-size="<%= order.orderItems.size %>">
-              Cancel
-            </button>
+  
+          <!-- Status and Actions Section -->
+          <div class="col-md-3 justify-content-left" style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="details">
+              <p><strong>Status :&nbsp;</strong><span class="status <%= order.status %> m-l-17"><%= order.status %></span></p>
+              <p><strong>Payment :&nbsp;</strong><span class="status <%= order.paymentStatus %>"><%= order.paymentStatus %></span></p>
+            </div>
+            <div class="actions" style="display: flex; flex-direction: row; gap: 10px;">
+              <% if(order.status === 'Delivered'){ %>
+              <button class="btn btn-danger btn-sm return-order" data-order-id="<%= order._id %>" data-order-quantity="<%= order.orderItems.quantity %>" data-product-id="<%= order.orderItems.productId %>" data-product-size="<%= order.orderItems.size %>">
+                Return
+              </button>
+              <% } %>
+              <% if(order.status === 'Pending' || order.status === 'Processing') { %>
+              <button class="btn btn-danger btn-sm cancel-order" data-order-id="<%= order._id %>" data-order-quantity="<%= order.orderItems.quantity %>" data-product-id="<%= order.orderItems.productId %>" data-product-size="<%= order.orderItems.size %>">
+                Cancel
+              </button>
+              <% } %>
+            </div>
           </div>
-        
         </div>
-      </a>
       <% } %>
-
     <% } else { %>
       <div class="no-orders">
         <h5>No orders found</h5>
@@ -212,6 +226,9 @@
   </div>
 
 </div>
+<%- include('../../views/partials/user/footer') %>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
 
 <script>
@@ -309,5 +326,72 @@
     });
 
   });
+
+    async function payRazorpayAmount(razorpay_order_id) {
+      console.log(razorpay_order_id)
+    try {
+        const options = {
+            key: '<%= process.env.RAZORPAY_KEY_ID %>', // Replace with your Razorpay Key ID
+            order_id: razorpay_order_id, // Use the stored Razorpay order ID
+            name: "Your Store",
+            description: "Complete your payment",
+            handler: async function (response) {
+                console.log("Payment Response:", response);
+
+                // Send payment details to backend for verification
+                const verifyResponse = await fetch('/verify-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature
+                    }),
+                });
+
+                const result = await verifyResponse.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        title: "Payment Successful!",
+                        text: "Your order has been updated.",
+                        icon: "success",
+                        timer: 2000
+                    }).then(() => {
+                        window.location.reload(); // Reload to reflect payment update
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Payment Failed!",
+                        text: "Verification failed. Please try again.",
+                        icon: "error"
+                    });
+                }
+            },
+            prefill: {
+                email: "customer@example.com",
+                contact: "9999999999"
+            },
+            theme: {
+                color: "#3399cc"
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+
+    } catch (error) {
+        console.error("Error in payRazorpayAmount:", error);
+        Swal.fire({
+            title: "Error!",
+            text: "Something went wrong while processing payment.",
+            icon: "error"
+        });
+    }
+}
+
+
+  
 </script>
-<%- include('../../views/partials/user/footer') %>
+
+

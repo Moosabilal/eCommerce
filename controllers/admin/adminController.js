@@ -43,46 +43,126 @@ const login = async (req,res)=>{
 const loadDashboard = async (req,res)=>{
     if(req.session.admin){
         try {
-            console.log("hellolsljdfng")
             const admin = await User.findOne({isAdmin:true});
+            // const orders = await Order.aggregate([
+            //     {
+            //         $lookup: {
+            //             from: 'users',
+            //             localField: 'userId',
+            //             foreignField: '_id',
+            //             as: 'customerInfo',
+            //         },
+            //     },
+            //     {
+            //         $unwind: '$customerInfo',
+            //     },
+            //     {
+            //         $project: {
+            //             orderId: 1,
+            //             customerName: '$customerInfo.name',
+            //             salesCount: {
+            //                 $sum: '$orderItems.quantity',
+            //             },
+            //             orderAmount: '$finalAmount',
+            //             discount: 1, 
+            //             status: 1,
+            //             createdOn:1,
+            //         },
+            //     },
+            //     {$sort:{createdOn:-1}}
+                
+            // ]);
+            // console.log("orders",orders)
             Order.aggregate([
                 {
-                  $facet: {
+                $facet: {
                     totalOrders: [{ $count: "totalOrders" }],
                     totalDiscountPrice: [{ $group: { _id: null, totalDiscount: { $sum: "$discount" } } }],
                     discountGreaterThanZero: [
-                      { $match: { discount: { $gt: 0 } } },
-                      { $count: "totalDiscountCount" }
+                    { $match: { discount: { $gt: 0 } } },
+                    { $count: "totalDiscountCount" }
                     ],
-                    totalSales: [
-                      { $unwind: "$orderItems" },
-                      { $group: { _id: "$orderItems.productId" } },
-                      { $count: "totalSales" }
+                    totalQuantitySold: [
+                    { $match: { status: "Delivered" } },
+                    { $unwind: "$orderItems" },
+                    { $group: { _id: null, totalQuantity: { $sum: "$orderItems.quantity" } } }
                     ]
-                  }
+                }
                 },
                 {
-                  $project: {
+                $project: {
                     totalOrders: { $arrayElemAt: ["$totalOrders.totalOrders", 0] },
                     totalDiscountPrice: { $arrayElemAt: ["$totalDiscountPrice.totalDiscount", 0] },
                     totalDiscountCount: { $arrayElemAt: ["$discountGreaterThanZero.totalDiscountCount", 0] },
-                    totalSales: { $arrayElemAt: ["$totalSales.totalSales", 0] }
-                  }
+                    totalQuantitySold: { $arrayElemAt: ["$totalQuantitySold.totalQuantity", 0] }
                 }
-              ]).then(results => {
+                }
+            ]).then(async results => {
                 const totalOrders = results[0]?.totalOrders || 0;
                 const totalDiscountPrice = results[0]?.totalDiscountPrice || 0;
                 const totalDiscountCount = results[0]?.totalDiscountCount || 0;
-                const totalSales = results[0]?.totalSales || 0;
+                const totalQuantitySold = results[0]?.totalQuantitySold || 0;
+                
+                const mostSoldProduct = await Order.aggregate([
+                    {$match: { status: "Delivered" } },
+                    { $unwind: "$orderItems" },
+                    { $group: { _id: "$orderItems.productId", count: { $sum: "$orderItems.quantity" } } },
+                    { $sort: { count: -1 } },
+                    { $limit: 10 },
+                    {$lookup:{
+                        from: 'products',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'productDetails'
+                    }},
+                    {$unwind: '$productDetails'},
+    
+                ])
 
-                console.log("Total Orders:", totalOrders);
-  console.log("Total Discount Price:", totalDiscountPrice);
-  console.log("Total Discount Count (greater than 0):", totalDiscountCount);
-  console.log("Total Sales (unique product count):", totalSales);
-})
-            
+                const bestSellingCategory = await Order.aggregate([
+                    {$match: { status: "Delivered" } },
+                    { $unwind: "$orderItems" },
+                    {$lookup:{
+                        from: 'products',
+                        localField: 'orderItems.productId',
+                        foreignField: '_id',
+                        as: 'productDetails'
+                    }},
+                    {$unwind: '$productDetails'},
+                    {$group: { _id: "$productDetails.category", count: { $sum: "$orderItems.quantity" } } },
+                    {$sort: { count: -1 } },
+                    {$limit: 10},
+                    {$lookup:{
+                        from: 'categories',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'categoryDetails'
+                    }},
+                    {$unwind: '$categoryDetails'}
 
-            res.render("dashboard");
+                ])
+
+                const bestSellingBrand = [
+                    {brandName: "Velvet Bloom", count: 3},
+                    {brandName: "Ethereal Threads", count: 2},
+                    {brandName: "Silk & Sage", count: 1},
+                ]
+    
+                const countUser = await User.countDocuments();
+    
+                res.render('dashboard', {
+                totalOrders: totalOrders,
+                totalDiscountPrice: totalDiscountPrice,
+                totalDiscountCount: totalDiscountCount,
+                totalSales: totalQuantitySold,
+                totalUser: countUser,
+                mostSoldProduct: mostSoldProduct,
+                bestSellingCategory: bestSellingCategory,
+                bestSellingBrand: bestSellingBrand
+                // orders:orders
+                });
+            })
+
         } catch (error) {
             res.redirect("/admin/pageerror")
         }

@@ -45,14 +45,19 @@ const loadHomepage = async (req,res)=>{
             productData = productData.slice(0,4);
         if(user){
             const uniqueColors = await Product.find({isBlocked:false}).distinct('color');
-            const transactions = []; 
+            let wallet = await Wallet.findOne({ userId: user });
+                    if(!wallet){
+                        const transactions = []; 
             
-            const newWallet = new Wallet({
-                userId:user,
-                balance: 0,
-                transactions
-            });
-            await newWallet.save();
+                        const newWallet = new Wallet({
+                            userId:user,
+                            balance: 0,
+                            transactions
+                        });
+            
+                        // Save the new wallet to the database
+                        wallet = await newWallet.save();
+                    }
 
             res.render("home",{
                 user:userData|| null,
@@ -62,7 +67,11 @@ const loadHomepage = async (req,res)=>{
             })
           
         }else{
-            return res.render('home',{products:productData})
+            return res.render('home',{
+                products:productData,
+                category:categories,
+                colors:uniqueColors
+            })
         }
     } catch (error) {
         console.log('home page not found');
@@ -275,6 +284,7 @@ const loadShoppingPage = async (req, res) => {
         const totalProducts = await Product.countDocuments({
             isBlocked:false,
             category:{$in:categoryIds},
+            'stock.quantity': { $gt: 0 }
            
         });
         const totalPages = Math.ceil(totalProducts/limit);

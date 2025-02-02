@@ -33,7 +33,7 @@
                 <div class="card text-white bg-primary mb-3">
                   <div class="card-body">
                     <h5 class="card-title">Total Sales</h5>
-                    <p class="card-text">₹<span id="totalSales"><%= totalSales %></span></p>
+                    <p class="card-text"><span id="totalSales"><%= totalSales %></span></p>
                   </div>
                 </div>
               </div>
@@ -58,7 +58,7 @@
                 <div class="card text-white bg-success mb-3">
                   <div class="card-body">
                     <h5 class="card-title">Total Coupon Used</h5>
-                    <p class="card-text">₹<span id="totalProfit"><%= totalDiscountCount %></span></p>
+                    <p class="card-text"><span id="totalProfit"><%= totalDiscountCount %></span></p>
                   </div>
                 </div>
               </div>
@@ -150,6 +150,8 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.26/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     
     <script>
         document.getElementById('period').addEventListener('change', function(e) {
@@ -177,11 +179,6 @@
 
             const data = await response.json();
 
-            // Update the summary cards
-            // document.getElementById('totalSales').innerText = `₹${data.totalSales}`;
-            // document.getElementById('totalOrders').innerText = data.totalOrders;
-            // document.getElementById('totalProfit').innerText = `₹${data.totalDiscountPrice}`;
-            // document.getElementById('totalCustomers').innerText = data.totalUser;
 
             const tableBody = document.querySelector('tbody');
             tableBody.innerHTML = '';
@@ -205,41 +202,35 @@
         }
     }
 
-    async function downloadPDF() {
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text("Sales Report", 14, 10);
+    function downloadPDF() {
+    const reportTable = document.querySelector('.report-table');
 
-        const tableBody = [];
-        const rows = document.querySelectorAll("tbody tr");
-        rows.forEach((row) => {
-            const columns = row.querySelectorAll("td");
-            const rowData = Array.from(columns).map((col) => col.innerText);
-            tableBody.push(rowData);
-        });
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-        const tableHeaders = [
-            "Order ID",
-            "Customer",
-            "Sales Count",
-            "Order Amount",
-            "Coupon Applied",
-            "Discount",
-            "Status",
-        ];
+    doc.setFontSize(18);
+    doc.text('Sales Report', 14, 20);
 
-        doc.autoTable({
-            head: [tableHeaders],
-            body: tableBody,
-            startY: 20,
-        });
-        doc.save("sales_report.pdf");
-    } catch (error) {
-        console.error("Error generating PDF:", error);
-        alert("Failed to generate PDF. Please try again.");
-    }
+    doc.autoTable({
+        html: '.table',
+        startY: 30,  
+    });
+
+    doc.save('sales_report.pdf');
 }
+
+
+function downloadExcel() {
+        const table = document.querySelector("table");
+        const rows = Array.from(table.rows).map(row =>
+            Array.from(row.cells).map(cell => cell.innerText)
+        );
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Report");
+
+        XLSX.writeFile(workbook, "sales_report.xlsx");
+    }
 
 
 </script>

@@ -145,7 +145,6 @@ const postNewPassword = async (req,res)=>{
 const userProfile = async (req,res)=>{
     try {
         const userId = req.session.user;
-        console.log(userId)
         const userData = await User.findById(userId);
         const addressData = await Address.findOne({userId:userId});
         if(!addressData){

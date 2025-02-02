@@ -1,13 +1,7 @@
-<%- include('../../views/partials/user/header') %>
-<%- include('../../views/partials/user/profile-sidebar') %>
+<%- include('../../views/partials/admin/header') %>
+
 <style>
-  .main-content {
-    background-color: rgb(230, 244, 230);
-    margin-left: 16.4%;
-    padding: 40px 30px;
-    margin-top: 0px;
-    border-radius: 8px;
-  }
+
   div.bread-crumb.flex-w.p-l-25.p-r-15.p-t-30.p-lr-0-lg{
     margin-bottom: 20px;
   }
@@ -20,24 +14,10 @@
   div.col-lg-8.col-md-10{
     width: 90%;
   }
-    @media (max-width: 768px) {
-    .main-content {
-      margin-left: 0;
-      padding: 20px;
-    }
-  }
+ 
 </style>
-<div class="container-fluid main-content bg-light p-4">
-  <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg" style="margin-left: 10%;">
-    <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
-      Home
-      <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-    </a>
-
-    <span class="stext-109 cl4">
-      My Orders
-    </span>
-  </div>
+<div class="container-fluid content bg-light p-4">
+  
   <% orderDetails.forEach(order => { %>
     <div class="row justify-content-left ml-5">
       <div class="col-lg-8 col-md-10">
@@ -109,21 +89,21 @@
       </div>
     </div>
   </div>
-  <div class="row justify-content-left ml-5 mt-4">
+  <!-- <div class="row justify-content-left ml-5 mt-4">
     <div class="col-lg-8 col-md-10 text-center">
-        <!-- Download Invoice button -->
+        Download Invoice button
         <a href="/download-invoice/<%= orderDetails[0].orderId %>" class="btn btn-success">Download Invoice as PDF</a>
     </div>
-</div>
+</div> -->
 
 
   <div class="row justify-content-left ml-5 mt-4">
     <div class="col-lg-8 col-md-10 text-center">
       <!-- Back button -->
-      <a href="/orderHistory" class="btn btn-primary">Back to Orders</a>
+      <a href="/admin/orders" class="btn btn-primary">Back to Orders</a>
     </div>
   </div>
 </div>
 
-<%- include('../../views/partials/user/footer') %>
+<%- include('../../views/partials/admin/footer') %>
 

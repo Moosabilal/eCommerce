@@ -168,7 +168,8 @@
     <!-- Phone -->
     <div class="form-group">
       <label for="phone">Phone</label>
-      <input type="tel" name="phone" id="phone" placeholder="Enter your phone number" value="<%= user.phone %>" required>
+      <input type="tel" name="phone" id="phone" placeholder="Enter your phone number" value="<%= user.phone %>" required pattern="[0-9]{10}">
+      <span class="error-message" id="phoneError" style="display: none; color: red;">Please enter a valid 10-digit phone number.</span>
     </div>
 
     <!-- Edit Email Button -->
@@ -183,6 +184,7 @@
 
     <!-- Submit Button -->
     <button type="submit">Save Changes</button>
+  
   </form>
 </div>
 
@@ -197,6 +199,42 @@
       reader.readAsDataURL(file);
     }
   });
+
+  document.getElementById("phone").addEventListener("input", function () {
+    const phoneInput = this.value;
+    const phoneError = document.getElementById("phoneError");
+    const phonePattern = /^[0-9]{10}$/;
+
+    if (phonePattern.test(phoneInput)) {
+      phoneError.style.display = "none"; // Hide error message if valid
+    } else {
+      phoneError.style.display = "block"; // Show error message if invalid
+    }
+  });
+
+    const form = document.querySelector('.profile-form');
+    const nameInput = document.getElementById('name');
+    const phoneInput = document.getElementById('phone');
+    const originalName = nameInput.value;
+    const originalPhone = phoneInput.value;
+
+    form.addEventListener('submit', function(event) {
+      if (nameInput.value === originalName && phoneInput.value === originalPhone) {
+        event.preventDefault();
+        Swal.fire({
+          icon: 'info',
+          title: 'No Changes Made',
+          text: 'You have not made any changes to your profile.',
+        });
+      }else{
+        Swal.fire({
+          icon: 'success',
+          title: 'Profile Updated',
+          text: 'Your profile has been updated successfully.',
+          showConfirmButton: false,
+        });
+      }
+    });
 </script>
 
 <%- include('../../views/partials/user/footer') %>

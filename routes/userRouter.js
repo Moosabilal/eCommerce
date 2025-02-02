@@ -117,7 +117,8 @@ router.post('/check-wallet-balance',userAuth,orderController.checkWalletBalance)
 router.get("/wallet",userAuth,walletController.getWallet);
 router.patch('/add-amount-to-wallet',userAuth,walletController.addAmount)
 
-
+//invoice download
+router.get('/download-invoice/:orderId',userAuth,orderController.downloadInvoice)
 
 
 

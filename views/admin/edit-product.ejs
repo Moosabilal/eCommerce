@@ -96,6 +96,19 @@
                     <div id="salePrice-error" class="error-message"></div>
                 </div>
             </div>
+            <!-- here show the selected size and quantity -->
+            <div class="row g-3">
+                <div class="col-md-6 col-12">
+                    <label for="selectedSize" class="form-label">Selected Size</label>
+                    <input type="text" class="form-control" id="selectedSize" value="<%= product.size %>" readonly>
+                </div>
+                <div class="col-md-6 col-12">
+                    <label for="selectedQuantity" class="form-label">Selected Quantity</label>
+                    <input type="number" class="form-control" id="selectedQuantity" value="<%= product.quantity %>" readonly>
+                </div>
+            </div>
+
+
 
             <div class="row g-3">
                 <div class="col-md-6 col-12">
@@ -128,7 +141,7 @@
                     <label for="category" class="form-label">Category</label>
                     <select class="form-select" name="category" id="category" required>
                         <option value="<%= cat.name %> " selected><%= cat.name %></option>
-                        <% for(let i = 0 ; i < categories.length ; i++) { %>
+                        <% for(let i = 1 ; i < categories.length ; i++) { %>
                         <option value="<%= categories[i].name %>"><%= categories[i].name %></option>
                         <% } %>
                     </select>
@@ -170,7 +183,7 @@
                     <div class="col-md-6 col-12 mb-3">
                         <div class="card-body text-center">
                             <img src="" alt="" id="imgView1" class="img-fluid mb-2">
-                            <input class="form-control" type="file" name="images" id="input1" accept="image/png, image/jpeg, image/jpg" onchange="viewImage1(event), viewImage(event, 1)">
+                            <input class="form-control" type="file" name="images" id="input1" accept="image/*" onchange="validateImageFile(event), viewImage1(event), viewImage(event, 1)">
                             <div id="images-error" class="error-message"></div>
                         </div>
                         <div class="image-cropper d-flex align-items-center">
@@ -178,11 +191,12 @@
                             <button type="button" id="saveButton1" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </div>
+                    
 
                     <div class="col-md-6 col-12 mb-3">
                         <div class="card-body text-center">
                             <img src="" alt="" id="imgView2" class="img-fluid mb-2">
-                            <input class="form-control" type="file" name="images" id="input2" accept="image/png, image/jpeg, image/jpg" onchange="viewImage2(event), viewImage(event, 2)">
+                            <input class="form-control" type="file" name="images" id="input2" accept="image/*" onchange="validateImageFile(event), viewImage2(event), viewImage(event, 2)">
                             <div id="images-error" class="error-message"></div>
                         </div>
                         <div class="image-cropper d-flex align-items-center">
@@ -190,11 +204,12 @@
                             <button type="button" id="saveButton2" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </div>
+                    
 
                     <div class="col-md-6 col-12 mb-3">
                         <div class="card-body text-center">
                             <img src="" alt="" id="imgView3" class="img-fluid mb-2">
-                            <input class="form-control" type="file" name="images" id="input3" accept="image/png, image/jpeg, image/jpg" onchange="viewImage3(event), viewImage(event, 3)">
+                            <input class="form-control" type="file" name="images" id="input3" accept="image/*" onchange="validateImageFile(event), viewImage3(event), viewImage(event, 3)">
                             <div id="images-error" class="error-message"></div>
                         </div>
                         <div class="image-cropper d-flex align-items-center">
@@ -202,11 +217,12 @@
                             <button type="button" id="saveButton3" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </div>
+                    
 
                     <div class="col-md-6 col-12 mb-3">
                         <div class="card-body text-center">
                             <img src="" alt="" id="imgView4" class="img-fluid mb-2">
-                            <input class="form-control" type="file" name="images" id="input4" accept="image/png, image/jpeg, image/jpg" onchange="viewImage4(event), viewImage(event, 4)">
+                            <input class="form-control" type="file" name="images" id="input4" accept="image/*" onchange="validateImageFile(event), viewImage4(event), viewImage(event, 4)">
                             <div id="images-error" class="error-message"></div>
                         </div>
                         <div class="image-cropper d-flex align-items-center">
@@ -214,14 +230,20 @@
                             <button type="button" id="saveButton4" class="btn btn-sm btn-primary">Save</button>
                         </div>
                     </div>
+                    
                 </div>
             </div>
+
+
+            
+            
+            
 
             <button type="button" onclick="validateAndSubmit()" id="updatebtn" class="btn btn-primary btn-block">Publish Product</button>
         </form>
     </div>
 </div>
-
+<%- include('../../views/partials/admin/footer') %>
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
 
@@ -437,7 +459,7 @@ function validateAndSubmit() {
                   displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
                   isValid = false;
               }
-              if (parseFloat(price) <= parseFloat(saleprice)) {
+              if (parseFloat(price) < parseFloat(saleprice)) {
       displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
       isValid = false;
    }
@@ -501,8 +523,26 @@ function validateAndSubmit() {
     }
 }
 
+function validateImageFile(event) {
+                const file = event.target.files[0];
+                
+                if (file) {
+                  const fileType = file.type;
+                  const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+                  
+                  if (!validImageTypes.includes(fileType)) {
+                    // Show an error message and reset the file input
+                    document.getElementById('images-error').innerText = 'Please upload a valid image file (JPEG, PNG, JPG, GIF, or WEBP).';
+                    event.target.value = ''; // Reset the file input
+                    document.getElementById('imgView1').src = ''; // Clear any previously displayed image
+                  } else {
+                    // Clear any previous error message
+                    document.getElementById('images-error').innerText = '';
+                  }
+                }
+              }
+
 
         </script>
         
 
-<%- include('../../views/partials/admin/footer') %>

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Razorpay = require('razorpay');
 const {Schema} = mongoose;
 const {v4:uuidv4} = require('uuid');
 
@@ -47,6 +48,12 @@ const orderSchema = new Schema({
         required: true,
         enum: ['COD', 'Card', 'UPI']
     },
+    paymentStatus: {
+        type: String,
+        required: false, //true
+        enum: ['Pending', 'Completed', 'Failed', 'Refunded'],
+        default: 'Pending',
+    },
     addressId: {
         type: Schema.Types.ObjectId,
         ref: 'Address',
@@ -87,7 +94,20 @@ const orderSchema = new Schema({
     couponApplied: {
         type: Boolean,
         default: false
-    }
+    },
+    razorpay_order_id:{
+        type: String,
+        default: null
+    },
+    razorpay_payment_id:{
+        type: String,
+        default: null
+    },
+    razorpay_signature:{
+        type: String,
+        default: null
+    },
+    
 })
 
 const Order = mongoose.model('Order', orderSchema);

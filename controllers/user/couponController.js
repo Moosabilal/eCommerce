@@ -6,23 +6,21 @@ const applyCoupon = async (req, res) => {
     try {
         const userId = req.session.user;
         const couponCode = req.body.coupon;
+        let couponC = couponCode.trim();
 
-        // Check if the coupon exists
-        const coupon = await Coupon.findOne({ couponCode: couponCode });
+        const coupon = await Coupon.findOne({ couponCode: couponC,expireOn: { $gte: new Date() } });
         if (!coupon) {
             return res.status(404).json({ success: false, message: "Coupon not found" });
         }
-
-        // Check if the user has already applied this coupon
-        if (coupon.userId.includes(userId)) {
-            return res.status(400).json({ success: false, message: "Only one Coupon can apply at a time" });
+        const usedCoupon = await Coupon.findOne({ userId: userId });
+        if (usedCoupon) {
+            return res.status(400).json({ success: false, message: "User has already applied a coupon" });
         }
-
-        // Apply the coupon to the user
         coupon.userId.push(userId);
         await coupon.save();
 
         const discount = coupon.offerPrice;
+        console.log("coupon",coupon)
 
         return res.status(200).json({
             success: true,
@@ -40,8 +38,9 @@ const applyCoupon = async (req, res) => {
 const cancelCoupon = async (req, res) => {
     try {
         couponCode = req.body.coupon
+        let couponC = couponCode.trim();
         const user = req.session.user
-        const coupon = await Coupon.findOneAndUpdate({couponCode:couponCode},{})
+        const coupon = await Coupon.findOneAndUpdate({couponCode:couponC},{})
         if (!coupon) {
             return res.status(404).json({ success: false, message: "Coupon not found" });
         }
