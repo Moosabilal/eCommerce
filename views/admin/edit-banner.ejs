@@ -1,0 +1,203 @@
+<%- include('../../views/partials/admin/header') %>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .thumbnail {
+        display: inline-block;
+        margin: 10px;
+        position: relative;
+    }
+    .thumbnail img {
+        width: 100px;
+        height: auto;
+        border-radius: 5px;
+    }
+    .remove-icon {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: red;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        cursor: pointer;
+    }
+    #croppedImgContainer {
+        display: none;
+        margin-top: 10px;
+    }
+    #croppedImg {
+        width: 200px;
+        display: none;
+    }
+</style>
+
+<div class="content mt-100">
+    <h2 class="text-center mb-4">Edit Banner</h2>
+
+    <!-- Form to Edit Banner -->
+    <div class="card shadow p-4 mb-4">
+        <h4 class="mb-3">Update Banner</h4>
+        <form id="bannerForm" enctype="multipart/form-data">
+            <input type="hidden" name="bannerId" value="<%= banner._id %>"> <!-- Hidden ID -->
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Banner Title:</label>
+                <input type="text" class="form-control" name="title" value="<%= banner.title %>" required>
+            </div>
+        
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <input type="text" class="form-control" name="description" value="<%= banner.description %>" required>
+            </div>
+
+            <!-- Show Existing Image -->
+            <div class="mb-3">
+                <label class="form-label">Current Banner Image:</label>
+                <% if (banner.image) { %>
+                    <div id="currentImageContainer">
+                        <img src="/uploads/product-images/<%= banner.image %>" id="currentBannerImg" name="image" class="img-thumbnail" width="300">
+                        <button type="button" id="removeImageBtn" class="btn btn-danger btn-sm">Remove Image</button>
+                    </div>
+                <% } %>
+            </div>
+        
+            <div class="mb-3">
+                <label for="imageInput" class="form-label">Upload New Banner Image:</label>
+                <input type="file" class="form-control" id="imageInput" name="image" accept="image/*">
+            </div>
+        
+            <div id="imagePreviewContainer" style="display: none;">
+                <h5>Crop Image</h5>
+                <img id="imgView" class="img-fluid">
+                <button type="button" id="saveButton" class="btn btn-success mt-2" style="display: none;">Save Cropped Image</button>
+            </div>
+        
+            <div id="croppedImgContainer">
+                <h5>Final Cropped Image</h5>
+                <img id="croppedImg" class="img-thumbnail">
+            </div>
+            <input type="hidden" name="bannerId" value="<%= banner._id %>">
+            <button type="submit" id="uploadBannerButton" class="btn btn-primary w-100 mt-3">Update Banner</button>
+        </form>
+    </div>
+</div>
+<%- include('../../views/partials/admin/footer') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script>
+    let cropper;
+    let croppedBlob = null;
+    const imageInput = document.getElementById("imageInput");
+    const imgView = document.getElementById("imgView");
+    const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+    const saveButton = document.getElementById("saveButton");
+    const croppedImg = document.getElementById("croppedImg");
+    const croppedImgContainer = document.getElementById("croppedImgContainer");
+    const uploadBannerButton = document.getElementById("uploadBannerButton");
+    const bannerForm = document.getElementById("bannerForm");
+    const removeImageBtn = document.getElementById("removeImageBtn");
+    const currentImageContainer = document.getElementById("currentImageContainer");
+    const currentBannerImg = document.getElementById("currentBannerImg");
+  
+    if (removeImageBtn) {
+        removeImageBtn.addEventListener("click", function () {
+            currentImageContainer.style.display = "none";
+            currentBannerImg.src = "";
+        });
+    }
+  
+    imageInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+  
+        imgView.src = URL.createObjectURL(file);
+        imagePreviewContainer.style.display = "block";
+  
+        if (currentImageContainer) {
+            currentImageContainer.style.display = "none";
+        }
+  
+        if (cropper) {
+            cropper.destroy();
+        }
+  
+        cropper = new Cropper(imgView, {
+            aspectRatio: 18.5 / 9,
+            viewMode: 2,
+            autoCropArea: 1.2,
+            zoomable: true,
+            cropBoxResizable: true,
+            dragMode: "move",
+        });
+  
+        saveButton.style.display = "block";
+    });
+  
+    saveButton.addEventListener("click", async function () {
+        try {
+            const croppedCanvas = cropper.getCroppedCanvas({
+                width: 800,
+                height: 450,
+                imageSmoothingQuality: "high"
+            });
+  
+            if (!croppedCanvas) {
+                throw new Error("Cropping failed");
+            }
+  
+            croppedBlob = await new Promise(resolve => croppedCanvas.toBlob(resolve, "image/jpeg", 0.8));
+  
+            croppedImg.src = URL.createObjectURL(croppedBlob);
+            croppedImg.style.display = "block";
+            croppedImgContainer.style.display = "block";
+  
+            Swal.fire("Success", "Image cropped successfully!", "success");
+  
+            cropper.destroy();
+            cropper = null;
+            imagePreviewContainer.style.display = "none";
+  
+        } catch (error) {
+            console.error("Cropping error:", error);
+            Swal.fire("Error", "Failed to crop image. Please try again.", "error");
+        }
+    });
+  
+    bannerForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+  
+        const formData = new FormData();
+        formData.append("bannerId", "<%= banner._id %>");
+        formData.append("title", bannerForm.title.value);
+        formData.append("description", bannerForm.description.value);
+  
+        if (croppedBlob) {
+            formData.append("image", croppedBlob, "cropped_image.jpg");
+        } else if (imageInput.files.length > 0) {
+            formData.append("image", imageInput.files[0]);
+        }
+  
+        fetch("/admin/edit-banner", {
+            method: "PUT",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire("Success", "Banner updated!", "success").then(() => {
+                    window.location.href = "/admin/banner";
+                });
+            } else {
+                Swal.fire("Error", data.message, "error");
+            }
+        })
+        .catch(error => {
+            console.error("Update error:", error);
+            Swal.fire("Error", "Failed to update banner.", "error");
+        });
+    });
+  </script>
+  

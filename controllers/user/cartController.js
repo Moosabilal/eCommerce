@@ -56,6 +56,11 @@ const addToCart = async (req, res) => {
         const userCart = await Cart.findOne({ userId: userData._id });
         const product = await Product.findById(productId);
 
+        if (userData.wishlist.includes(productId)) {
+            userData.wishlist = userData.wishlist.filter(id => id.toString() !== productId.toString());
+            await userData.save();
+        }
+
         if (!product) {
             return res.status(404).json({ status: false, message: "Product not found" });
         }
@@ -275,12 +280,12 @@ const checkoutPage = async (req, res)=>{
         const productIds = userCart.items.map((item) => item.productId);
         const products = await Product.find({ _id: { $in: productIds } });
         const address = await Address.findOne({userId: user});
-        if (!address) {
-            return res.status(200).json({ status: false, message: "Address not found"
-                });
-                }
+        
         const totalPrice = userCart.items.reduce((total, item) => total + item.totalPrice, 0);
-        const coupons = await Coupon.find({expireOn: { $gte: new Date() }});
+        const coupons = await Coupon.find({
+            expireOn: { $gte: new Date() },
+            userId: { $nin: [user] } 
+        });
         const wallet = await Wallet.findOne({userId: user});
             res.render('checkout',{
             user: userData,
@@ -289,7 +294,7 @@ const checkoutPage = async (req, res)=>{
             wallet:wallet,
             products: products,
             totalPrice: totalPrice,
-            userAddress: address,
+            userAddress: address || 0,
         
         });
             

@@ -587,29 +587,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const availabilitySpan = document.getElementById(`availability-${productId}`);
       if (selectedStock && selectedStock.quantity > 0) {
+        availabilitySpan.style.color = "green";
         availabilitySpan.textContent = selectedStock.quantity;
       } else {
+      availabilitySpan.style.color = "red";
         availabilitySpan.textContent = "Out of stock";
       }
     }
   });
 
-  // Function to update availability dynamically on size selection
-  function updateAvailability(productId) {
-    const sizeSelect = document.getElementById(`product-size-${productId}`);
-    const selectedSize = sizeSelect.value;
+//   // Function to update availability dynamically on size selection
+//   function updateAvailability(productId) {
+//     const sizeSelect = document.getElementById(`product-size-${productId}`);
+//     const selectedSize = sizeSelect.value;
 
-    const stockData = <%- JSON.stringify(product.stock) %>;
+//     const stockData = <%- JSON.stringify(product.stock) %>;
 
-    const selectedStock = stockData.find(item => item.size === selectedSize);
+//     const selectedStock = stockData.find(item => item.size === selectedSize);
 
-    const availabilitySpan = document.getElementById(`availability-${productId}`);
-    if (selectedStock && selectedStock.quantity > 0) {
-      availabilitySpan.textContent = selectedStock.quantity;
-    } else {
-      availabilitySpan.textContent = "Out of stock";
-    }
-  }
+//     const availabilitySpan = document.getElementById(`availability-${productId}`);
+//     if (selectedStock && selectedStock.quantity > 0) {
+//       availabilitySpan.textContent = selectedStock.quantity;
+//     } else {
+//       availabilitySpan.textContent = "Out of stock";
+//     }
+//   }
 
                                         
     

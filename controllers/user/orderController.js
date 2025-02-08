@@ -323,8 +323,7 @@ const cancelOrder = async (req, res) => {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
         let orderIdValue = existingOrder.orderId; 
-        console.log(orderIdValue)
-        if(existingOrder.status === "Pending" || existingOrder.status === "Processing" || existingOrder.status === "Shipped"){
+        if(existingOrder.status === "Processing" || existingOrder.status === "Shipped"){
             return res.status(200).json({ success: false, message: "You can't cancel this order when it is in pending, processing or shipped" });
         }
         if (existingOrder.status === "Cancelled") {
@@ -354,9 +353,7 @@ const cancelOrder = async (req, res) => {
             // }
         );
 
-        if (!wallet) {
-            return res.status(404).json({ success: false, message: "Failed to credit the amount to the wallet, Please contact the admin" });
-        }
+        
 
         existingOrder.status = "Cancelled";
         await existingOrder.save();
@@ -384,9 +381,12 @@ const cancelOrder = async (req, res) => {
 
 const returnOrder = async (req, res) => {
     try {
+        console.log('yes')
         const userId = req.session.user;
-        const { orderId, productId, orderQuantity, orderSize } = req.body;
+        console.log(req.body)
+        const { orderId, reason } = req.body;
 
+        console.log("reason",reason)
         const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });
 
         if (!existingOrder) {
@@ -398,55 +398,23 @@ const returnOrder = async (req, res) => {
             return res.status(200).json({ success: false, message: "You can't Return this order when it is in pending, processing or shipped" });
         }
 
-        if (existingOrder.status === "Return Request") {
+        if (existingOrder.status === "Return_Requested") {
             return res.status(200).json({ success: false, message: "Retrun request already sent wait for admin response" });
         }
         if (existingOrder.status === "Cancelled") {
             return res.status(200).json({ success: false, message: "our order is already cancelled, courier will pickup soon" });
         }
-
-        let refundAmount = existingOrder.finalAmount;
-        const wallet = await Wallet.findOneAndUpdate(
-            { userId: new mongoose.Types.ObjectId(userId) },
-            {
-                $inc: { balance: refundAmount },
-                $push: {
-                    transactions: {
-                        transactionType: "Credit",
-                        amount: refundAmount,
-                        status: "Success",
-                        date: new Date(),
-                        orderId:orderIdValue,
-                    },
-                },
-            },
-            // {
-            //     new: true,
-            //     upsert: true,
-            //     setDefaultsOnInsert: false,
-            //     runValidators: true,
-            // }
-        );
-
-        if (!wallet) {
-            return res.status(404).json({ success: false, message: "Failed to credit the amount to the wallet, Please contact the admin" });
-        }
-
-        existingOrder.status = "Returned";
+        if(existingOrder.status === "Delivered"){
+        existingOrder.status = "Return_Requested";
+        const returnStatus = existingOrder.status
         await existingOrder.save();
+        return res.status(200).json ({ success: true,returnStatus });
+        }
 
         if (existingOrder.nModified === 0) {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
 
-        const product = await Product.updateOne(
-            { _id: new mongoose.Types.ObjectId(productId), "stock.size": orderSize },
-            { $inc: { "stock.$.quantity": orderQuantity } }
-        );
-
-        if (product.nModified === 0) {
-            return res.status(404).json({ success: false, message: "Product not found or size mismatch" });
-        }
 
         res.status(200).json({ success: true });
     } catch (error) {
@@ -532,7 +500,6 @@ const createOrder = async (req, res) => {
         };
 
         const order = await razorpay.orders.create(options);
-        console.log("order",order)
 
         if (!order) {
             return res.status(500).json({ success: false, message: "Error creating Razorpay order." });
@@ -555,7 +522,6 @@ const verifyPayment = async (req, res) => {
     try {
         
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    console.log("razorpaync",req.body);
 
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto

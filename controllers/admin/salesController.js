@@ -275,69 +275,89 @@ const getSales = async (req, res) => {
                   return res.status(404).json({ message: "No orders found" });
               }
       
-              const doc = new PDFDocument({ margin: 40, size: 'A4' });
-      
-              // Ensure reports directory exists
-              const reportsDir = path.join(__dirname, '../public/reports');
-              if (!fs.existsSync(reportsDir)) {
-                  fs.mkdirSync(reportsDir, { recursive: true });
-              }
-      
-              const filePath = path.join(reportsDir, 'ledger.pdf');
-              const stream = fs.createWriteStream(filePath);
-              doc.pipe(stream);
-      
-              // Title
-              doc.fontSize(22).fillColor('#000').text('Ledger Book', { align: 'center', underline: true }).moveDown(1);
-      
-              // Column Settings - Equal width for all columns
-              const startX = 50;
-              const columnWidth = 100; // Same width for all columns
-              const startY = doc.y;
-      
-              // Table Headers (Background and Text)
-              doc
-                  .font('Helvetica-Bold')
-                  .fontSize(12)
-                  .fillColor('#fff')
-                  .rect(startX, startY, columnWidth * 5, 25) // Full row width
-                  .fill('#333')
-                  .fillColor('#fff');
-      
-              doc.text('Order ID', startX + 10, startY + 8, { width: columnWidth, align: 'left' });
-              doc.text('User', startX + 10 + columnWidth, startY + 8, { width: columnWidth, align: 'left' });
-              doc.text('Amount', startX + 10 + columnWidth * 2, startY + 8, { width: columnWidth, align: 'center' });
-              doc.text('Payment', startX + 10 + columnWidth * 3, startY + 8, { width: columnWidth, align: 'center' });
-              doc.text('Status', startX + 10 + columnWidth * 4, startY + 8, { width: columnWidth, align: 'center' });
-      
-              doc.moveDown(1);
-      
-              // Orders Data
-              let yPosition = startY + 30;
-              orders.forEach((order, index) => {
-                  const bgColor = index % 2 === 0 ? '#f3f3f3' : '#fff'; // Alternating row colors
-                  doc.rect(startX, yPosition, columnWidth * 5, 25).fill(bgColor).fillColor('#000');
-      
-                  doc
-                      .font('Helvetica')
-                      .fontSize(10)
-                      .text(order.orderId.slice(-9), startX + 10, yPosition + 8, { width: columnWidth, align: 'left' })
-                      .text(order.userName || 'Guest', startX + 10 + columnWidth, yPosition + 8, { width: columnWidth, align: 'left' })
-                      .text(`₹${order.finalAmount.toFixed(2)}`, startX + 10 + columnWidth * 2, yPosition + 8, { width: columnWidth, align: 'center' })
-                      .text(order.paymentMethod, startX + 10 + columnWidth * 3, yPosition + 8, { width: columnWidth, align: 'center' })
-                      .text(order.status, startX + 10 + columnWidth * 4, yPosition + 8, { width: columnWidth, align: 'center' });
-      
-                  yPosition += 30;
-              });
-      
-              doc.end();
-      
-              stream.on('finish', () => {
-                  res.download(filePath, 'ledger.pdf', (err) => {
-                      if (err) console.error(err);
-                      fs.unlinkSync(filePath); // Delete after download
-                  });
-              });
+              const doc = new PDFDocument({ margin: 40, size: 'A3', layout: 'landscape' });
+
+const reportsDir = path.join(__dirname, '../public/reports');
+if (!fs.existsSync(reportsDir)) {
+  fs.mkdirSync(reportsDir, { recursive: true });
+}
+
+const filePath = path.join(reportsDir, 'ledger.pdf');
+const stream = fs.createWriteStream(filePath);
+doc.pipe(stream);
+
+// Title
+doc.fontSize(26).fillColor('#000').text('Ledger Book', { align: 'center', underline: true }).moveDown(1);
+
+// Column Settings
+const columnWidths = {
+  orderId: 120,
+  user: 150,
+  amount: 100,
+  paymentMethod: 120,
+  status: 120,
+  createdOn: 200
+};
+
+const totalTableWidth = Object.values(columnWidths).reduce((a, b) => a + b); // Calculate total table width
+const startX = (doc.page.width - totalTableWidth) / 2; // Center the table horizontally
+const startY = doc.y;
+
+// Table Headers
+doc
+  .font('Helvetica-Bold')
+  .fontSize(14)
+  .fillColor('#fff')
+  .rect(startX, startY, totalTableWidth, 30)
+  .fill('#333')
+  .fillColor('#fff');
+
+doc.text('Order ID', startX + 10, startY + 8, { width: columnWidths.orderId, align: 'left' });
+doc.text('User', startX + 10 + columnWidths.orderId, startY + 8, { width: columnWidths.user, align: 'left' });
+doc.text('Amount', startX + 10 + columnWidths.orderId + columnWidths.user, startY + 8, { width: columnWidths.amount, align: 'center' });
+doc.text('Payment', startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount, startY + 8, { width: columnWidths.paymentMethod, align: 'center' });
+doc.text('Status', startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount + columnWidths.paymentMethod, startY + 8, { width: columnWidths.status, align: 'center' });
+doc.text('Order Created', startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount + columnWidths.paymentMethod + columnWidths.status, startY + 8, { width: columnWidths.createdOn, align: 'center' });
+
+doc.moveDown(1);
+
+// Orders Data
+let yPosition = startY + 40;
+orders.forEach((order, index) => {
+  const bgColor = index % 2 === 0 ? '#f3f3f3' : '#fff';
+  doc.rect(startX, yPosition, totalTableWidth, 30).fill(bgColor).fillColor('#000');
+
+  doc
+    .font('Helvetica')
+    .fontSize(12)
+    .text(order.orderId.slice(-9), startX + 10, yPosition + 8, { width: columnWidths.orderId, align: 'left' })
+    .text(order.userName || 'Guest', startX + 10 + columnWidths.orderId, yPosition + 8, { width: columnWidths.user, align: 'left' })
+    .text(`₹${order.finalAmount.toFixed(2)}`, startX + 10 + columnWidths.orderId + columnWidths.user, yPosition + 8, { width: columnWidths.amount, align: 'center' })
+    .text(order.paymentMethod, startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount, yPosition + 8, { width: columnWidths.paymentMethod, align: 'center' })
+    .text(order.status, startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount + columnWidths.paymentMethod, yPosition + 8, { width: columnWidths.status, align: 'center' })
+    .text(order.createdOn.toLocaleDateString('en-GB') + ' ' + order.createdOn.toLocaleTimeString('en-GB'), startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount + columnWidths.paymentMethod + columnWidths.status, yPosition + 8, { width: columnWidths.createdOn, align: 'center' });
+
+  yPosition += 40;
+});
+
+// Add Footer with Ledger Download Date
+doc.moveDown(2);
+doc
+  .font('Helvetica-Bold')
+  .fontSize(12)
+  .text(`Ledger Book Downloaded on: ${new Date().toLocaleDateString('en-GB')} at ${new Date().toLocaleTimeString('en-GB')}`, {
+    align: 'right'
+});
+
+doc.end();
+
+stream.on('finish', () => {
+  res.download(filePath, 'ledger.pdf', (err) => {
+    if (err) console.error(err);
+    fs.unlinkSync(filePath); // Delete after download
+  });
+});
+
       
           } catch (error) {
               console.error('Error generating ledger:', error);

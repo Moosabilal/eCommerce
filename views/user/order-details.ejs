@@ -105,6 +105,10 @@
     background-color: #dc3545;
   }
 
+  .status.Return_Requested {
+  background-color: #ffc107;
+}
+
   .status.Returned {
     background-color: #6c757d;
   }
@@ -191,9 +195,12 @@
               <% } %>
             </p>
             <p><strong>Date:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></p>
-            <% if(order.paymentStatus!=='Completed'){ %>
+            <% if(order.paymentStatus!=='Completed' && order.status!=='Cancelled' && order.status!=='Returned' && order.status !== 'Return_Requested') { %>
               <button class="btn btn-primary w-50" onclick="payRazorpayAmount('<%= order.razorpay_order_id %>')">Pay Now</button>
-            <% } %>
+            <% }else { %>
+              <p> </p>
+              <% } %>
+
           </div>
   
           <!-- Status and Actions Section -->
@@ -232,100 +239,204 @@
 
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Cancel order logic
-    document.querySelectorAll('.cancel-order').forEach(button => {
-      button.addEventListener('click', function () {
-        event.preventDefault();
+// document.addEventListener('DOMContentLoaded', function () {
+//     // Cancel order logic
+//     document.querySelectorAll('.cancel-order').forEach(button => {
+//       button.addEventListener('click', function () {
+//         event.preventDefault();
 
-        const orderId = this.getAttribute('data-order-id');
-        const productId = this.getAttribute('data-product-id');
-        const orderQuantity = this.getAttribute('data-order-quantity');
-        const orderSize = this.getAttribute('data-product-size');
-        Swal.fire({
-          title: 'Cancel Order?',
-          text: `Are you sure you want to cancel order ID: ${orderId}?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#3085d6',
-          confirmButtonText: 'Yes, cancel it!',
-        }).then((result) => {
-          if (result.isConfirmed) {
-            fetch("/cancelOrder", {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ orderId, productId, orderQuantity, orderSize }),
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                Swal.fire('Cancelled!', `Order ${orderId} has been cancelled.`, 'success');
-                const statusElement = button.closest('.order-row').querySelector('.status');
-                statusElement.textContent = 'Cancelled';
-                statusElement.className = 'status Cancelled';
-              } else {
-                Swal.fire('Sorry!', data.message, 'warning');
+//         const orderId = this.getAttribute('data-order-id');
+//         const productId = this.getAttribute('data-product-id');
+//         const orderQuantity = this.getAttribute('data-order-quantity');
+//         const orderSize = this.getAttribute('data-product-size');
+//         Swal.fire({
+//           title: 'Cancel Order?',
+//           text: `Are you sure you want to cancel order ID: ${orderId}?`,
+//           icon: 'warning',
+//           showCancelButton: true,
+//           confirmButtonColor: '#d33',
+//           cancelButtonColor: '#3085d6',
+//           confirmButtonText: 'Yes, cancel it!',
+//         }).then((result) => {
+//           if (result.isConfirmed) {
+//             fetch("/cancelOrder", {
+//               method: 'POST',
+//               headers: {
+//                 'Content-Type': 'application/json',
+//               },
+//               body: JSON.stringify({ orderId, productId, orderQuantity, orderSize }),
+//             })
+//             .then(response => response.json())
+//             .then(data => {
+//               if (data.success) {
+//                 Swal.fire('Cancelled!', `Order ${orderId} has been cancelled.`, 'success');
+//                 const statusElement = button.closest('.order-row').querySelector('.status');
+//                 statusElement.textContent = 'Cancelled';
+//                 statusElement.className = 'status Cancelled';
+//                 window.location.reload();
+//               } else {
+//                 Swal.fire('Sorry!', data.message, 'warning');
+//               }
+//             })
+//             .catch(error => {
+//               console.error(error.message);
+//               Swal.fire('Error!', 'There was a problem cancelling your order. Please try again.', 'error');
+//             });
+//           }
+//         });
+//       });
+//     });
+
+//     //return order
+//     document.querySelectorAll('.return-order').forEach(button => {
+//       button.addEventListener('click', function () {
+//         event.preventDefault();
+
+//         const orderId = this.getAttribute('data-order-id');
+//         const productId = this.getAttribute('data-product-id');
+//         const orderQuantity = this.getAttribute('data-order-quantity');
+//         const orderSize = this.getAttribute('data-product-size');
+//         Swal.fire({
+//           title: 'Return Order?',
+//           text: `Are you sure you want to Return order ID: ${orderId}?`,
+//           icon: 'warning',
+//           showCancelButton: true,
+//           confirmButtonColor: '#d33',
+//           cancelButtonColor: '#3085d6',
+//           confirmButtonText: 'Yes, Return it!',
+//         }).then((result) => {
+//           if (result.isConfirmed) {
+//             fetch("/returnOrder", {
+//               method: 'POST',
+//               headers: {
+//                 'Content-Type': 'application/json',
+//               },
+//               body: JSON.stringify({ orderId, productId, orderQuantity, orderSize }),
+//             })
+//             .then(response => response.json())
+//             .then(data => {
+//               if (data.success) {
+//                 Swal.fire('Returned!', `Order ${orderId} has been Returned.`, 'success');
+//                 const statusElement = button.closest('.order-row').querySelector('.status');
+//                 statusElement.textContent = 'Returned';
+//                 statusElement.className = 'status Returned';
+//               } else {
+//                 Swal.fire('Sorry!', data.message, 'warning');
+//               }
+//             })
+//             .catch(error => {
+//               console.error(error.message);
+//               Swal.fire('Error!', 'There was a problem Returning your order. Please try again.', 'error');
+//             });
+//           }
+//         });
+//       });
+//     });
+
+//   });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.cancel-order, .return-order').forEach(button => {
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+
+      const orderId = this.getAttribute('data-order-id');
+      const action = this.classList.contains('cancel-order') ? 'cancel' : 'return';
+      const confirmText = action === 'cancel' ? 'Cancel Order?' : 'Return Order?';
+      const successText = action === 'cancel' ? 'Order Cancelled' : 'Order Return Request Sent';
+
+      Swal.fire({
+        title: confirmText,
+        text: `Are you sure you want to ${action} order ID: ${orderId}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: `Yes, ${action} it!`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Show the reason input after confirmation
+          Swal.fire({
+            title: `${action === 'cancel' ? 'Cancel' : 'Return'} Order Reason`,
+            input: 'textarea',
+            inputPlaceholder: 'Please enter the reason for the return...',
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => {
+              if (!value) {
+                return 'You need to provide a reason!';
               }
-            })
-            .catch(error => {
-              console.error(error.message);
-              Swal.fire('Error!', 'There was a problem cancelling your order. Please try again.', 'error');
-            });
-          }
-        });
+            }
+          }).then((reasonResult) => {
+            if (reasonResult.isConfirmed) {
+              const reason = reasonResult.value;
+              const productId = this.getAttribute('data-product-id');
+              const orderQuantity = this.getAttribute('data-order-quantity');
+              const orderSize = this.getAttribute('data-product-size');
+
+              // Send the order data along with the return reason to the backend
+              fetch(`/${action}Order`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  orderId, productId, orderQuantity, orderSize, reason
+                }),
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  console.log('data',data)
+                  Swal.fire(successText, `Order ${orderId} has been ${action}ed. Reason: ${reason}`, 'success');
+                  console.log('return request',data.returnStatus)
+                  // Update status in the UI
+                  const orderRow = button.closest('.order-row');
+                  const statusElement = orderRow.querySelector('.status');
+                  if (action === 'cancel') {
+                    statusElement.textContent = 'Cancelled';
+                    statusElement.className = 'status Cancelled';
+                    const payNowButton = orderRow.querySelector('button.btn-primary');
+                  if (payNowButton) {
+                    payNowButton.remove();
+                  }
+                  } else {
+                    statusElement.textContent = data.returnStatus; 
+                    statusElement.className = `status ${statusElement.textContent}`;
+                    const returnButton = orderRow.querySelector('.btn.btn-danger.btn-sm.return-order'); // Fixed the selector
+                    if (returnButton) {
+                      returnButton.remove();
+                      }
+                      const payNowButton = orderRow.querySelector('button.btn-primary');
+
+                      if (payNowButton) {
+                    payNowButton.remove();
+                  }
+                      
+                    
+                  }
+
+                  
+
+                } else {
+                  Swal.fire('Sorry!', data.message, 'warning');
+                }
+              })
+              .catch(error => {
+                console.error(error.message);
+                Swal.fire('Error!', 'There was a problem updating your order. Please try again.', 'error');
+              });
+            }
+          });
+        }
       });
     });
-
-    //return order
-    document.querySelectorAll('.return-order').forEach(button => {
-      button.addEventListener('click', function () {
-        event.preventDefault();
-
-        const orderId = this.getAttribute('data-order-id');
-        const productId = this.getAttribute('data-product-id');
-        const orderQuantity = this.getAttribute('data-order-quantity');
-        const orderSize = this.getAttribute('data-product-size');
-        Swal.fire({
-          title: 'Return Order?',
-          text: `Are you sure you want to Return order ID: ${orderId}?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#3085d6',
-          confirmButtonText: 'Yes, Return it!',
-        }).then((result) => {
-          if (result.isConfirmed) {
-            fetch("/returnOrder", {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ orderId, productId, orderQuantity, orderSize }),
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                Swal.fire('Returned!', `Order ${orderId} has been Returned.`, 'success');
-                const statusElement = button.closest('.order-row').querySelector('.status');
-                statusElement.textContent = 'Returned';
-                statusElement.className = 'status Returned';
-              } else {
-                Swal.fire('Sorry!', data.message, 'warning');
-              }
-            })
-            .catch(error => {
-              console.error(error.message);
-              Swal.fire('Error!', 'There was a problem Returning your order. Please try again.', 'error');
-            });
-          }
-        });
-      });
-    });
-
   });
+});
+
+
 
     async function payRazorpayAmount(razorpay_order_id) {
       console.log(razorpay_order_id)

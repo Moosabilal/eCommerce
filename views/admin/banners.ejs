@@ -1,0 +1,167 @@
+<%- include('../../views/partials/admin/header') %>
+
+<style>
+    .bannerActive{
+        background-color: green;
+        color: white;
+    }
+    .bannerInactive{
+        background-color: red;
+        color: white;
+    }
+</style>
+
+<!-- Display Existing Banners -->
+<div class="content mt-100">
+<!-- Display Existing Banners -->
+<div class="card shadow p-4">
+    <div class="mb-4 d-flex justify-content-between align-items-center"> 
+    <h4 class="mb-3">Existing Banners</h4>
+    <button class="btn btn-primary mb-3" onclick="newBanner()">Add Banner</button>
+    </div>
+    <table class="table table-bordered text-center align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (banners.length > 0) { %>
+                <% banners.forEach(banner => { %>
+                    <tr>
+                        <td>
+                            <img src="/uploads/product-images/<%= banner.image %>" width="100" class="img-thumbnail">
+                        </td>
+                        <td><%= banner.title %></td>
+                        <td><%= banner.description %></td>
+                        <td>
+                            <span class="badge <%= banner.isActive ? 'bannerActive' : 'bannerInactive' %>" 
+                                  data-id="<%= banner._id %>">
+                                <%= banner.isActive ? 'Active' : 'Inactive' %>
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" data-id="<%= banner._id %>" 
+                                    onclick="bannerActivation('<%= banner._id %>')">
+                                Toggle Status
+                            </button>
+                            <button class="btn btn-info btn-sm" onclick="window.location.href='/admin/edit-banner/<%= banner._id %>'">
+                                Edit
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteBanner('<%= banner._id %>')">
+                                Delete
+                            </button>
+
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5">No banners found</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+</div>
+<%- include('../../views/partials/admin/footer') %>
+
+<script>
+    function newBanner(){
+        if('<%= banners.length %>' >= 4){
+            Swal.fire({
+                icon:'info',
+                title:'warning',
+                text:"Max Banner can hold upto 4"
+            })
+        }else{
+            window.location.href='/admin/addBanner'
+        }
+    }
+
+    async function bannerActivation(id) {
+    console.log('Toggling banner ID:', id);
+
+    const response = await fetch('/admin/banner-toggle', {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+        // Find the specific banner status span
+        const statusElement = document.querySelector(`span[data-id="${id}"]`);
+
+        // Update the status dynamically
+        if (data.isActive) {
+            statusElement.classList.remove('bannerInactive');
+            statusElement.classList.add('bannerActive');
+            statusElement.textContent = 'Active';
+        } else {
+            statusElement.classList.remove('bannerActive');
+            statusElement.classList.add('bannerInactive');
+            statusElement.textContent = 'Inactive';
+        }
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: data.message
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message
+        });
+    }
+}
+
+    async function deleteBanner(id) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This action cannot be undone!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/admin/delete-banner/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire("Deleted!", data.message, "success");
+                    
+                    // Remove the banner row from the table dynamically
+                    const bannerRow = document.querySelector(`button[onclick="deleteBanner('${id}')"]`).closest("tr");
+                    bannerRow.remove();
+                } else {
+                    Swal.fire("Error!", data.message, "error");
+                }
+            } catch (error) {
+                console.error("Error deleting banner:", error);
+                Swal.fire("Error!", "Something went wrong. Try again later.", "error");
+            }
+        }
+    });
+}
+
+
+</script>

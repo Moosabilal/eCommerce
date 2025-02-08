@@ -47,7 +47,7 @@ rel="stylesheet">
 }
 
 .sidebar a:hover {
-  background-color: #007bff;
+  background-color: #7397be;
 }
 
 .sidebar a i {
@@ -73,6 +73,11 @@ button.btn.toggle-sidebar-btn{
   font-size: 20px;
   cursor: pointer;
   background-color: #b9cbdc;
+}
+.sidebar a.active {
+  background-color: #007bff; /* Blue background */
+  color: white; /* White text */
+  font-weight: bold;
 }
 
 
@@ -116,7 +121,7 @@ footer {
 
 <div class="sidebar">
   
-  <a href="/userProfile"><i class="fas fa-user"></i> Profile</a>
+  <a href="/userProfile" ><i class="fas fa-user"></i> Profile</a>
   <a href="/updateProfile"><i class="fas fa-user-edit"></i> Update Profile</a>
   <a href="/addAddress"><i class="fas fa-map-marker-alt"></i> My Address</a>
   <a href="/orderHistory"><i class="fas fa-box"></i> Orders</a>
@@ -134,6 +139,18 @@ footer {
 
 <!-- till here -->
 <!-- </div> -->
+ <script>
+   $(document).ready(function() {
+    let currentPath = window.location.pathname;
+
+    $('.sidebar a').each(function() {
+      let linkPath = $(this).attr('href');
+      if (currentPath === linkPath) {
+        $(this).addClass('active');
+      }
+    });
+  });
+ </script>
 
 
 

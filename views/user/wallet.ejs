@@ -40,7 +40,7 @@
         <img src="uploads\product-images\wallet.webp" alt="Wallet Image" style="width: 150px; height: auto; margin-top: 20px; margin-bottom: 10px; margin-left: 44%; filter: grayscale(100%);">
 
         <h4>Your Wallet Balance</h4>
-        <p class="balance-amount" style="font-size: 2rem; font-weight: bold;">₹<span id="walletBalance"><%= wallet.balance %></span></p>
+        <p class="balance-amount" style="font-size: 2rem; font-weight: bold;">₹<span id="walletBalance"><%= wallet.balance.toFixed(2) %></span></p>
     </div>
 
     <div class="transaction-history card shadow-sm p-4">
@@ -77,7 +77,7 @@
         </table>
     </div>
 
-    <div class="add-balance card shadow-sm p-4 mt-4">
+    <!-- <div class="add-balance card shadow-sm p-4 mt-4">
         <h4>Add Amount to Wallet</h4>
         <div class="input-group mb-3">
             <input type="number" class="form-control" id="addAmount" placeholder="Enter amount" aria-label="Enter amount">
@@ -85,7 +85,7 @@
                 <button class="btn btn-success" id="addAmountButton" onclick="return addAmountToWallet()">Add Amount</button>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 
 <%- include('../../views/partials/user/footer') %>

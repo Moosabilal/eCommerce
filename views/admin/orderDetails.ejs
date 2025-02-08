@@ -28,15 +28,20 @@
           <td><%= orders[i].userId.name%></td>
           <td><%= orders[i].finalAmount %></td>
           <td><%= orders[i].paymentMethod %></td>
-          <td><%= orders[i].parentAddress.addressType %>,<%= orders[i].parentAddress.name %>,<%= orders[i].parentAddress.city %>, <%= orders[i].parentAddress.landMark %>, <%= orders[i].parentAddress.state %>, <%= orders[i].parentAddress.pincode %>, <%= orders[i].parentAddress.phone %>, <%= orders[i].parentAddress.altPhone %></td>
+          <td><span class="fw-bold"><%= orders[i].parentAddress.addressType %></span>,<br><%= orders[i].parentAddress.name %>,<%= orders[i].parentAddress.city %>, <br><%= orders[i].parentAddress.landMark %>, <%= orders[i].parentAddress.state %>, <%= orders[i].parentAddress.pincode %>, <br><%= orders[i].parentAddress.phone %>, <%= orders[i].parentAddress.altPhone %></td>
           <td><%= orders[i].shipping %></td>
-          <td><%= new Date(orders[i].createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
-            <td>
+          <td><%= new Date(orders[i].createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }) %></td>
+          <td>
             <select class="form-select form-select-sm status-select" data-order-id="<%= orders[i]._id %>">
-              <% ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'].forEach(status => { %>
+              
+              <% ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return_Requested', 'Returned'].forEach(status => { %>
               <option value="<%= status %>" <%= orders[i].status === status ? 'selected' : '' %>><%= status %></option>
               <% }) %>
             </select>
+            <% if (orders[i].status === 'Return_Requested') { %>
+              <i class="fas fa-exclamation-triangle text-warning">Return Requested</i> 
+            <% } %>
+        
             </td>
           <td>
             <button class="btn btn-danger btn-sm delete-order" data-order-id="<%= orders[i]._id %>">
@@ -81,6 +86,7 @@
             })
             .then(response => response.json())
             .then(data => {
+              console.log(data)
               if (data.success) {
                 Swal.fire('Updated!', `Order status updated to "${newStatus}".`, 'success');
               } else {

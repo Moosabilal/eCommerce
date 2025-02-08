@@ -4,6 +4,7 @@ const User = require('../../models/userSchema')
 const Cart = require('../../models/cartSchema')
 const Address = require('../../models/addressSchema')
 const mongoose = require('mongoose')
+const Wallet = require('../../models/walletSchema')
 
 
 const getOrders = async (req, res) => {
@@ -46,7 +47,6 @@ const getOrders = async (req, res) => {
         });
 
         enrichedOrders.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
-
         res.render('orderDetails', {
             orders: enrichedOrders,
         });
@@ -58,12 +58,62 @@ const getOrders = async (req, res) => {
 
 const statusSelection = async (req,res)=>{
     try {
-        const {orderId,status} = req.body;
-        const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
-        if(!order){
-            return res.status(404).json({ status:false,message: "Order not found" });
+        const { orderId, status } = req.body;
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+        return res.status(404).json({ status: false, message: "Order not found" });
         }
-        res.status(200).json({ success:true,message: "Order status updated successfully" });
+
+        if (order.status === status) {
+        return res.json({ message: `Order status is already ${status}` });
+        }
+
+        order.status = status;
+        await order.save();
+
+        const finalAmount = parseFloat(order.finalAmount.toFixed(2));
+        const user = order.userId;
+
+        if (status === "Returned") {
+            const id = order.orderId;
+        const wallet = await Wallet.findOneAndUpdate(
+            { userId: new mongoose.Types.ObjectId(user) },
+            {
+            $inc: { balance: finalAmount },
+            $push: {
+                transactions: {
+                transactionType: "Credit",
+                amount: finalAmount,
+                status: "Success",
+                date: new Date(),
+                orderId:id,
+                },
+            },
+            }
+        );
+
+        if (!wallet) {
+            return res.status(404).json({ success: false, message: "Failed to credit the amount to the user wallet" });
+        }
+
+        for (const item of order.orderItems) {
+            const productId = item.productId;
+            const orderSize = item.size;
+            const orderQuantity = item.quantity;
+
+            const product = await Product.updateOne(
+            { _id: new mongoose.Types.ObjectId(productId), "stock.size": orderSize },
+            { $inc: { "stock.$.quantity": orderQuantity } }
+            );
+
+            if (product.nModified === 0) {
+            return res.status(404).json({ success: false, message: `Failed to update stock for product ${productId} with size ${orderSize}` });
+            }
+        }
+        }
+
+        res.status(200).json({ success: true, message: "Order status updated successfully" });
 
     } catch (error) {
         console.error("Error in statusSelection:", error);

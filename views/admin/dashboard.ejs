@@ -288,20 +288,15 @@ async function updateChart(filterType) {
   }
 }
 
-// Initialize chart on page load with default filter (yearly)
 updateChart('yearly');
 
-// Handle filter change event
 document.getElementById('chartFilter').addEventListener('change', (e) => {
   updateChart(e.target.value);
 });
 
 
-  // Ledger Book Generator (dummy implementation)
   document.getElementById('generateLedger').addEventListener('click', async () => {
-    // You might call an endpoint to generate a ledger PDF/CSV and then trigger download
     try {
-      // Replace URL with your ledger generation endpoint.
       const response = await fetch('/admin/generate-ledger');
       if(response.ok){
         const blob = await response.blob();
@@ -309,7 +304,7 @@ document.getElementById('chartFilter').addEventListener('change', (e) => {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = 'ledger.pdf'; // or ledger.csv
+        a.download = 'ledger.pdf';
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

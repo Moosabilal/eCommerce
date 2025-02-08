@@ -36,7 +36,7 @@
       font-size: 16px;
     }
     .sidebar a:hover {
-      background-color: #007bff;
+      background-color: #7397be;
     }
     .sidebar a i {
       margin-right: 10px;
@@ -87,6 +87,11 @@
       height: 20px;
       cursor: pointer;
     }
+    .sidebar a.active {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-250px);
@@ -122,6 +127,7 @@
     <hr>
     <a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
     <a href="/admin/users"><i class="fas fa-users"></i> Customers</a>
+    <a href="/admin/banner"><i class="fas fa-images"></i> Banner</a>
     <a href="/admin/category"><i class="fas fa-tags"></i> Category</a>
     <a href="/admin/addProducts"><i class="fas fa-clipboard-list"></i> add Product</a>
     <a href="/admin/products"><i class="fas fa-box-open"></i> Products</a>
@@ -158,8 +164,20 @@
 
 
 <!-- write the dashbord content here -->
+<script>
+  $(document).ready(function() {
+    let currentPath = window.location.pathname;
 
+    $('.sidebar a').each(function() {
+      let linkPath = $(this).attr('href');
+      if (currentPath === linkPath) {
+        $(this).addClass('active');
+      }
+    });
 
-
-
-
+    // Sidebar toggle for small screens
+    $('#toggleSidebarBtn').on('click', function() {
+      $('.sidebar').toggleClass('show');
+    });
+  });
+</script>

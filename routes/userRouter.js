@@ -47,7 +47,7 @@ router.get('/filterByNew',userAuth,userController.filterByNewProduct);
 router.get('/filterByColor',userAuth,userController.filterByColor);
 router.get('/filterByA-Z',userAuth,userController.filterByAtoZ);
 router.get('/filterByZ-A',userAuth,userController.filterByZtoA);
-router.post("/search",userAuth,userController.searchProducts)
+router.post("/search",userController.handleSearch)
 
 //profile management
 router.get("/forgot-password",profileController.getForgotPassPage)

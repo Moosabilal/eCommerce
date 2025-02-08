@@ -1,226 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Admin Dashboard</title>
-  <!-- Bootstrap CSS (you can use CDN) -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <!-- FontAwesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHq6F1C7Xw5B1zJY5Dd2ZjHoxSmM6tF69+XyF1q/5pbZKTx7ryD+8Qe/j5YxN1njI9o+Ae0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      background: #f4f6f9;
-    }
-    .dashboard-card {
-      border-radius: 8px;
-      padding: 1rem;
-      background: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin-bottom: 1rem;
-    }
-    .dashboard-header {
-      margin-bottom: 2rem;
-    }
-    .list-title {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-bottom: .5rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="container-fluid">
-    <div class="dashboard-header text-center my-4">
-      <h1>Admin Dashboard</h1>
-    </div>
-    <div class="row">
-      <!-- Chart with Filter -->
-      <div class="col-md-8">
-        <div class="dashboard-card">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Sales Chart</h4>
-            <select id="chartFilter" class="form-control w-auto">
-              <option value="yearly">Yearly</option>
-              <option value="monthly">Monthly</option>
-              <option value="weekly">Weekly</option>
-            </select>
-          </div>
-          <canvas id="salesChart" height="200"></canvas>
-        </div>
-      </div>
-      <!-- Ledger Book Generator -->
-      <div class="col-md-4">
-        <div class="dashboard-card text-center">
-          <h4>Ledger Book</h4>
-          <p>Generate a detailed ledger report.</p>
-          <button id="generateLedger" class="btn btn-primary">
-            <i class="fas fa-file-alt"></i> Generate Ledger
-          </button>
-        </div>
-      </div>
-    </div>
-    
-    <div class="row">
-      <!-- Best Selling Products -->
-      <div class="col-md-4">
-        <div class="dashboard-card">
-          <div class="list-title">Top 10 Best Selling Products</div>
-          <ul class="list-group">
-            <% bestSellingProducts.forEach(function(product, index) { %>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <%= index+1 %>. <%= product.name %>
-                <span class="badge badge-primary badge-pill"><%= product.sales %></span>
-              </li>
-            <% }); %>
-          </ul>
-        </div>
-      </div>
-      
-      <!-- Best Selling Categories -->
-      <div class="col-md-4">
-        <div class="dashboard-card">
-          <div class="list-title">Top 10 Best Selling Categories</div>
-          <ul class="list-group">
-            <% bestSellingCategories.forEach(function(category, index) { %>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <%= index+1 %>. <%= category.name %>
-                <span class="badge badge-success badge-pill"><%= category.sales %></span>
-              </li>
-            <% }); %>
-          </ul>
-        </div>
-      </div>
-      
-      <!-- Best Selling Brands -->
-      <div class="col-md-4">
-        <div class="dashboard-card">
-          <div class="list-title">Top 10 Best Selling Brands</div>
-          <ul class="list-group">
-            <% bestSellingBrands.forEach(function(brand, index) { %>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <%= index+1 %>. <%= brand.name %>
-                <span class="badge badge-danger badge-pill"><%= brand.sales %></span>
-              </li>
-            <% }); %>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- JavaScript for Chart and Ledger -->
-  <script>
-    // Chart.js initialization
-    let salesChart;
-    const ctx = document.getElementById('salesChart').getContext('2d');
-
-    function fetchChartData(filterType) {
-      // Call your backend API to fetch chart data based on filterType (yearly, monthly, weekly)
-      // For demo, we use static data.
-      // Replace with actual AJAX/fetch call.
-      let labels = [];
-      let data = [];
-
-      if(filterType === 'yearly'){
-        labels = ['2019','2020','2021','2022','2023'];
-        data = [15000, 20000, 18000, 25000, 30000];
-      } else if(filterType === 'monthly'){
-        labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        data = [1200, 1500, 1100, 1800, 2000, 1700, 1900, 2200, 2400, 2600, 2300, 2500];
-      } else if(filterType === 'weekly'){
-        labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-        data = [300, 400, 350, 450, 500, 480, 520];
-      }
-
-      return { labels, data };
-    }
-
-    function updateChart(filterType) {
-      const chartData = fetchChartData(filterType);
-
-      if(salesChart){
-        salesChart.data.labels = chartData.labels;
-        salesChart.data.datasets[0].data = chartData.data;
-        salesChart.update();
-      } else {
-        salesChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: chartData.labels,
-            datasets: [{
-              label: 'Sales',
-              data: chartData.data,
-              backgroundColor: 'rgba(54, 162, 235, 0.2)',
-              borderColor: 'rgba(54, 162, 235, 1)',
-              borderWidth: 2,
-              fill: true,
-              tension: 0.3
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true
-              }
-            }
-          }
-        });
-      }
-    }
-
-    // Initialize chart on page load with default filter (yearly)
-    updateChart('yearly');
-
-    // Handle filter change
-    document.getElementById('chartFilter').addEventListener('change', (e) => {
-      updateChart(e.target.value);
-    });
-
-    // Ledger Book Generator (dummy implementation)
-    document.getElementById('generateLedger').addEventListener('click', async () => {
-      // You might call an endpoint to generate a ledger PDF/CSV and then trigger download
-      try {
-        // Replace URL with your ledger generation endpoint.
-        const response = await fetch('/admin/generate-ledger');
-        if(response.ok){
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = url;
-          a.download = 'ledger.pdf'; // or ledger.csv
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          Swal.fire({
-            icon: 'success',
-            title: 'Ledger Generated!',
-            text: 'Your ledger book has been downloaded.'
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Failed to generate ledger. Try again later.'
-          });
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .image-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-      } catch (error) {
-        console.error(error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: 'Something went wrong.'
+        .preview-container {
+            position: relative;
+        }
+        .preview-container img {
+            width: 100px;
+            height: auto;
+            border-radius: 5px;
+        }
+        .remove-icon {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Banner Management</h2>
+
+        <div class="card shadow p-4 mb-4">
+            <h4 class="mb-3">Upload New Banner</h4>
+            <form action="/admin/banner/upload" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Banner Title:</label>
+                    <input type="text" class="form-control" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <input type="text" class="form-control" name="description" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Upload Banner Images (Up to 4)</label>
+                    <input type="file" class="form-control" id="imageInput" accept="image/*" multiple required>
+                </div>
+                
+                <div id="cropContainer" style="display: none;">
+                    <h5>Crop Image</h5>
+                    <img id="cropImage" class="img-fluid">
+                    <button type="button" id="saveCropped" class="btn btn-success mt-2">Save Cropped Image</button>
+                </div>
+                
+                <div class="image-preview mt-3" id="imagePreview"></div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3">Upload Banner</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script>
+        let cropper;
+        let selectedFile;
+        let imageCount = 0;
+        const imageInput = document.getElementById("imageInput");
+        const cropImage = document.getElementById("cropImage");
+        const cropContainer = document.getElementById("cropContainer");
+        const saveCropped = document.getElementById("saveCropped");
+        const imagePreview = document.getElementById("imagePreview");
+        
+        imageInput.addEventListener("change", function(event) {
+            const files = event.target.files;
+            if (files.length + imageCount > 4) {
+                Swal.fire("Error", "You can upload up to 4 images only.", "error");
+                return;
+            }
+            
+            selectedFile = files[0];
+            if (!selectedFile) return;
+            
+            cropImage.src = URL.createObjectURL(selectedFile);
+            cropContainer.style.display = "block";
+            
+            if (cropper) {
+                cropper.destroy();
+            }
+            
+            cropper = new Cropper(cropImage, {
+                aspectRatio: 16 / 9,
+                viewMode: 2,
+                autoCropArea: 1,
+                zoomable: true,
+                cropBoxResizable: true,
+                dragMode: "move",
+            });
         });
-      }
-    });
-  </script>
-  <!-- SweetAlert for alerts -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- Bootstrap JS and dependencies -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+        
+        saveCropped.addEventListener("click", async function() {
+            if (!cropper) return;
+            
+            const croppedCanvas = cropper.getCroppedCanvas({
+                width: 800,
+                height: 450,
+                imageSmoothingQuality: "high"
+            });
+            
+            if (!croppedCanvas) {
+                Swal.fire("Error", "Cropping failed. Try again.", "error");
+                return;
+            }
+            
+            const blob = await new Promise(resolve => croppedCanvas.toBlob(resolve, "image/jpeg", 0.8));
+            const croppedFile = new File([blob], `cropped_${Date.now()}.jpg`, { type: "image/jpeg" });
+            
+            const dataTransfer = new DataTransfer();
+            for (let file of imageInput.files) {
+                dataTransfer.items.add(file);
+            }
+            dataTransfer.items.add(croppedFile);
+            imageInput.files = dataTransfer.files;
+            
+            imageCount++;
+            
+            const previewContainer = document.createElement("div");
+            previewContainer.classList.add("preview-container");
+            
+            const previewImg = document.createElement("img");
+            previewImg.src = croppedCanvas.toDataURL("image/jpeg");
+            previewContainer.appendChild(previewImg);
+            
+            const removeIcon = document.createElement("span");
+            removeIcon.classList.add("remove-icon");
+            removeIcon.innerHTML = "&times;";
+            removeIcon.onclick = function() {
+                previewContainer.remove();
+                imageCount--;
+            };
+            previewContainer.appendChild(removeIcon);
+            
+            imagePreview.appendChild(previewContainer);
+            
+            cropContainer.style.display = "none";
+            cropper.destroy();
+            
+            Swal.fire("Success", "Image cropped and added!", "success");
+        });
+    </script>
 </body>
 </html>

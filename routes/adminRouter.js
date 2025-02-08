@@ -8,6 +8,7 @@ const productController = require('../controllers/admin/productController');
 const orderController = require('../controllers/admin/orderController');
 const couponController = require('../controllers/admin/couponController')
 const salesController = require('../controllers/admin/salesController')
+const bannerController = require('../controllers/admin/BannerController')
 
 const multer = require('multer'); 
 // const { userAuth, adminAuth } = require("../middlewares/auth");
@@ -47,6 +48,16 @@ router.get("/listCategory",isAuthenticated,categoryController.getlistCategory);
 router.get("/unlistCategory",isAuthenticated,categoryController.getunlistCategory)
 router.get("/editCategory",isAuthenticated,categoryController.getEditCategory)
 router.post("/editCategory/:id",isAuthenticated,categoryController.editCategory)
+
+//banner management
+router.get("/banner",isAuthenticated,bannerController.getBanner)
+router.get("/addBanner",isAuthenticated,bannerController.getAddBanner)
+router.post('/banner-upload',isAuthenticated,upload.single('image'),bannerController.addBanner)
+router.patch('/banner-toggle',isAuthenticated,bannerController.toggleBanner)
+router.get("/edit-banner/:id",isAuthenticated,bannerController.getEditBanner)
+router.put("/edit-banner", upload.single("image"), bannerController.editBanner);
+router.delete('/delete-banner/:id',isAuthenticated,bannerController.deleteBanner)
+
 //product
 router.get("/addProducts",isAuthenticated,productController.getProductAddPage);
 router.post("/addProducts",isAuthenticated,upload.array("images",4),productController.addProducts)

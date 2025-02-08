@@ -8,19 +8,22 @@ const applyCoupon = async (req, res) => {
         const couponCode = req.body.coupon;
         let couponC = couponCode.trim();
 
-        const coupon = await Coupon.findOne({ couponCode: couponC,expireOn: { $gte: new Date() } });
+        const coupon = await Coupon.findOne({ couponCode: couponC, expireOn: { $gte: new Date() } });
         if (!coupon) {
             return res.status(404).json({ success: false, message: "Coupon not found" });
         }
-        const usedCoupon = await Coupon.findOne({ userId: userId });
-        if (usedCoupon) {
-            return res.status(400).json({ success: false, message: "User has already applied a coupon" });
+
+        if (coupon.userId.includes(userId)) {
+            return res.status(400).json({ success: false, message: "This coupon is already applied" });
         }
+        if (!coupon) {
+            return res.status(404).json({ success: false, message: "Coupon not found" });
+        }
+        
         coupon.userId.push(userId);
         await coupon.save();
 
         const discount = coupon.offerPrice;
-        console.log("coupon",coupon)
 
         return res.status(200).json({
             success: true,

@@ -143,3 +143,27 @@
 </div>
 
 <%- include('../../views/partials/user/footer') %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addressTypeSelect = document.getElementById('addressType');
+        const addAddressForm = document.querySelector('form.newform');
+        const existingAddresses = <%- JSON.stringify(userAddress ? userAddress.address : []) %>;
+
+        addAddressForm.addEventListener('submit', function (e) {
+            const selectedAddressType = addressTypeSelect.value;
+
+            // Check if the selected address type already exists
+            const existingAddress = existingAddresses.find(addr => addr.addressType === selectedAddressType);
+
+            if (existingAddress) {
+                e.preventDefault(); // Prevent form submission
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: `You already have a ${selectedAddressType} address.`,
+                });
+            }
+        });
+    });
+</script>
