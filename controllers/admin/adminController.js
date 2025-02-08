@@ -44,35 +44,7 @@ const loadDashboard = async (req,res)=>{
     if(req.session.admin){
         try {
             const admin = await User.findOne({isAdmin:true});
-            // const orders = await Order.aggregate([
-            //     {
-            //         $lookup: {
-            //             from: 'users',
-            //             localField: 'userId',
-            //             foreignField: '_id',
-            //             as: 'customerInfo',
-            //         },
-            //     },
-            //     {
-            //         $unwind: '$customerInfo',
-            //     },
-            //     {
-            //         $project: {
-            //             orderId: 1,
-            //             customerName: '$customerInfo.name',
-            //             salesCount: {
-            //                 $sum: '$orderItems.quantity',
-            //             },
-            //             orderAmount: '$finalAmount',
-            //             discount: 1, 
-            //             status: 1,
-            //             createdOn:1,
-            //         },
-            //     },
-            //     {$sort:{createdOn:-1}}
-                
-            // ]);
-            // console.log("orders",orders)
+           
             Order.aggregate([
                 {
                 $facet: {

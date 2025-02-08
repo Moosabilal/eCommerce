@@ -323,9 +323,37 @@ doc.moveDown(1);
 
 // Orders Data
 let yPosition = startY + 40;
+const rowHeight = 40; // Adjust the row height as needed
+const pageBottomMargin = doc.page.height - 60; // Leave some space at the bottom
+
 orders.forEach((order, index) => {
+  // Check if yPosition is too close to the bottom of the page
+  if (yPosition + rowHeight > pageBottomMargin) {
+    doc.addPage();
+    yPosition = 50; // Reset yPosition for the new page
+    
+    // Re-draw the table headers on the new page
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(14)
+      .fillColor('#fff')
+      .rect(startX, yPosition, totalTableWidth, 30)
+      .fill('#333')
+      .fillColor('#fff');
+
+    doc.text('Order ID', startX + 10, yPosition + 8, { width: columnWidths.orderId, align: 'left' });
+    doc.text('User', startX + 10 + columnWidths.orderId, yPosition + 8, { width: columnWidths.user, align: 'left' });
+    doc.text('Amount', startX + 10 + columnWidths.orderId + columnWidths.user, yPosition + 8, { width: columnWidths.amount, align: 'center' });
+    doc.text('Payment', startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount, yPosition + 8, { width: columnWidths.paymentMethod, align: 'center' });
+    doc.text('Status', startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount + columnWidths.paymentMethod, yPosition + 8, { width: columnWidths.status, align: 'center' });
+    doc.text('Order Created', startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount + columnWidths.paymentMethod + columnWidths.status, yPosition + 8, { width: columnWidths.createdOn, align: 'center' });
+
+    yPosition += 40; // Move yPosition below the header
+  }
+
+  // Fill each order row
   const bgColor = index % 2 === 0 ? '#f3f3f3' : '#fff';
-  doc.rect(startX, yPosition, totalTableWidth, 30).fill(bgColor).fillColor('#000');
+  doc.rect(startX, yPosition, totalTableWidth, rowHeight).fill(bgColor).fillColor('#000');
 
   doc
     .font('Helvetica')
@@ -337,7 +365,7 @@ orders.forEach((order, index) => {
     .text(order.status, startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount + columnWidths.paymentMethod, yPosition + 8, { width: columnWidths.status, align: 'center' })
     .text(order.createdOn.toLocaleDateString('en-GB') + ' ' + order.createdOn.toLocaleTimeString('en-GB'), startX + 10 + columnWidths.orderId + columnWidths.user + columnWidths.amount + columnWidths.paymentMethod + columnWidths.status, yPosition + 8, { width: columnWidths.createdOn, align: 'center' });
 
-  yPosition += 40;
+  yPosition += rowHeight;
 });
 
 // Add Footer with Ledger Download Date

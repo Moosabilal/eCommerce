@@ -236,63 +236,71 @@
 <script>
   // Chart.js initialization
   let salesChart;
-const ctx = document.getElementById('salesChart').getContext('2d');
+        const ctx = document.getElementById('salesChart').getContext('2d');
 
-async function fetchChartData(filterType) {
-  try {
-    const response = await fetch(`/admin/sales-data?filterType=${filterType}`); // Call backend API
-    const result = await response.json();
-    console.log(result);
+        async function fetchChartData(filterType) {
+            try {
+                const response = await fetch(`/admin/sales-data?filterType=${filterType}`); // Call backend API
+                const result = await response.json();
+                console.log(result);
 
-    return {
-      labels: result.labels,
-      data: result.data
-    };
-  } catch (error) {
-    console.error("Error fetching sales data:", error);
-    return { labels: [], data: [] };
-  }
-}
-
-async function updateChart(filterType) {
-  const chartData = await fetchChartData(filterType);
-
-  if (salesChart) {
-    salesChart.data.labels = chartData.labels;
-    salesChart.data.datasets[0].data = chartData.data;
-    salesChart.update();
-  } else {
-    salesChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: chartData.labels,
-        datasets: [{
-          label: 'Sales',
-          data: chartData.data,
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true
-          }
+                return {
+                    labels: result.labels,
+                    data: result.data
+                };
+            } catch (error) {
+                console.error("Error fetching sales data:", error);
+                return { labels: [], data: [] };
+            }
         }
-      }
-    });
-  }
-}
 
-updateChart('yearly');
+        async function updateChart(filterType) {
+            const chartData = await fetchChartData(filterType);
 
-document.getElementById('chartFilter').addEventListener('change', (e) => {
-  updateChart(e.target.value);
-});
+            if (filterType === 'monthly') {
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const dataMap = new Map(chartData.labels.map((label, index) => [label, chartData.data[index]]));
+
+                chartData.labels = monthNames;
+                chartData.data = monthNames.map(month => dataMap.get(month) || 0);
+            }
+
+            if (salesChart) {
+                salesChart.data.labels = chartData.labels;
+                salesChart.data.datasets[0].data = chartData.data;
+                salesChart.update();
+            } else {
+                salesChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Sales',
+                            data: chartData.data,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        updateChart('yearly');
+
+        document.getElementById('chartFilter').addEventListener('change', (e) => {
+            updateChart(e.target.value);
+        });
 
 
   document.getElementById('generateLedger').addEventListener('click', async () => {
@@ -363,26 +371,7 @@ document.getElementById('chartFilter').addEventListener('change', (e) => {
       }
     });
 
-    document.getElementById('generateLedger').addEventListener('click', async () => {
-    try {
-        const response = await fetch('/admin/generate-ledger');
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'ledger.pdf';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            Swal.fire('Success', 'Ledger downloaded!', 'success');
-        } else {
-            Swal.fire('Error', 'Failed to generate ledger', 'error');
-        }
-    } catch (error) {
-        Swal.fire('Error', 'Something went wrong', 'error');
-    }
-});
+   
   </script>
   
  <%- include('../../views/partials/admin/footer')%>
