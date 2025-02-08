@@ -495,8 +495,8 @@ console.log(selectedPaymentMethod,balance,totalAmount)
                 modal: {
                     ondismiss: function () {
                         Swal.fire({
-                            title: 'Payment Cancelled!',
-                            text: 'You cancelled the payment, but your order was still placed.',
+                            title: 'Payment Failed!',
+                            text: 'Your payment failed, your order was placed.',
                             icon: 'warning',
                             showConfirmButton: true
                         }).then(() => {

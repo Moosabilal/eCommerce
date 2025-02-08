@@ -313,7 +313,7 @@ const loadShoppingPage = async (req, res) => {
         }
 
         // Determine sort options
-        let sortOptions = { createdOn: -1 }; // Default sort
+        let sortOptions = { createdAt: 1 }; // Default sort
         if (sortBy) {
             switch (sortBy) {
                 case 'price_asc':
@@ -327,6 +327,9 @@ const loadShoppingPage = async (req, res) => {
                     break;
                 case 'name_desc':
                     sortOptions = { productName: -1 };
+                    break;
+                case 'latest':
+                    sortOptions = { createdAt: -1 };
                     break;
                 default:
                     break;
@@ -390,6 +393,8 @@ const handleSearch = async (req, res) => {
 
     res.redirect(searchUrl.pathname + searchUrl.search);
 };
+
+
 
 const filterProduct = async (req, res) => {
     try {
