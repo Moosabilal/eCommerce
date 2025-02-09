@@ -123,7 +123,6 @@ const generateInvoice = (order, res) => {
 
 const PostPlaceOrder = async (req, res) => {
     try {
-        console.log("req.body",req.body)
         const {addressId, shipping, payment, parentAddressId, finalAmount, subtotal, shippingValue, discountValue, taxValue, paymentMethod, paymentStatus, razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
 
         const user = req.session.user;
@@ -178,12 +177,8 @@ const PostPlaceOrder = async (req, res) => {
         const findOrderId = await Order.findOne({ userId: user }).sort({createdOn:-1});
         const orderId = findOrderId.orderId;
         
-            console.log("balance",finalAmount)
-            console.log("walletsdf",wallet.balance)
-
             wallet.balance -= finalAmount;
             wallet.balance = wallet.balance.toFixed(2);
-            console.log("wallet",wallet.balance)
             wallet.transactions.push({
                 transactionType: 'Debit',
                 amount: finalAmount,
@@ -381,19 +376,15 @@ const cancelOrder = async (req, res) => {
 
 const returnOrder = async (req, res) => {
     try {
-        console.log('yes')
         const userId = req.session.user;
-        console.log(req.body)
         const { orderId, reason } = req.body;
 
-        console.log("reason",reason)
         const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });
 
         if (!existingOrder) {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
         let orderIdValue = existingOrder.orderId; 
-        console.log(orderIdValue)
         if(existingOrder.status === "Pending" || existingOrder.status === "Processing" || existingOrder.status === "Shipped"){
             return res.status(200).json({ success: false, message: "You can't Return this order when it is in pending, processing or shipped" });
         }
@@ -528,8 +519,6 @@ const verifyPayment = async (req, res) => {
         .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET) 
         .update(body.toString())
         .digest('hex');
-        console.log("expectedSignature",expectedSignature)
-        console.log("razorpay_signature",razorpay_signature)
     if (expectedSignature === razorpay_signature) {
         const order = await Order.findOne({ razorpay_order_id });
             if (order) {

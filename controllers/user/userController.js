@@ -583,13 +583,9 @@ const filterByColor = async (req,res)=>{
     try {
         const color = req.query.color;
         const user = req.session.user;
-        console.log("user",user)
         const userData = await User.findOne({_id:user});
-        console.log("userData",userData)
         const categories = await Category.find({ isListed: true }).lean();
-        console.log("categories",categories)
         let findProducts = await Product.find({ isBlocked:false,color :color}).lean();
-        console.log("products",findProducts)
         let itemsPerPage =  10;
         let currentPage = parseInt(req.query.page) || 1;
         let startIndex = (currentPage-1)*itemsPerPage;

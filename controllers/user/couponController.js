@@ -56,7 +56,6 @@ const cancelCoupon = async (req, res) => {
         } else {
             return res.status(400).json({ success: false, message: "This Coupon not applied" });
         }
-        console.log(coupon)
     } catch (error) {
         console.log(" Error in cancelCoupon", error);
         res.status(500).json({ status: false, message: "Internal Server Error" });

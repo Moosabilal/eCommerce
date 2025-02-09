@@ -241,7 +241,6 @@ const increaseQuantity = async (req, res) => {
 const getProductStock = async (req, res) => {
     try {
         const { productId, stockSize } = req.params;
-        console.log(productId, stockSize)
 
         if (!productId || !stockSize) {
             return res.status(400).json({ status: false, message: "Invalid input" });

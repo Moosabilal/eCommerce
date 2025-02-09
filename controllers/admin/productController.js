@@ -59,7 +59,6 @@ const addProducts = async (req, res) => {
                 productImage: images,
                 status: "Available",
             })
-            console.log(newProduct)
             await newProduct.save();
             return res.redirect("/admin/Products")
         
@@ -181,7 +180,6 @@ const unBlockProduct = async (req,res)=>{
 
 const getEditProduct = async (req,res)=>{
     try {
-        console.log('hello')
         const id = req.query.id;
         const product = await Product.findOne({_id:id});
         const category = await Category.findOne({_id:product.category});

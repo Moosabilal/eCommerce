@@ -334,16 +334,12 @@ const getResetProfilePassPage = async (req,res)=>{
 }
 
 const postNewProfilePassword = async (req,res)=>{
-    console.log("coming")
     try {
         const {newPassword, confirmPassword} = req.body;
         const email = req.session.email;
-        console.log(email,req.session.email)
         if(newPassword===confirmPassword){
             const passwordHash =  await securePassword(newPassword);
-            console.log("passwordHash",passwordHash)
             await User.updateOne({email:email},{$set:{password:passwordHash}});
-           console.log(await User.findOne({email:email}))
             res.redirect("userProfile")
             
 
@@ -399,7 +395,6 @@ const postAddAddress = async (req,res)=>{
 
 const editAddress = async (req,res)=>{
     try {
-        console.log(req.query.id)
         const addressId = req.query.id;
         const user = req.session.user;
         const currentAddress = await Address.findOne({

@@ -100,11 +100,11 @@
             <div class="row g-3">
                 <div class="col-md-6 col-12">
                     <label for="selectedSize" class="form-label">Selected Size</label>
-                    <input type="text" class="form-control" id="selectedSize" value="<%= product.size %>" readonly>
+                    <input type="text" class="form-control" id="selectedSize" value="<%= product.stock.map((val)=>val.size) %>" readonly>
                 </div>
                 <div class="col-md-6 col-12">
                     <label for="selectedQuantity" class="form-label">Selected Quantity</label>
-                    <input type="number" class="form-control" id="selectedQuantity" value="<%= product.quantity %>" readonly>
+                    <input type="text" class="form-control" id="selectedQuantity" value="<%= product.stock.map((quant)=>quant.quantity) %>" readonly>
                 </div>
             </div>
 

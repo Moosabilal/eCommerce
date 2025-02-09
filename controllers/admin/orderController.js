@@ -140,7 +140,6 @@ const deleteOrder = async (req, res) => {
 
 const orderedDetailsPage = async (req,res)=>{
     try {
-        console.log(req.query)
         const userId = req.session.user;
         const size = req.query.size
         const productId = req.query.productId

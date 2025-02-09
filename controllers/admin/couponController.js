@@ -28,7 +28,6 @@ const createCoupon = async (req, res) => {
             offerPrice:parseInt(req.body.offerPrice),
             minimumPrice: parseInt(req.body.minimumPrice),
         }
-        console.log("createcoupon",data)
 
         const newCoupon = new Coupon({
             name:data.couponName,
@@ -62,9 +61,7 @@ const updateCoupon = async (req, res) => {
     try {
         const couponId = req.body.couponId;
         const old = new mongoose.Types.ObjectId(couponId)
-        console.log(old)
         const selectedCoupon = await Coupon.findOne({_id:old});
-        console.log(selectedCoupon)
         if(selectedCoupon){
             const startDate = new Date(req.body.startDate);
             const endDate = new Date(req.body.endDate);
@@ -79,7 +76,6 @@ const updateCoupon = async (req, res) => {
                     minimumPrice:parseInt(req.body.minimumPrice)
                 }},{new:true}
             );
-            console.log(updatedCoupon)
             if(updatedCoupon!==null){
                 res.status(200).json("Coupon Updated Successfully")
             }else{
