@@ -103,7 +103,7 @@
                     <input type="text" class="form-control" id="selectedSize" value="<%= product.stock.map((val)=>val.size) %>" readonly>
                 </div>
                 <div class="col-md-6 col-12">
-                    <label for="selectedQuantity" class="form-label">Selected Quantity</label>
+                    <label for="selectedQuantity" class="form-label">Selected Quantity (Respectively)</label>
                     <input type="text" class="form-control" id="selectedQuantity" value="<%= product.stock.map((quant)=>quant.quantity) %>" readonly>
                 </div>
             </div>
@@ -127,7 +127,7 @@
 
                 <div class="col-md-6 col-12">
                     <label for="quantity" class="form-label">Quantity</label>
-                    <input type="number" class="form-control" name="quantity" id="quantity" >
+                    <input type="number" class="form-control" name="quantity" id="quantity" placeholder="Enter the quantity" >
                     <div id="quantity-error" class="error-message"></div>
                 </div>
 
@@ -140,9 +140,11 @@
                 <div class="col-md-6 col-12 mb-3">
                     <label for="category" class="form-label">Category</label>
                     <select class="form-select" name="category" id="category" required>
-                        <option value="<%= cat.name %> " selected><%= cat.name %></option>
-                        <% for(let i = 1 ; i < categories.length ; i++) { %>
+                        <option value="<%= cat.name %>" selected><%= cat.name %></option>
+                        <% for(let i = 0 ; i < categories.length ; i++) { %>
+                            <% if(categories[i].name != cat.name) { %>
                         <option value="<%= categories[i].name %>"><%= categories[i].name %></option>
+                        <% } %>
                         <% } %>
                     </select>
                     <div id="category-error" class="error-message"></div>

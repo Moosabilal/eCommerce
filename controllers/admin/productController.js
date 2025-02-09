@@ -231,7 +231,7 @@ const editProduct = async (req,res)=>{
 
         const existingSize = product.stock.find((item) => item.size === size);
         if (existingSize) {
-            existingSize.quantity += Number(quantity);
+            existingSize.quantity = Number(quantity);
         } else {
             product.stock.push({ size: size, quantity: quantity });
         }
