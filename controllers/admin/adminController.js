@@ -130,7 +130,8 @@ const loadDashboard = async (req,res)=>{
                 totalUser: countUser,
                 mostSoldProduct: mostSoldProduct,
                 bestSellingCategory: bestSellingCategory,
-                bestSellingBrand: bestSellingBrand
+                bestSellingBrand: bestSellingBrand,
+                admin
                 // orders:orders
                 });
             })

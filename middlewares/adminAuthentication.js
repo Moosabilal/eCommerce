@@ -1,5 +1,8 @@
-const isAuthenticated = (req,res,next)=>{
+const User = require('../models/userSchema')
+const isAuthenticated = async (req,res,next)=>{
     if(req.session.admin){
+      const admin = await User.findOne({isAdmin:req.session.admin})
+        res.locals.admin = admin
       next()
     }else{
       return res.redirect('/admin/login')
