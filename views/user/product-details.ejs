@@ -581,9 +581,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Parse the stock data passed from the backend
       const stockData = <%- JSON.stringify(product.stock) %>;
+      console.log(stockData)
 
       // Find the quantity for the default selected size
       const selectedStock = stockData.find(item => item.size === selectedSize);
+      console.log(selectedStock)
 
       const availabilitySpan = document.getElementById(`availability-${productId}`);
       if (selectedStock && selectedStock.quantity > 0) {
@@ -596,22 +598,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-//   // Function to update availability dynamically on size selection
-//   function updateAvailability(productId) {
-//     const sizeSelect = document.getElementById(`product-size-${productId}`);
-//     const selectedSize = sizeSelect.value;
+  // Function to update availability dynamically on size selection
+  function updateAvailability(productId) {
+    const sizeSelect = document.getElementById(`product-size-${productId}`);
+    const selectedSize = sizeSelect.value;
 
-//     const stockData = <%- JSON.stringify(product.stock) %>;
+    const stockData = <%- JSON.stringify(product.stock) %>;
 
-//     const selectedStock = stockData.find(item => item.size === selectedSize);
+    const selectedStock = stockData.find(item => item.size === selectedSize);
 
-//     const availabilitySpan = document.getElementById(`availability-${productId}`);
-//     if (selectedStock && selectedStock.quantity > 0) {
-//       availabilitySpan.textContent = selectedStock.quantity;
-//     } else {
-//       availabilitySpan.textContent = "Out of stock";
-//     }
-//   }
+    const availabilitySpan = document.getElementById(`availability-${productId}`);
+    if (selectedStock && selectedStock.quantity > 0) {
+      availabilitySpan.textContent = selectedStock.quantity;
+    } else {
+      availabilitySpan.textContent = "Out of stock";
+    }
+  }
 
                                         
     
