@@ -8,7 +8,7 @@ const productController = require('../controllers/admin/productController');
 const orderController = require('../controllers/admin/orderController');
 const couponController = require('../controllers/admin/couponController')
 const salesController = require('../controllers/admin/salesController')
-const bannerController = require('../controllers/admin/BannerController')
+const bannerController = require('../controllers/admin/bannerController')
 
 const multer = require('multer'); 
 // const { userAuth, adminAuth } = require("../middlewares/auth");
