@@ -481,7 +481,7 @@
 <script>
     // Function to add a product to the wishlist
     async function addToWishlist(productId) {
-        console.log(Swal.version)
+        // console.log(Swal.version)
         try {
             // Sending POST request using fetch
             const response = await fetch("/addToWishlist", {
@@ -571,19 +571,15 @@
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Set initial availability when the page loads
     initializeAvailability('<%= product._id %>');
 
-    // Function to initialize availability on page load
     function initializeAvailability(productId) {
       const sizeSelect = document.getElementById(`product-size-${productId}`);
       const selectedSize = sizeSelect.value;
 
-      // Parse the stock data passed from the backend
       const stockData = <%- JSON.stringify(product.stock) %>;
       console.log(stockData)
 
-      // Find the quantity for the default selected size
       const selectedStock = stockData.find(item => item.size === selectedSize);
       console.log(selectedStock)
 
@@ -598,7 +594,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Function to update availability dynamically on size selection
   function updateAvailability(productId) {
     const sizeSelect = document.getElementById(`product-size-${productId}`);
     const selectedSize = sizeSelect.value;
