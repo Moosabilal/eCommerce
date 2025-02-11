@@ -139,6 +139,7 @@ const signup = async (req, res) => {
         const otp = generateOtp();
 
         const emailSent = await sendVerificationEmail(email,otp);
+        console.log('emailerror',emailSent)
         if(!emailSent){
             return res.json("email-error")
         }
@@ -276,7 +277,6 @@ const loadShoppingPage = async (req, res) => {
         const categories = await Category.find({ isListed: true });
         const categoryIds = categories.map((category) => category._id);
 
-        // Get query parameters
         const page = parseInt(req.query.page) || 1;
         const limit = 12;
         const skip = (page - 1) * limit;
@@ -286,34 +286,28 @@ const loadShoppingPage = async (req, res) => {
         const priceRange = req.query.price;
         const searchQuery = req.query.search;
 
-        // Base query
         let query = { isBlocked: false };
 
-        // Add category filter if selected
         if (selectedCategories.length > 0) {
             query.category = { $in: selectedCategories };
         } else {
             query.category = { $in: categoryIds };
         }
 
-        // Add color filter if selected
         if (colors.length > 0) {
             query.color = { $in: colors };
         }
 
-        // Add price filter if selected
         if (priceRange) {
             const [minPrice, maxPrice] = priceRange.split('-').map(Number);
             query.salePrice = { $gte: minPrice, $lte: maxPrice };
         }
 
-        // Add search filter if present
         if (searchQuery) {
             query.productName = { $regex: searchQuery, $options: 'i' };
         }
 
-        // Determine sort options
-        let sortOptions = { createdAt: 1 }; // Default sort
+        let sortOptions = { createdAt: 1 }; 
         if (sortBy) {
             switch (sortBy) {
                 case 'price_asc':
@@ -353,7 +347,6 @@ const loadShoppingPage = async (req, res) => {
             isSelected: selectedCategories.includes(category._id.toString())
         }));
         const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
-
         res.render('shop', {
             user: userData,
             category: categoriesWithIds,

@@ -244,11 +244,9 @@
 
 <%-include('../../views/partials/user/footer')%>
 <script>
-	// Function to toggle filter parameters
 	function toggleFilter(filterType, filterValue) {
 		const searchParams = new URLSearchParams(window.location.search);
 		
-		// Handle categories filter
 		if (filterType === 'categories') {
 			let categories = searchParams.get('categories') ? searchParams.get('categories').split(',') : [];
 			if (categories.includes(filterValue)) {
@@ -263,7 +261,6 @@
 			}
 		}
 
-		// Handle sort filter
 		if (filterType === 'sort') {
 			if (searchParams.get('sort') === filterValue) {
 				searchParams.delete('sort');
@@ -272,7 +269,6 @@
 			}
 		}
 
-		// Handle colors filter
 		if (filterType === 'colors') {
 			let colors = searchParams.get('colors') ? searchParams.get('colors').split(',') : [];
 			if (colors.includes(filterValue)) {
@@ -287,7 +283,7 @@
 			}
 		}
 
-		// Handle price filter
+	
 		if (filterType === 'price') {
 			if (searchParams.get('price') === filterValue) {
 				searchParams.delete('price');
@@ -296,7 +292,6 @@
 			}
 		}
 
-		// Update the URL without reloading the page
 		const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
 		window.history.pushState({ path: newUrl }, '', newUrl);
 
