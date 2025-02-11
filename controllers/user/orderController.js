@@ -124,6 +124,7 @@ const generateInvoice = (order, res) => {
 const PostPlaceOrder = async (req, res) => {
     try {
         const {addressId, shipping, payment, parentAddressId, finalAmount, subtotal, shippingValue, discountValue, taxValue, paymentMethod, paymentStatus, razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
+        console.log(req.body)
 
         const user = req.session.user;
         const cart = await Cart.findOne({ userId: user }).populate('items.productId')
