@@ -287,6 +287,7 @@ const changePasswordValid = async (req,res)=>{
         if(userExists){
             const otp = generateOtp();
             const emailSent = await sendVerificationEmail(email,otp);
+            console.log('th')
             if(emailSent){
                 req.session.userOtp =  otp;
                 req.session.email = email;
