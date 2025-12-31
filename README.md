@@ -1,6 +1,6 @@
 # 🛍️ Eagleswing - Fashion E-Commerce Platform
 
-A fully functional B2C e-commerce application built using the **EJS, Node.js, MongoDB, Express.js (Monolithic)** with **Server-Side Rendering (SSR)**.
+A fully functional B2C e-commerce application built using **EJS, Node.js, MongoDB, Express.js (Monolithic)** with **Server-Side Rendering (SSR)**.
 
 This project implements the classic **MVC (Model-View-Controller)** architecture to organize code efficiently, featuring a robust Admin Dashboard, secure payments via Razorpay, and a custom wallet system.
 
@@ -46,13 +46,13 @@ This application follows the **Model-View-Controller** design pattern to separat
 ---
 
 ## 📸 Screenshots
-![Home page]<img width="1905" height="918" alt="image" src="https://github.com/user-attachments/assets/bec746d3-c196-4d62-8891-ac8654cef7a7" />
-![Profile page]<img width="1905" height="918" alt="image" src="https://github.com/user-attachments/assets/efd2e0dd-e0a8-4823-882d-0f6abeb7466a" />
-![Orders Details page]<img width="1905" height="918" alt="image" src="https://github.com/user-attachments/assets/42b0cb6c-5d60-471e-8cf5-43584f54445d" />
 
-
-
-*(Add screenshots here of your Home Page, Product Details, and Admin Dashboard)*
+| Page | Preview |
+| :--- | :--- |
+| **Home Page** | <img src="https://github.com/user-attachments/assets/bec746d3-c196-4d62-8891-ac8654cef7a7" alt="Home page" width="100%"> |
+| **Profile Page** | <img src="https://github.com/user-attachments/assets/efd2e0dd-e0a8-4823-882d-0f6abeb7466a" alt="Profile page" width="100%"> |
+| **Order Details** | <img src="https://github.com/user-attachments/assets/42b0cb6c-5d60-471e-8cf5-43584f54445d" alt="Orders Details page" width="100%"> |
+| **Admin Dashboard** | <img src="https://github.com/user-attachments/assets/c4b38e92-676a-4ec5-95b4-040feb90f642" alt="Admin Dashboard" width="100%"> |
 
 ---
 
@@ -62,5 +62,81 @@ Follow these steps to run the project locally.
 
 ### 1. Clone the Repository
 ```bash
-git clone [https://github.com/yourusername/eagleswing.git](https://github.com/yourusername/eagleswing.git
+git clone [https://github.com/Moosabilal/eCommerce.git](https://github.com/Moosabilal/eCommerce.git)
 cd eagleswing
+
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+
+```
+
+### 3. Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+PORT=3000
+MONGO_URI=your_mongodb_connection_string
+SESSION_SECRET=your_random_session_secret
+
+# Payment Gateway
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+
+# Google Auth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=your_google_callback_url
+
+# Email Service (OTP)
+NODEMAILER_EMAIL=your_email_for_otp
+NODEMAILER_PASSWORD=your_email_app_password
+
+```
+
+### 4. Start the Application
+
+```bash
+npm run dev
+
+```
+
+---
+
+## 📂 Project Structure (MVC)
+
+```text
+eagleswing/
+├── config/             # Database & Passport config
+├── controllers/        # Business Logic (User, Admin, Product controllers)
+├── models/             # Mongoose Schemas (Data Layer)
+├── routes/             # Express Routes
+├── views/              # EJS Templates (UI Layer)
+│   ├── user/           # User-facing pages
+│   ├── admin/          # Admin dashboard pages
+│   └── partials/       # Reusable headers/footers
+├── public/             # Static files (CSS, Images, JS)
+├── middleware/         # Auth & Validation middleware
+└── app.js              # Server Entry Point
+
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request.
+
+---
+
+### 📬 Contact
+
+**Moosa K A** [LinkedIn](https://www.google.com/search?q=https://www.linkedin.com/in/moosa-k-a-898300257) | [Portfolio](https://my-portfolio-eight-delta-akilc77lz3.vercel.app/projects)
+
+```
+
+```
