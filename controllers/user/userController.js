@@ -96,7 +96,8 @@ const loadSignup = async (req,res)=>{
 async function sendVerificationEmail(email,otp){
     try {
         const transporter = nodeMailer.createTransport({
-            service:'gmail',
+            host:'smtp.gmail.com',
+            service:'Gmail',
             port:465,
             secure:true,
             requireTLS:true,
