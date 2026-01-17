@@ -97,8 +97,8 @@ async function sendVerificationEmail(email,otp){
     try {
         const transporter = nodeMailer.createTransport({
             service:'gmail',
-            port:587,
-            secure:false,
+            port:465,
+            secure:true,
             requireTLS:true,
             auth:{
                 user:process.env.NODEMAILER_EMAIL,
