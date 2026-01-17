@@ -97,7 +97,6 @@ async function sendVerificationEmail(email,otp){
     try {
         const transporter = nodeMailer.createTransport({
             host:'smtp.gmail.com',
-            service:'Gmail',
             port:465,
             secure:true,
             requireTLS:true,
@@ -111,7 +110,6 @@ async function sendVerificationEmail(email,otp){
             from:process.env.NODEMAILER_EMAIL,
             to:email,
             subject:"Verify your account",
-            text:`Your OTP is ${otp}`,
             html:`<b>Your OTP: ${otp}</b>`,
         })
 
