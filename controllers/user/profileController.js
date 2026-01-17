@@ -49,7 +49,45 @@ const sendVerificationEmail= async (email,otp)=>{
             to:email,
             subject:"Your OTP for password reset",
             text:`Your OTP is ${otp} Please enter this OTP to reset your password`,
-            html:`<b><h4>Your OTP : ${otp}</h4><br></b>`
+            html: `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Password Reset</title>
+                    <style>
+                        body { font-family: Helvetica, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+                        .container { max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+                        .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
+                        .header h1 { color: #333; margin: 0; font-size: 24px; }
+                        .content { text-align: center; color: #555; line-height: 1.6; }
+                        .otp-box { background-color: #fdf2f2; color: #d9534f; font-size: 32px; font-weight: bold; letter-spacing: 5px; padding: 15px 20px; border-radius: 5px; border: 1px dashed #d9534f; display: inline-block; margin: 20px 0; }
+                        .warning { font-size: 13px; color: #888; margin-top: 20px; }
+                        .footer { text-align: center; font-size: 12px; color: #aaa; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Password Reset Request</h1>
+                        </div>
+                        <div class="content">
+                            <p>Hello,</p>
+                            <p>We received a request to reset the password for your <strong>EagleSwing</strong> account.</p>
+                            <p>Use the OTP below to proceed:</p>
+                            
+                            <div class="otp-box">${otp}</div>
+                            
+                            <p class="warning">This code is valid for 10 minutes. If you did not request a password reset, please ignore this email or contact support.</p>
+                        </div>
+                        <div class="footer">
+                            <p>&copy; ${new Date().getFullYear()} EagleSwing Shop. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `
         }
 
         const info = await transporter.sendMail(mailOptions);
