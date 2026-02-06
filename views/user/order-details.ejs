@@ -1,89 +1,132 @@
-
 <%- include('../../views/partials/user/header') %>
 <%- include('../../views/partials/user/profile-sidebar') %>
 
 <style>
-   .main-content {
+  .main-content {
     background-color: rgb(230, 244, 230);
     margin-left: 16.4%;
     padding: 40px 30px;
     margin-top: 0px;
     border-radius: 8px;
+    min-height: 100vh;
   }
+
   .order-container {
     margin: 2rem auto;
-    max-width: 90%;
+    max-width: 100%;
   }
 
   .order-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.order-row-left {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.details {
-  flex: 1;
-  margin-left: 1rem;
-}
-
-  .order-row .details {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    gap: 1rem;
+  }
+
+  .order-products-section {
+    flex: 1 1 100%;
+    min-width: 280px;
+  }
+
+  .product-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .product-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .product-image-wrapper {
+    flex-shrink: 0;
+    width: 100px;
+    margin-right: 1rem;
+  }
+
+  .product-image-wrapper img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .product-details {
     flex: 1;
-    margin-left: 1rem;
+    min-width: 0;
   }
 
-  .order-row h5 {
-    margin: 0;
-    color: #333;
-    font-size: 1rem;
-  }
-
-  .order-row p {
-    margin: 0;
+  .product-details p {
+    margin: 0.25rem 0;
     font-size: 0.9rem;
     color: #555;
   }
 
-  .priceDetails {
-  flex: 1;
-  margin-left: 1rem;
-}
+  .product-details strong {
+    color: #333;
+  }
 
+  .order-info-section {
+    flex: 1 1 200px;
+    min-width: 200px;
+  }
 
+  .order-info-section h5 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1rem;
+    word-break: break-word;
+  }
 
-  .order-row .actions {
+  .order-info-section p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .order-status-section {
+    flex: 1 1 200px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .status-info {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    align-items: flex-end;
   }
 
-  .order-row .status {
+  .status-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .status {
     font-weight: bold;
-    padding: 0.3rem 0.6rem;
+    padding: 0.3rem 0.8rem;
     border-radius: 4px;
     color: #fff;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    display: inline-block;
   }
-  .status {
-  font-weight: bold;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  color: #fff;
-}
 
   .status.Pending {
     background-color: #ffc107;
@@ -106,28 +149,267 @@
   }
 
   .status.Return_Requested {
-  background-color: #ffc107;
-}
+    background-color: #ffc107;
+  }
 
   .status.Returned {
     background-color: #6c757d;
   }
+
   .status.Completed {
     background-color: #28a745;
   }
-  div.priceDetails{
-    margin-right: 25%;
+
+  .order-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
-  @media (max-width: 768px) {
+
+  .order-actions .btn {
+    flex: 1 1 auto;
+    min-width: 100px;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+  }
+
+  .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+  }
+
+  .no-orders {
+    text-align: center;
+    padding: 3rem 1rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .no-orders h5 {
+    color: #333;
+    margin-bottom: 1rem;
+  }
+
+  .no-orders p {
+    color: #666;
+  }
+
+  .text-primary {
+    color: #007bff !important;
+  }
+
+  .bread-crumb {
+    margin-left: 0;
+    margin-bottom: 1rem;
+    padding: 1rem 0;
+  }
+
+  /* Tablet Styles (768px - 1024px) */
+  @media (max-width: 1024px) {
     .main-content {
       margin-left: 0;
-      padding: 20px;
+      padding: 30px 20px;
+    }
+
+    .order-row {
+      padding: 1.25rem;
+    }
+
+    .order-products-section {
+      flex: 1 1 100%;
+    }
+
+    .order-info-section,
+    .order-status-section {
+      flex: 1 1 45%;
+    }
+  }
+
+  /* Mobile Styles (481px - 767px) */
+  @media (max-width: 767px) {
+    .main-content {
+      margin-left: 0;
+      padding: 20px 15px;
+    }
+
+    .order-container {
+      margin: 1rem auto;
+    }
+
+    .order-row {
+      flex-direction: column;
+      padding: 1rem;
+    }
+
+    .order-products-section,
+    .order-info-section,
+    .order-status-section {
+      flex: 1 1 100%;
+      min-width: 100%;
+    }
+
+    .product-image-wrapper {
+      width: 80px;
+      margin-right: 0.75rem;
+    }
+
+    .product-details p {
+      font-size: 0.85rem;
+    }
+
+    .order-info-section h5 {
+      font-size: 0.95rem;
+    }
+
+    .order-info-section p {
+      font-size: 0.85rem;
+    }
+
+    .status-info p {
+      font-size: 0.85rem;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.6rem;
+    }
+
+    .order-actions {
+      flex-direction: column;
+    }
+
+    .order-actions .btn {
+      width: 100%;
+      min-width: 100%;
+    }
+
+    .bread-crumb {
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Small Mobile Styles (320px - 480px) */
+  @media (max-width: 480px) {
+    .main-content {
+      padding: 15px 10px;
+    }
+
+    .order-row {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .product-item {
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .product-image-wrapper {
+      width: 100%;
+      max-width: 150px;
+      margin-right: 0;
+      margin-bottom: 0.75rem;
+    }
+
+    .product-details {
+      width: 100%;
+    }
+
+    .product-details p {
+      font-size: 0.8rem;
+    }
+
+    .order-info-section h5 {
+      font-size: 0.9rem;
+    }
+
+    .order-info-section p,
+    .status-info p {
+      font-size: 0.8rem;
+    }
+
+    .status {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+    }
+
+    .order-actions .btn {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.8rem;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .bread-crumb {
+      font-size: 0.85rem;
+      padding: 0.5rem 0;
+    }
+  }
+
+  /* Extra Small Devices (below 320px) */
+  @media (max-width: 319px) {
+    .main-content {
+      padding: 10px 5px;
+    }
+
+    .order-row {
+      padding: 0.5rem;
+    }
+
+    .product-details p,
+    .order-info-section p,
+    .status-info p {
+      font-size: 0.75rem;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+    }
+  }
+
+  /* Landscape Mobile */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .main-content {
+      padding: 20px 15px;
+    }
+
+    .order-row {
+      padding: 1rem;
+    }
+  }
+
+  /* Print Styles */
+  @media print {
+    .main-content {
+      margin-left: 0;
+      background-color: #fff;
+    }
+
+    .order-actions,
+    .btn {
+      display: none;
     }
   }
 </style>
 
 <div class="main-content">
-  <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg" style="margin-left: 10%;">
+  <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
     <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
       Home
       <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
@@ -153,36 +435,34 @@
       
       <% for (const orderId in ordersGrouped) { 
         const orderGroup = ordersGrouped[orderId]; 
-        const order = orderGroup[0]; // Assuming all items have the same orderId
+        const order = orderGroup[0];
       %>
         <div class="order-row">
-          <div class="col-md-5">
+          <!-- Products Section -->
+          <div class="order-products-section">
             <% orderGroup.forEach(product => { %>
-              <a href="/orderedProducts?parentAddressId=<%= order.parentAddressId %>&orderId=<%=order._id%>" style="text-decoration: none;">
-
-              <div class="row align-items-center mb-4"> 
-                <div class="col-md-4 text-center">
-                  <img src="uploads/product-images/<%= product.productDetails.productImage[0] %>" 
-                       alt="Product Image" 
-                       class="img-fluid rounded" 
-                       style="max-width: 100px;">
+              <a href="/orderedProducts?parentAddressId=<%= order.parentAddressId %>&orderId=<%=order._id%>" style="text-decoration: none; color: inherit;">
+                <div class="product-item">
+                  <div class="product-image-wrapper">
+                    <img src="uploads/product-images/<%= product.productDetails.productImage[0] %>" 
+                         alt="Product Image" 
+                         class="img-fluid">
+                  </div>
+                  <div class="product-details">
+                    <p><strong>Product Name:</strong> <%= product.productDetails.productName %></p>
+                    <p><strong>Price:</strong> ₹<%= product.orderItems.price %></p>
+                    <p><strong>Quantity:</strong> <%= product.orderItems.quantity %></p>
+                    <p><strong>Total:</strong> <span class="text-primary">₹<%= product.orderItems.totalPrice %></span></p>
+                  </div>
                 </div>
-                <div class="col-md-3" style="width: 60%;">
-                  <p class="mb-1"><strong>Product Name:</strong> <%= product.productDetails.productName %></p>
-                  <p class="mb-1"><strong>Price:</strong> ₹<%= product.orderItems.price %></p>
-                  <p class="mb-1"><strong>Quantity:</strong> <%= product.orderItems.quantity %></p>
-                  <p class="mb-1"><strong>Total:</strong> <span class="text-primary">₹<%= product.orderItems.totalPrice %></span></p>
-                </div>
-              </div>
-            </a>
+              </a>
             <% }); %>
           </div>
           
-  
           <!-- Order Info Section -->
-          <div class="col-md-4 details" style="width: 20%;">
+          <div class="order-info-section">
             <h5>Order ID: <span class="text-primary"><%= order.orderId %></span></h5>
-            <p><strong>finalAmount:</strong> <span class="text-primary">₹<%= order.finalAmount %></span></p>
+            <p><strong>Final Amount:</strong> <span class="text-primary">₹<%= order.finalAmount %></span></p>
             <p><strong>Address Type:</strong>
               <% if(addressData){ %>
                 <% addressData.forEach(address => { %>
@@ -191,34 +471,39 @@
                   <% } %>
                 <% }); %>
               <% } else { %>
-                <p>No Data Found</p>
+                No Data Found
               <% } %>
             </p>
             <p><strong>Date:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></p>
             <% if(order.paymentStatus!=='Completed' && order.status!=='Cancelled' && order.status!=='Returned' && order.status !== 'Return_Requested') { %>
-              <button class="btn btn-primary w-50" onclick="payRazorpayAmount('<%= order.razorpay_order_id %>')">Pay Now</button>
-            <% }else { %>
-              <p> </p>
-              <% } %>
-
+              <button class="btn btn-primary" onclick="payRazorpayAmount('<%= order.razorpay_order_id %>')">Pay Now</button>
+            <% } %>
           </div>
   
           <!-- Status and Actions Section -->
-          <div class="col-md-3 justify-content-left" style="display: flex; flex-direction: column; gap: 10px;">
-            <div class="details">
-              <p><strong>Status :&nbsp;</strong><span class="status <%= order.status %> m-l-17"><%= order.status %></span></p>
-              <p><strong>Payment :&nbsp;</strong><span class="status <%= order.paymentStatus %>"><%= order.paymentStatus %></span></p>
+          <div class="order-status-section">
+            <div class="status-info">
+              <p><strong>Status:</strong> <span class="status <%= order.status %>"><%= order.status %></span></p>
+              <p><strong>Payment:</strong> <span class="status <%= order.paymentStatus %>"><%= order.paymentStatus %></span></p>
             </div>
-            <div class="actions" style="display: flex; flex-direction: row; gap: 10px;">
+            <div class="order-actions">
               <% if(order.status === 'Delivered'){ %>
-              <button class="btn btn-danger btn-sm return-order" data-order-id="<%= order._id %>" data-order-quantity="<%= order.orderItems.quantity %>" data-product-id="<%= order.orderItems.productId %>" data-product-size="<%= order.orderItems.size %>">
-                Return
-              </button>
+                <button class="btn btn-danger btn-sm return-order" 
+                        data-order-id="<%= order._id %>" 
+                        data-order-quantity="<%= order.orderItems.quantity %>" 
+                        data-product-id="<%= order.orderItems.productId %>" 
+                        data-product-size="<%= order.orderItems.size %>">
+                  Return
+                </button>
               <% } %>
               <% if(order.status === 'Pending' || order.status === 'Processing') { %>
-              <button class="btn btn-danger btn-sm cancel-order" data-order-id="<%= order._id %>" data-order-quantity="<%= order.orderItems.quantity %>" data-product-id="<%= order.orderItems.productId %>" data-product-size="<%= order.orderItems.size %>">
-                Cancel
-              </button>
+                <button class="btn btn-danger btn-sm cancel-order" 
+                        data-order-id="<%= order._id %>" 
+                        data-order-quantity="<%= order.orderItems.quantity %>" 
+                        data-product-id="<%= order.orderItems.productId %>" 
+                        data-product-size="<%= order.orderItems.size %>">
+                  Cancel
+                </button>
               <% } %>
             </div>
           </div>
@@ -227,115 +512,16 @@
     <% } else { %>
       <div class="no-orders">
         <h5>No orders found</h5>
-        <p>It seems like you haven’t placed any orders yet.</p>
+        <p>It seems like you haven't placed any orders yet.</p>
       </div>
     <% } %>
   </div>
-
 </div>
+
 <%- include('../../views/partials/user/footer') %>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-
-
 <script>
-// document.addEventListener('DOMContentLoaded', function () {
-//     // Cancel order logic
-//     document.querySelectorAll('.cancel-order').forEach(button => {
-//       button.addEventListener('click', function () {
-//         event.preventDefault();
-
-//         const orderId = this.getAttribute('data-order-id');
-//         const productId = this.getAttribute('data-product-id');
-//         const orderQuantity = this.getAttribute('data-order-quantity');
-//         const orderSize = this.getAttribute('data-product-size');
-//         Swal.fire({
-//           title: 'Cancel Order?',
-//           text: `Are you sure you want to cancel order ID: ${orderId}?`,
-//           icon: 'warning',
-//           showCancelButton: true,
-//           confirmButtonColor: '#d33',
-//           cancelButtonColor: '#3085d6',
-//           confirmButtonText: 'Yes, cancel it!',
-//         }).then((result) => {
-//           if (result.isConfirmed) {
-//             fetch("/cancelOrder", {
-//               method: 'POST',
-//               headers: {
-//                 'Content-Type': 'application/json',
-//               },
-//               body: JSON.stringify({ orderId, productId, orderQuantity, orderSize }),
-//             })
-//             .then(response => response.json())
-//             .then(data => {
-//               if (data.success) {
-//                 Swal.fire('Cancelled!', `Order ${orderId} has been cancelled.`, 'success');
-//                 const statusElement = button.closest('.order-row').querySelector('.status');
-//                 statusElement.textContent = 'Cancelled';
-//                 statusElement.className = 'status Cancelled';
-//                 window.location.reload();
-//               } else {
-//                 Swal.fire('Sorry!', data.message, 'warning');
-//               }
-//             })
-//             .catch(error => {
-//               console.error(error.message);
-//               Swal.fire('Error!', 'There was a problem cancelling your order. Please try again.', 'error');
-//             });
-//           }
-//         });
-//       });
-//     });
-
-//     //return order
-//     document.querySelectorAll('.return-order').forEach(button => {
-//       button.addEventListener('click', function () {
-//         event.preventDefault();
-
-//         const orderId = this.getAttribute('data-order-id');
-//         const productId = this.getAttribute('data-product-id');
-//         const orderQuantity = this.getAttribute('data-order-quantity');
-//         const orderSize = this.getAttribute('data-product-size');
-//         Swal.fire({
-//           title: 'Return Order?',
-//           text: `Are you sure you want to Return order ID: ${orderId}?`,
-//           icon: 'warning',
-//           showCancelButton: true,
-//           confirmButtonColor: '#d33',
-//           cancelButtonColor: '#3085d6',
-//           confirmButtonText: 'Yes, Return it!',
-//         }).then((result) => {
-//           if (result.isConfirmed) {
-//             fetch("/returnOrder", {
-//               method: 'POST',
-//               headers: {
-//                 'Content-Type': 'application/json',
-//               },
-//               body: JSON.stringify({ orderId, productId, orderQuantity, orderSize }),
-//             })
-//             .then(response => response.json())
-//             .then(data => {
-//               if (data.success) {
-//                 Swal.fire('Returned!', `Order ${orderId} has been Returned.`, 'success');
-//                 const statusElement = button.closest('.order-row').querySelector('.status');
-//                 statusElement.textContent = 'Returned';
-//                 statusElement.className = 'status Returned';
-//               } else {
-//                 Swal.fire('Sorry!', data.message, 'warning');
-//               }
-//             })
-//             .catch(error => {
-//               console.error(error.message);
-//               Swal.fire('Error!', 'There was a problem Returning your order. Please try again.', 'error');
-//             });
-//           }
-//         });
-//       });
-//     });
-
-//   });
-
-
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.cancel-order, .return-order').forEach(button => {
     button.addEventListener('click', function (event) {
@@ -356,7 +542,6 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmButtonText: `Yes, ${action} it!`,
       }).then((result) => {
         if (result.isConfirmed) {
-          // Show the reason input after confirmation
           Swal.fire({
             title: `${action === 'cancel' ? 'Cancel' : 'Return'} Order Reason`,
             input: 'textarea',
@@ -376,7 +561,6 @@ document.addEventListener('DOMContentLoaded', function () {
               const orderQuantity = this.getAttribute('data-order-quantity');
               const orderSize = this.getAttribute('data-product-size');
 
-              // Send the order data along with the return reason to the backend
               fetch(`/${action}Order`, {
                 method: 'POST',
                 headers: {
@@ -392,34 +576,28 @@ document.addEventListener('DOMContentLoaded', function () {
                   console.log('data',data)
                   Swal.fire(successText, `Order ${orderId} has been ${action}ed. Reason: ${reason}`, 'success');
                   console.log('return request',data.returnStatus)
-                  // Update status in the UI
+                  
                   const orderRow = button.closest('.order-row');
                   const statusElement = orderRow.querySelector('.status');
                   if (action === 'cancel') {
                     statusElement.textContent = 'Cancelled';
                     statusElement.className = 'status Cancelled';
                     const payNowButton = orderRow.querySelector('button.btn-primary');
-                  if (payNowButton) {
-                    payNowButton.remove();
-                  }
+                    if (payNowButton) {
+                      payNowButton.remove();
+                    }
                   } else {
                     statusElement.textContent = data.returnStatus; 
                     statusElement.className = `status ${statusElement.textContent}`;
-                    const returnButton = orderRow.querySelector('.btn.btn-danger.btn-sm.return-order'); // Fixed the selector
+                    const returnButton = orderRow.querySelector('.btn.btn-danger.btn-sm.return-order');
                     if (returnButton) {
                       returnButton.remove();
-                      }
-                      const payNowButton = orderRow.querySelector('button.btn-primary');
-
-                      if (payNowButton) {
-                    payNowButton.remove();
+                    }
+                    const payNowButton = orderRow.querySelector('button.btn-primary');
+                    if (payNowButton) {
+                      payNowButton.remove();
+                    }
                   }
-                      
-                    
-                  }
-
-                  
-
                 } else {
                   Swal.fire('Sorry!', data.message, 'warning');
                 }
@@ -436,82 +614,75 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+async function payRazorpayAmount(razorpay_order_id) {
+  console.log(razorpay_order_id)
+  try {
+    const options = {
+      key: '<%= process.env.RAZORPAY_KEY_ID %>', 
+      order_id: razorpay_order_id,
+      name: "Your Store",
+      description: "Complete your payment",
+      handler: async function (response) {
+        console.log("Payment Response:", response);
 
-
-    async function payRazorpayAmount(razorpay_order_id) {
-      console.log(razorpay_order_id)
-    try {
-        const options = {
-            key: '<%= process.env.RAZORPAY_KEY_ID %>', 
-            order_id: razorpay_order_id,
-            name: "Your Store",
-            description: "Complete your payment",
-            handler: async function (response) {
-                console.log("Payment Response:", response);
-
-                const verifyResponse = await fetch('/verify-payment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_signature: response.razorpay_signature
-                    }),
-                });
-
-                const result = await verifyResponse.json();
-
-                if (result.success) {
-                    Swal.fire({
-                        title: "Payment Successful!",
-                        text: "Your order has been updated.",
-                        icon: "success",
-                        timer: 2000
-                    }).then(() => {
-                        window.location.reload(); // Reload to reflect payment update
-                    });
-                } else {
-                    Swal.fire({
-                        title: "Payment Failed!",
-                        text: "Verification failed. Please try again.",
-                        icon: "error"
-                    });
-                }
-            },
-            prefill: {
-                email: "customer@example.com",
-                contact: "9999999999"
-            },
-            theme: {
-                color: "#3399cc"
-            },
-            modal: {
-                    ondismiss: function () {
-                        Swal.fire({
-                            title: 'Payment Failed!',
-                            text: 'Failed to complete the payment.',
-                            icon: 'warning',
-                            showConfirmButton: true
-                        })
-                    }
-                }
-        };
-
-        const rzp = new Razorpay(options);
-        rzp.open();
-
-    } catch (error) {
-        console.error("Error in payRazorpayAmount:", error);
-        Swal.fire({
-            title: "Error!",
-            text: "Something went wrong while processing payment.",
-            icon: "error"
+        const verifyResponse = await fetch('/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          }),
         });
-    }
+
+        const result = await verifyResponse.json();
+
+        if (result.success) {
+          Swal.fire({
+            title: "Payment Successful!",
+            text: "Your order has been updated.",
+            icon: "success",
+            timer: 2000
+          }).then(() => {
+            window.location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: "Payment Failed!",
+            text: "Verification failed. Please try again.",
+            icon: "error"
+          });
+        }
+      },
+      prefill: {
+        email: "customer@example.com",
+        contact: "9999999999"
+      },
+      theme: {
+        color: "#3399cc"
+      },
+      modal: {
+        ondismiss: function () {
+          Swal.fire({
+            title: 'Payment Failed!',
+            text: 'Failed to complete the payment.',
+            icon: 'warning',
+            showConfirmButton: true
+          })
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+
+  } catch (error) {
+    console.error("Error in payRazorpayAmount:", error);
+    Swal.fire({
+      title: "Error!",
+      text: "Something went wrong while processing payment.",
+      icon: "error"
+    });
+  }
 }
-
-
-  
 </script>
-
-

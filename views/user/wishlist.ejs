@@ -1,14 +1,52 @@
 <%- include('../partials/user/header') %>
+
+<style>
+    /* Custom styles for wishlist responsiveness */
+    .wishlist-row {
+        transition: transform 0.2s ease;
+    }
+    .wishlist-row:hover {
+        transform: translateY(-2px);
+    }
+    .wishlist-image {
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    /* Mobile specific adjustments */
+    @media (max-width: 768px) {
+        .wishlist-row {
+            flex-direction: column !important; /* Stack vertically */
+            align-items: flex-start !important;
+            text-align: left;
+        }
+        .wishlist-actions-wrapper {
+            width: 100%;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 15px !important;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .wishlist-buttons {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+        }
+        .wishlist-buttons button {
+            flex: 1; /* Make buttons equal width on mobile */
+        }
+    }
+</style>
+
 <div class="container">
     <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
         <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
             Home
             <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
         </a>
-
-        <span class="stext-109 cl4">
-            My Wishlist
-        </span>
+        <span class="stext-109 cl4">My Wishlist</span>
     </div>
 </div>
 
@@ -17,52 +55,63 @@
 
     <% if (wishlist.length > 0) { %>
         <% for (let product of wishlist) { %>
-        <!-- Single Wishlist Row -->
         <div class="wishlist-row d-flex align-items-center justify-content-between border rounded p-3 mb-3 shadow-sm bg-white">
-            <!-- Product Image and Details -->
+            
             <div class="d-flex align-items-center gap-3">
-                <img src="uploads/product-images/<%= product.productImage[0] %>" class="wishlist-image" style="height: 120px; width: 100px;" alt="<%= product.productName %>">
+                <img src="uploads/product-images/<%= product.productImage[0] %>" 
+                     class="wishlist-image" 
+                     style="height: 100px; width: 90px;" 
+                     alt="<%= product.productName %>">
                 <div>
-                    <p class="wishlist-title mb-1"><%= product.productName %></p>
-                    <p class="wishlist-price mb-0">
-                        <span class="text-muted">Category: </span><%= product.category.name %>
+                    <h6 class="wishlist-title mb-1 fw-bold text-dark"><%= product.productName %></h6>
+                    <p class="mb-0 text-muted" style="font-size: 0.9rem;">
+                        Category: <%= product.category.name %>
                     </p>
                     <% if (product.stock.some(item => item.quantity > 0)) { %>
-                        <p class="text-success mb-0"><small>In Stock</small></p>
+                        <span class="badge bg-light text-success border border-success mt-1">In Stock</span>
                     <% } else { %>
-                        <p class="text-danger mb-0"><small>Out of Stock</small></p>
+                        <span class="badge bg-light text-danger border border-danger mt-1">Out of Stock</span>
                     <% } %>
-            
                 </div>
             </div>
-            <!-- Price and Actions -->
-            <div class="d-flex align-items-center  gap-4">
-                <!-- Price -->
-                <p class="wishlist-price mb-0 fw-bold" >Price : &#8377;<%= product.salePrice %></p>
-                <!-- Buttons -->
-                <div class="d-flex gap-2">
-                    <button class="btn btn-success btn-sm" onclick="addToCart('<%= product._id %>','<%= product.stock[0].size %>')">
-                        <i class="fas fa-cart-plus"></i> Move to Cart
+
+            <div class="wishlist-actions-wrapper d-flex align-items-center gap-4">
+                <div class="text-nowrap">
+                    <p class="wishlist-price mb-0 fw-bold fs-5 text-primary">
+                        &#8377;<%= product.salePrice %>
+                    </p>
+                </div>
+                
+                <div class="wishlist-buttons d-flex gap-2">
+                    <button class="btn btn-success btn-sm d-flex align-items-center gap-1" 
+                            onclick="addToCart('<%= product._id %>','<%= product.stock[0].size %>')">
+                        <i class="fas fa-cart-plus"></i> <span class="d-none d-sm-inline">Move to Cart</span>
+                        <span class="d-inline d-sm-none">Add</span>
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="confirmRemove('<%= product._id %>')">
-                        <i class="fas fa-trash"></i> Remove
+                    <button class="btn btn-outline-danger btn-sm" 
+                            onclick="confirmRemove('<%= product._id %>')">
+                        <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </div>
         </div>
         <% } %>
     <% } else { %>
-    <!-- Empty Wishlist Message -->
-    <div class="d-flex justify-content-center align-items-center vh-100">
-        <div class="card shadow-sm text-center p-4" style="width: 24rem;">
-            <h5 class="card-title mb-3">No Items Found in Wishlist</h5>
-            <p class="text-muted">Your wishlist is currently empty. Start adding your favorite products!</p>
+    <div class="d-flex justify-content-center align-items-center" style="min-height: 50vh;">
+        <div class="card shadow-sm text-center p-5 border-0" style="max-width: 400px; width: 100%;">
+            <div class="mb-3">
+                <i class="far fa-heart fa-4x text-muted"></i>
+            </div>
+            <h5 class="card-title mb-2">Your wishlist is empty</h5>
+            <p class="text-muted mb-4">Looks like you haven't added anything yet.</p>
+            <a href="/shop" class="btn btn-primary rounded-pill">Start Shopping</a>
         </div>
     </div>
     <% } %>
 </div>
 
 <%- include('../partials/user/footer') %>
+
 <script>
     function confirmRemove(productId){
         Swal.fire({
@@ -70,7 +119,9 @@
             text:"Do you want to remove this product from wishlist?",
             icon:"warning",
             showCancelButton:true,
-            confirmButtonText:"Yes, delete it!"
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText:"Yes, remove it!"
         }).then((result)=>{
             if(result.isConfirmed){
                 window.location.href=`/removeFromWishlist/?productId=${productId}`;
@@ -82,9 +133,7 @@
         try {
             const response = await fetch('/addToCart',{
                 method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
-                },
+                headers:{"Content-Type":"application/json"},
                 body:JSON.stringify({
                     productId:productId,
                     size: size,
@@ -98,26 +147,21 @@
                     text:data.message,
                     icon:"success",
                     timer:1500,
-                    showCancelButton:false
+                    showConfirmButton:false
                 })
             }else{
                 Swal.fire({
                     title:"Warning",
                     text:data.message,
-                    icon:"info",
-                    timer:1500,
-                    showCancelButton:false
+                    icon:"info"
                 })
             }
-             } catch (error) {
-                Swal.fire({
-                    title:"Error",
-                    text:"There was an error adding to the cart",
-                    icon:"info",
-                    timer:1500,
-                    showCancelButton:false
-                })
-                console.log('Error in adding to cart',error)
+        } catch (error) {
+            Swal.fire({
+                title:"Error",
+                text:"There was an error adding to the cart",
+                icon:"error"
+            })
         }
     }
 </script>
