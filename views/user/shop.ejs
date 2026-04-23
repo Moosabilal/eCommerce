@@ -9,10 +9,19 @@
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
   /* ── Page background ── */
-  body {
-    background: linear-gradient(135deg, #f8f9fc 0%, #eef1f8 100%) !important;
+  html, body {
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+  html {
+    background: linear-gradient(135deg, #f8f9fc 0%, #eef1f8 100%) no-repeat center center fixed !important;
+    background-size: cover !important;
+  }
+  body, body.animsition {
+    background: transparent !important;
     font-family: 'Inter', sans-serif !important;
   }
+
 
   /* ── Hero banner strip ── */
   .shop-hero-banner {
