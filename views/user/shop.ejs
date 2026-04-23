@@ -1,343 +1,690 @@
-<%-include('../../views/partials/user/header')%>
+<%- include('../../views/partials/user/header') %>
 
+<style>
+  /* ============================================================
+     SHOP PAGE — PREMIUM REDESIGN
+     All styles scoped to shop-specific elements
+  ============================================================ */
+
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  /* ── Page background ── */
+  body {
+    background: linear-gradient(135deg, #f8f9fc 0%, #eef1f8 100%) !important;
+    font-family: 'Inter', sans-serif !important;
+  }
+
+  /* ── Hero banner strip ── */
+  .shop-hero-banner {
+    background: linear-gradient(120deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    padding: 48px 0 36px;
+    margin-bottom: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .shop-hero-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(229,57,53,.18) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(100,181,246,.12) 0%, transparent 50%);
+  }
+  .shop-hero-banner .hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .shop-hero-banner h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .shop-hero-banner p {
+    font-size: .95rem;
+    color: rgba(255,255,255,.65);
+    margin: 0;
+  }
+  .shop-hero-banner .breadcrumb-strip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    font-size: .8rem;
+    color: rgba(255,255,255,.5);
+  }
+  .shop-hero-banner .breadcrumb-strip a {
+    color: rgba(255,255,255,.6);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .shop-hero-banner .breadcrumb-strip a:hover { color: #e57373; }
+  .shop-hero-banner .breadcrumb-strip .sep { opacity: .4; }
+
+  /* ── Main shop wrapper ── */
+  .shop-main-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 20px 100px;
+  }
+
+  /* ── Category filter pills ── */
+  .shop-filters-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .category-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .category-pills button {
+    background: #fff;
+    border: 1.5px solid #e0e4ef;
+    border-radius: 50px;
+    padding: 7px 18px;
+    font-size: .82rem;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    transition: all .25s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,.04);
+    font-family: 'Inter', sans-serif;
+  }
+  .category-pills button a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .category-pills button:hover,
+  .category-pills button.how-active1 {
+    background: linear-gradient(135deg, #e53935, #c62828);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(229,57,53,.35);
+    transform: translateY(-1px);
+  }
+  .category-pills button.how-active1 a,
+  .category-pills button:hover a { color: #fff; }
+
+  /* ── Control buttons (Filter / Search) ── */
+  .shop-controls {
+    display: flex;
+    gap: 10px;
+  }
+  .shop-ctrl-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1.5px solid #e0e4ef;
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-size: .83rem;
+    font-weight: 500;
+    color: #444;
+    cursor: pointer;
+    transition: all .25s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    font-family: 'Inter', sans-serif;
+  }
+  .shop-ctrl-btn:hover {
+    background: #1a1a2e;
+    border-color: #1a1a2e;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(26,26,46,.25);
+  }
+  .shop-ctrl-btn i { font-size: 14px; }
+
+  /* ── Search panel ── */
+  .panel-search {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px 22px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,.07);
+    margin-bottom: 16px;
+  }
+  .panel-search .bor8 {
+    border-radius: 50px !important;
+    background: #f5f6f9;
+    border: 1.5px solid #e5e8f0 !important;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .panel-search .bor8:focus-within {
+    border-color: #e53935 !important;
+    box-shadow: 0 0 0 3px rgba(229,57,53,.08);
+  }
+  .panel-search .search-input {
+    background: transparent !important;
+    border: none !important;
+    padding: 10px 16px !important;
+    font-size: .9rem;
+    color: #333;
+    font-family: 'Inter', sans-serif;
+  }
+  .panel-search button[type="submit"] {
+    color: #e53935 !important;
+    background: transparent;
+    border: none;
+  }
+
+  /* ── Filter panel (glassmorphism card) ── */
+  .panel-filter .wrap-filter {
+    background: rgba(255,255,255,.95) !important;
+    backdrop-filter: blur(12px);
+    border-radius: 18px !important;
+    border: 1px solid rgba(255,255,255,.8);
+    box-shadow: 0 8px 32px rgba(0,0,0,.08);
+    padding: 28px 36px !important;
+    margin-bottom: 20px;
+  }
+  .panel-filter .mtext-102 {
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #1a1a2e !important;
+    margin-bottom: 14px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #f0f1f5;
+  }
+  .panel-filter .filter-link {
+    font-size: .84rem;
+    color: #666;
+    text-decoration: none;
+    padding: 3px 0;
+    position: relative;
+    transition: color .2s;
+  }
+  .panel-filter .filter-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1.5px;
+    background: #e53935;
+    transition: width .25s;
+  }
+  .panel-filter .filter-link:hover { color: #e53935; }
+  .panel-filter .filter-link:hover::after,
+  .panel-filter .filter-link-active::after { width: 100%; }
+  .panel-filter .filter-link-active {
+    color: #e53935 !important;
+    font-weight: 600;
+  }
+  .panel-filter ul { list-style: none; padding: 0; margin: 0; }
+  .panel-filter ul li { padding-bottom: 10px; }
+
+  /* ── Product grid ── */
+  .isotope-grid {
+    margin: 0 -10px;
+  }
+  .isotope-grid .isotope-item {
+    padding: 10px !important;
+  }
+
+  /* ── Product card ── */
+  .block2 {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    transition: box-shadow .3s ease, transform .3s ease;
+    height: 100%;
+  }
+  .block2:hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,.13);
+    transform: translateY(-5px);
+  }
+
+  /* Product image area */
+  .block2-pic {
+    position: relative;
+    overflow: hidden;
+    background: #f8f8f8;
+    aspect-ratio: 1 / 1;
+  }
+  .block2-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .45s ease;
+    display: block;
+  }
+  .block2:hover .block2-pic img {
+    transform: scale(1.07);
+  }
+
+  /* Gradient overlay on hover */
+  .block2-pic::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.35) 0%, transparent 55%);
+    opacity: 0;
+    transition: opacity .35s ease;
+  }
+  .block2:hover .block2-pic::after { opacity: 1; }
+
+  /* Quick View button */
+  .block2-btn {
+    position: absolute !important;
+    bottom: 14px !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(10px) !important;
+    width: calc(100% - 32px) !important;
+    max-width: 180px;
+    border-radius: 50px !important;
+    background: #fff !important;
+    color: #1a1a2e !important;
+    font-size: .78rem !important;
+    font-weight: 600 !important;
+    letter-spacing: .5px;
+    padding: 9px 18px !important;
+    border: none !important;
+    opacity: 0;
+    transition: opacity .3s ease, transform .3s ease !important;
+    z-index: 10;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    text-decoration: none;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  .block2:hover .block2-btn {
+    opacity: 1 !important;
+    transform: translateX(-50%) translateY(0) !important;
+  }
+  .block2-btn:hover {
+    background: linear-gradient(135deg, #e53935, #c62828) !important;
+    color: #fff !important;
+  }
+
+  /* ── Product info ── */
+  .block2-txt {
+    padding: 14px 16px 16px !important;
+  }
+  .block2-txt-child1 { flex: 1; }
+
+  /* Product name */
+  .block2-txt .js-name-b2 {
+    font-size: .9rem !important;
+    font-weight: 600 !important;
+    color: #1a1a2e !important;
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+    transition: color .2s;
+    margin-bottom: 5px !important;
+  }
+  .block2-txt .js-name-b2:hover { color: #e53935 !important; }
+
+  /* Price row */
+  .block2-txt .stext-105 {
+    font-size: .82rem !important;
+    color: #888 !important;
+    display: block;
+    margin-top: 2px;
+  }
+  .block2-txt .stext-105 strike { color: #bbb; font-size: .78rem; }
+
+  /* Sale price highlight */
+  .price-sale {
+    color: #e53935 !important;
+    font-weight: 700;
+    font-size: .9rem !important;
+  }
+
+  /* Stock badges */
+  .stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 50px;
+    margin-top: 7px;
+  }
+  .stock-badge.in-stock {
+    background: rgba(46,125,50,.1);
+    color: #2e7d32;
+  }
+  .stock-badge.out-of-stock {
+    background: rgba(198,40,40,.1);
+    color: #c62828;
+  }
+  .stock-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* Wishlist button */
+  .btn-addwish-b2 {
+    font-size: 22px;
+    line-height: 1;
+    color: #888;
+    text-decoration: none;
+  }
+  .btn-addwish-b2 i {
+    transition: transform .25s ease, color .25s ease;
+  }
+  .btn-addwish-b2 i.empty-heart {
+    color: #888;
+  }
+  .btn-addwish-b2 i.filled-heart {
+    color: #e53935 !important; /* Forces the heart to be RED */
+  }
+  .btn-addwish-b2:hover i {
+    transform: scale(1.3);
+    color: #e53935;
+  }
+
+  /* ── Breadcrumb (original kept hidden; hero replaces it) ── */
+  .bread-crumb { display: none !important; }
+
+  /* ── Original bg0 section padding tweaks ── */
+  .bg0 {
+    background: transparent !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  .bg0 > .container { max-width: 1200px; }
+
+  /* ── Pagination area ── */
+  .p-t-45 { padding-top: 48px !important; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .shop-hero-banner h1 { font-size: 1.9rem; }
+    .shop-filters-bar { flex-direction: column; align-items: flex-start; }
+    .panel-filter .wrap-filter { padding: 20px 18px !important; }
+  }
+  @media (max-width: 480px) {
+    .shop-hero-banner { padding: 32px 0 24px; }
+    .shop-hero-banner h1 { font-size: 1.5rem; }
+    .category-pills button { padding: 6px 14px; font-size: .78rem; }
+  }
+</style>
+
+<!-- Hero Banner -->
+<div class="shop-hero-banner">
+  <div class="hero-inner">
+    <div class="breadcrumb-strip">
+      <a href="/">Home</a>
+      <span class="sep"><i class="fa fa-angle-right"></i></span>
+      <span>Shop</span>
+    </div>
+    <h1>Discover Our Collection</h1>
+    <p>Explore premium products curated just for you</p>
+  </div>
+</div>
+
+<!-- Original breadcrumb (hidden via CSS, kept for template compatibility) -->
 <div class="container">
-	<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-		<a href="/" class="stext-109 cl8 hov-cl1 trans-04">
-			Home
-			<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-		</a>
-
-		<span class="stext-109 cl4">
-			Shop
-		</span>
-	</div>
+  <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+    <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+      Home <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+    </a>
+    <span class="stext-109 cl4">Shop</span>
+  </div>
 </div>
 
-<!-- Product -->
+<!-- Product Section -->
 <div class="bg0 m-t-23 p-b-140">
-	<div class="container">
-		<div class="flex-w flex-sb-m p-b-52">
-			<div class="flex-w flex-l-m filter-tope-group m-tb-10">
-				<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5"
-					data-filter="*">
-					<a href="/shop">All</a>
-				</button>
-				<% for (let i = 0; i < category.length; i++) { %>
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 <%= selectedCategories.includes(category[i]._id.toString()) ? 'how-active1' : '' %>"
-						data-filter="*">
-						<a href="#" onclick="toggleFilter('categories', '<%= category[i]._id %>')">
-							<%= category[i].name %>
-						</a>
-					</button>
-				<% } %>
-			</div>
+  <div class="container">
+    <div class="shop-main-wrapper" style="max-width:100%;padding:28px 0 80px;">
 
-			<div class="flex-w flex-c-m m-tb-10">
-				<div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter">
-					<i class="icon-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-filter-list"></i>
-					<i class="icon-close-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
-					Filter
-				</div>
+      <!-- Filters bar -->
+      <div class="shop-filters-bar">
 
-				<div class="flex-c-m stext-106 cl6 size-105 bor4 pointer hov-btn3 trans-04 m-tb-4 js-show-search">
-					<i class="icon-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-search"></i>
-					<i class="icon-close-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
-					Search
-				</div>
-			</div>
+        <!-- Category pills -->
+        <div class="category-pills">
+          <button class="stext-106 cl6 hov1 bor3 trans-04 m-tb-5" data-filter="*">
+            <a href="/shop">All Products</a>
+          </button>
+          <% for (let i = 0; i < category.length; i++) { %>
+            <button class="stext-106 cl6 hov1 bor3 trans-04 m-tb-5 <%= selectedCategories.includes(category[i]._id.toString()) ? 'how-active1' : '' %>"
+              data-filter="*">
+              <a href="#" onclick="toggleFilter('categories', '<%= category[i]._id %>')">
+                <%= category[i].name %>
+              </a>
+            </button>
+          <% } %>
+        </div>
 
-			<!-- Search product -->
-			<div class="dis-none panel-search w-full p-t-10 p-b-15">
-				<form action="/search" method="POST" class="search-form">
-					<div class="bor8 dis-flex p-l-15">
-						<button type="submit" class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
-							<i class="zmdi zmdi-search"></i>
-						</button>
-						<input class="search-input mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="query"
-							placeholder="Search for products..." value="<%= searchQuery || '' %>" required>
-						<!-- Pass all current filter parameters -->
-						<input type="hidden" name="categories" value="<%= selectedCategories.join(',') %>">
-						<input type="hidden" name="sort" value="<%= currentSort || '' %>">
-						<input type="hidden" name="colors" value="<%= selectedColors.join(',') %>">
-						<input type="hidden" name="price" value="<%= selectedPriceRange || '' %>">
-					</div>
-				</form>
-			</div>
+        <!-- Controls -->
+        <div class="shop-controls">
+          <div class="shop-ctrl-btn js-show-filter">
+            <i class="icon-filter zmdi zmdi-filter-list"></i>
+            <i class="icon-close-filter zmdi zmdi-close dis-none"></i>
+            <span>Filter</span>
+          </div>
+          <div class="shop-ctrl-btn js-show-search">
+            <i class="icon-search zmdi zmdi-search"></i>
+            <i class="icon-close-search zmdi zmdi-close dis-none"></i>
+            <span>Search</span>
+          </div>
+        </div>
+      </div>
 
-			<!-- Filter -->
-			<div class="dis-none panel-filter w-full p-t-10">
-				<div class="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm">
-					<div class="filter-col1 p-r-15 p-b-27">
-						<div class="mtext-102 cl2 p-b-15">
-							Sort By
-						</div>
-						<ul>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('sort', '')"
-									class="filter-link stext-106 trans-04 <%= !currentSort ? 'filter-link-active' : '' %>">
-									Default
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('sort', 'price_asc')"
-									class="filter-link stext-106 trans-04 <%= currentSort === 'price_asc' ? 'filter-link-active' : '' %>">
-									Price: Low to High
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('sort', 'price_desc')"
-									class="filter-link stext-106 trans-04 <%= currentSort === 'price_desc' ? 'filter-link-active' : '' %>">
-									Price: High to Low
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('sort', 'name_asc')"
-									class="filter-link stext-106 trans-04 <%= currentSort === 'name_asc' ? 'filter-link-active' : '' %>">
-									Name: A to Z
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('sort', 'name_desc')"
-									class="filter-link stext-106 trans-04 <%= currentSort === 'name_desc' ? 'filter-link-active' : '' %>">
-									Name: Z to A
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('sort', 'latest')"
-									class="filter-link stext-106 trans-04 <%= currentSort === 'latest' ? 'filter-link-active' : '' %>">
-									Latest
-								</a>
-							</li>
-						</ul>
-					</div>
+      <!-- Search panel -->
+      <div class="dis-none panel-search w-full p-t-10 p-b-15">
+        <form action="/search" method="POST" class="search-form">
+          <div class="bor8 dis-flex p-l-15">
+            <button type="submit" class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+              <i class="zmdi zmdi-search"></i>
+            </button>
+            <input class="search-input mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="query"
+              placeholder="Search for products..." value="<%= searchQuery || '' %>" required>
+            <input type="hidden" name="categories" value="<%= selectedCategories.join(',') %>">
+            <input type="hidden" name="sort" value="<%= currentSort || '' %>">
+            <input type="hidden" name="colors" value="<%= selectedColors.join(',') %>">
+            <input type="hidden" name="price" value="<%= selectedPriceRange || '' %>">
+          </div>
+        </form>
+      </div>
 
-					<div class="filter-col2 p-r-15 p-b-27">
-						<div class="mtext-102 cl2 p-b-15">
-							Price
-						</div>
-						<ul>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('price', '')"
-									class="filter-link stext-106 trans-04 <%= !selectedPriceRange ? 'filter-link-active' : '' %>">
-									All
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('price', '0-500')"
-									class="filter-link stext-106 trans-04 <%= selectedPriceRange === '0-500' ? 'filter-link-active' : '' %>">
-									&#8377; 0.00 - &#8377; 500.00
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('price', '500-1000')"
-									class="filter-link stext-106 trans-04 <%= selectedPriceRange === '500-1000' ? 'filter-link-active' : '' %>">
-									&#8377; 500.00 - &#8377; 1000.00
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('price', '1000-1500')"
-									class="filter-link stext-106 trans-04 <%= selectedPriceRange === '1000-1500' ? 'filter-link-active' : '' %>">
-									&#8377; 1000.00 - &#8377; 1500.00
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('price', '1500-2000')"
-									class="filter-link stext-106 trans-04 <%= selectedPriceRange === '1500-2000' ? 'filter-link-active' : '' %>">
-									&#8377; 1500.00 - &#8377; 2000.00
-								</a>
-							</li>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('price', '2000-1000000')"
-									class="filter-link stext-106 trans-04 <%= selectedPriceRange === '2000-1000000' ? 'filter-link-active' : '' %>">
-									&#8377; 2000.00+
-								</a>
-							</li>
-						</ul>
-					</div>
+      <!-- Filter panel -->
+      <div class="dis-none panel-filter w-full p-t-10">
+        <div class="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm">
+          <!-- Sort -->
+          <div class="filter-col1 p-r-15 p-b-27">
+            <div class="mtext-102 cl2 p-b-15">Sort By</div>
+            <ul>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('sort', '')" class="filter-link stext-106 trans-04 <%= !currentSort ? 'filter-link-active' : '' %>">Default</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('sort', 'price_asc')" class="filter-link stext-106 trans-04 <%= currentSort === 'price_asc' ? 'filter-link-active' : '' %>">Price: Low to High</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('sort', 'price_desc')" class="filter-link stext-106 trans-04 <%= currentSort === 'price_desc' ? 'filter-link-active' : '' %>">Price: High to Low</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('sort', 'name_asc')" class="filter-link stext-106 trans-04 <%= currentSort === 'name_asc' ? 'filter-link-active' : '' %>">Name: A to Z</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('sort', 'name_desc')" class="filter-link stext-106 trans-04 <%= currentSort === 'name_desc' ? 'filter-link-active' : '' %>">Name: Z to A</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('sort', 'latest')" class="filter-link stext-106 trans-04 <%= currentSort === 'latest' ? 'filter-link-active' : '' %>">Latest</a></li>
+            </ul>
+          </div>
+          <!-- Price -->
+          <div class="filter-col2 p-r-15 p-b-27">
+            <div class="mtext-102 cl2 p-b-15">Price</div>
+            <ul>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('price', '')" class="filter-link stext-106 trans-04 <%= !selectedPriceRange ? 'filter-link-active' : '' %>">All</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('price', '0-500')" class="filter-link stext-106 trans-04 <%= selectedPriceRange === '0-500' ? 'filter-link-active' : '' %>">&#8377; 0 – &#8377; 500</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('price', '500-1000')" class="filter-link stext-106 trans-04 <%= selectedPriceRange === '500-1000' ? 'filter-link-active' : '' %>">&#8377; 500 – &#8377; 1,000</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('price', '1000-1500')" class="filter-link stext-106 trans-04 <%= selectedPriceRange === '1000-1500' ? 'filter-link-active' : '' %>">&#8377; 1,000 – &#8377; 1,500</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('price', '1500-2000')" class="filter-link stext-106 trans-04 <%= selectedPriceRange === '1500-2000' ? 'filter-link-active' : '' %>">&#8377; 1,500 – &#8377; 2,000</a></li>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('price', '2000-1000000')" class="filter-link stext-106 trans-04 <%= selectedPriceRange === '2000-1000000' ? 'filter-link-active' : '' %>">&#8377; 2,000+</a></li>
+            </ul>
+          </div>
+          <!-- Color -->
+          <div class="filter-col3 p-r-15 p-b-27">
+            <div class="mtext-102 cl2 p-b-15">Color</div>
+            <ul>
+              <li class="p-b-6"><a href="#" onclick="toggleFilter('colors', '')" class="filter-link stext-106 trans-04 <%= selectedColors.length === 0 ? 'filter-link-active' : '' %>">All</a></li>
+              <% colors.forEach(color => { %>
+                <li class="p-b-6">
+                  <span class="fs-15 lh-12 m-r-6" style="color: <%= color %>;"><i class="zmdi zmdi-circle"></i></span>
+                  <a href="#" onclick="toggleFilter('colors', '<%= color %>')"
+                    class="filter-link stext-106 trans-04 <%= selectedColors.includes(color) ? 'filter-link-active' : '' %>">
+                    <%= color %>
+                  </a>
+                </li>
+              <% }); %>
+            </ul>
+          </div>
+        </div>
+      </div>
 
-					<div class="filter-col3 p-r-15 p-b-27">
-						<div class="mtext-102 cl2 p-b-15">
-							Color
-						</div>
-						<ul>
-							<li class="p-b-6">
-								<a href="#" onclick="toggleFilter('colors', '')"
-									class="filter-link stext-106 trans-04 <%= selectedColors.length === 0 ? 'filter-link-active' : '' %>">
-									All
-								</a>
-							</li>
-							<% colors.forEach(color => { %>
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: <%= color %>;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-									<a href="#" onclick="toggleFilter('colors', '<%= color %>')"
-										class="filter-link stext-106 trans-04 <%= selectedColors.includes(color) ? 'filter-link-active' : '' %>">
-										<%= color %>
-									</a>
-								</li>
-							<% }); %>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
+      <!-- Product grid -->
+      <div class="row isotope-grid">
+        <% for(let i = 0; i < products.length; i++) { %>
+        <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
+          <div class="block2">
+            <div class="block2-pic hov-img0">
+              <a href="productDetails?id=<%= products[i]._id %>">
+                <img src="/uploads/product-images/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
+              </a>
+              <a href="#" onclick="event.preventDefault(); window.location.href='productDetails?id=<%= products[i]._id %>';"
+                class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
+                Quick View
+              </a>
+            </div>
 
-		<div class="row isotope-grid">
-			<% for(let i = 0 ; i < products.length ; i++) { %>
-			<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
-				
-				<!-- Block2 -->
-				<div class="block2">
-					<div class="block2-pic hov-img0">
-						<a href="productDetails?id=<%= products[i]._id %>"><img src="/uploads/product-images/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>"></a>
+            <div class="block2-txt flex-w flex-t p-t-14">
+              <div class="block2-txt-child1 flex-col-l">
+                <a href="productDetails?id=<%= products[i]._id %>" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                  <%= products[i].productName %>
+                </a>
+                <span class="stext-105 cl3">
+                  <span class="price-sale">&#8377;<%= products[i].salePrice.toLocaleString('en-IN') %></span>
+                  &nbsp;<strike>&#8377;<%= products[i].regularPrice.toLocaleString('en-IN') %></strike>
+                </span>
+                <% let totalQuantity = products[i].stock.reduce((total, item) => total + item.quantity, 0); %>
+                <% if(totalQuantity > 0) { %>
+                  <span class="stock-badge in-stock"><%= totalQuantity %> in stock</span>
+                <% } else { %>
+                  <span class="stock-badge out-of-stock">Out of stock</span>
+                <% } %>
+              </div>
 
-						<a href="#" onclick="event.preventDefault(); window.location.href='productDetails?id=<%= products[i]._id %>';"
-							class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-							Quick View
-						</a>
-					</div>
+              <div class="block2-txt-child2 flex-r p-t-3">
+                <% 
+                  let isInWishlist = false;
+                  if (locals.user && locals.user.wishlist) {
+                    isInWishlist = locals.user.wishlist.some(id => id.toString() === products[i]._id.toString());
+                  }
+                %>
+                <a href="#" class="btn-addwish-b2 dis-block pos-relative" onclick="addToWishlist(event, '<%= products[i]._id %>', this)">
+                  <i class="zmdi <%= isInWishlist ? 'zmdi-favorite filled-heart' : 'zmdi-favorite-outline empty-heart' %> trans-04"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      </div>
 
-					<div class="block2-txt flex-w flex-t p-t-14">
-						<div class="block2-txt-child1 flex-col-l ">
-							<a href="productDetails?id=<%= products[i]._id %>" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-								<%= products[i].productName %>
-							</a>
+      <!-- Pagination -->
+      <div class="flex-c-m flex-w w-full p-t-45">
+        <%- include('../../views/partials/admin/pagination') %>
+      </div>
 
-							<span class="stext-105 cl3">
-								price:&#8377;<%= products[i].salePrice.toLocaleString('en-IN') %> &nbsp;&nbsp;&nbsp;<strike>   &#8377;<%= products[i].regularPrice.toLocaleString('en-IN') %></strike>
-							</span>
-							<%let totalQuantity = products[i].stock.reduce((total, item) => total + item.quantity, 0) %>
-							<% if(totalQuantity > 0) { %>
-								<span class="stext-105 cl3 text-success">
-									<%= totalQuantity %> in stock
-								</span>
-							<% } else { %> 
-								<span class="stext-105 cl3 text-danger">
-									Out of stock
-								</span>
-								<% } %>
-						
-						</div>
-
-						<div class="block2-txt-child2 flex-r p-t-3">
-							
-							<a href="#" class="btn-addwish-b2 dis-block pos-relative" onclick="addToWishlist('<%= products[i]._id %>')">
-								<img class="icon-heart1 dis-block trans-04" src="images/icons/icon-heart-01.png" alt="ICON">
-							</a>
-							
-						</div>
-						
-					</div>
-				</div>
-				
-			</div>
-			<% } %>
-		</div>
-
-		<!-- Load more -->
-		<div class="flex-c-m flex-w w-full p-t-45">
-			<%-include('../../views/partials/admin/pagination')%>
-		</div>
-	</div>
+    </div>
+  </div>
 </div>
 
-<%-include('../../views/partials/user/footer')%>
+<%- include('../../views/partials/user/footer') %>
+
 <script>
-	function toggleFilter(filterType, filterValue) {
-		const searchParams = new URLSearchParams(window.location.search);
-		
-		if (filterType === 'categories') {
-			let categories = searchParams.get('categories') ? searchParams.get('categories').split(',') : [];
-			if (categories.includes(filterValue)) {
-				categories = categories.filter(category => category !== filterValue);
-			} else {
-				categories.push(filterValue);
-			}
-			if (categories.length > 0) {
-				searchParams.set('categories', categories.join(','));
-			} else {
-				searchParams.delete('categories');
-			}
-		}
+  function toggleFilter(filterType, filterValue) {
+    const searchParams = new URLSearchParams(window.location.search);
 
-		if (filterType === 'sort') {
-			if (searchParams.get('sort') === filterValue) {
-				searchParams.delete('sort');
-			} else {
-				searchParams.set('sort', filterValue);
-			}
-		}
+    if (filterType === 'categories') {
+      let categories = searchParams.get('categories') ? searchParams.get('categories').split(',') : [];
+      if (categories.includes(filterValue)) {
+        categories = categories.filter(c => c !== filterValue);
+      } else {
+        categories.push(filterValue);
+      }
+      if (categories.length > 0) {
+        searchParams.set('categories', categories.join(','));
+      } else {
+        searchParams.delete('categories');
+      }
+    }
 
-		if (filterType === 'colors') {
-			let colors = searchParams.get('colors') ? searchParams.get('colors').split(',') : [];
-			if (colors.includes(filterValue)) {
-				colors = colors.filter(color => color !== filterValue);
-			} else {
-				colors.push(filterValue);
-			}
-			if (colors.length > 0) {
-				searchParams.set('colors', colors.join(','));
-			} else {
-				searchParams.delete('colors');
-			}
-		}
+    if (filterType === 'sort') {
+      if (searchParams.get('sort') === filterValue) {
+        searchParams.delete('sort');
+      } else {
+        searchParams.set('sort', filterValue);
+      }
+    }
 
-	
-		if (filterType === 'price') {
-			if (searchParams.get('price') === filterValue) {
-				searchParams.delete('price');
-			} else {
-				searchParams.set('price', filterValue);
-			}
-		}
+    if (filterType === 'colors') {
+      let colors = searchParams.get('colors') ? searchParams.get('colors').split(',') : [];
+      if (colors.includes(filterValue)) {
+        colors = colors.filter(c => c !== filterValue);
+      } else {
+        colors.push(filterValue);
+      }
+      if (colors.length > 0) {
+        searchParams.set('colors', colors.join(','));
+      } else {
+        searchParams.delete('colors');
+      }
+    }
 
-		const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-		window.history.pushState({ path: newUrl }, '', newUrl);
+    if (filterType === 'price') {
+      if (searchParams.get('price') === filterValue) {
+        searchParams.delete('price');
+      } else {
+        searchParams.set('price', filterValue);
+      }
+    }
 
-		// Reload the page
-		window.location.reload();
-	}
+    const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+    window.location.reload();
+  }
 
-	async function addToWishlist(productId) {
-		try {
-			console.log('productId', productId);
-			const response = await fetch("/addToWishlist", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify({ productId: productId }) // Send the productId in the body as a JSON string
-			});
-
-			const data = await response.json(); // Parse the JSON response
-			console.log('data', data);
-			if (data.status) {
-				Swal.fire({
-					title: "Added to Wishlist",
-					text: data.message,
-					icon: "success",
-					timer: 2000,
-					showConfirmButton: false
-				});
-			} else {
-				Swal.fire({
-					title: "Error",
-					text: data.message,
-					icon: "info",
-					timer: 2000,
-					showConfirmButton: false
-				});
-			}
-		} catch (error) {
-			Swal.fire({
-				title: "Error",
-				text: "Please login to add to wishlist",
-				icon: "error",
-				timer: 2000,
-				showConfirmButton: false
-			});
-			console.error("Error in adding to wishlist:", error); // Log the error for debugging
-		}
-	}
+  async function addToWishlist(event, productId, btnElement) {
+    event.preventDefault();
+    try {
+      console.log('productId', productId);
+      const response = await fetch("/addToWishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: productId })
+      });
+      const data = await response.json();
+      console.log('data', data);
+      if (data.status) {
+        // Update the heart icon based on action
+        const icon = btnElement.querySelector('i');
+        if (data.action === 'added') {
+          icon.className = 'zmdi zmdi-favorite filled-heart trans-04';
+        } else if (data.action === 'removed') {
+          icon.className = 'zmdi zmdi-favorite-outline empty-heart trans-04';
+        }
+        Swal.fire({ title: data.action === 'added' ? "Added to Wishlist" : "Removed from Wishlist", text: data.message, icon: "success", timer: 2000, showConfirmButton: false });
+      } else {
+        Swal.fire({ title: "Error", text: data.message, icon: "info", timer: 2000, showConfirmButton: false });
+      }
+    } catch (error) {
+      Swal.fire({ title: "Error", text: "Please login to add to wishlist", icon: "error", timer: 2000, showConfirmButton: false });
+      console.error("Error in adding to wishlist:", error);
+    }
+  }
 </script>
