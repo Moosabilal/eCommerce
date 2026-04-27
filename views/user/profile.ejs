@@ -1,173 +1,261 @@
 <%- include('../../views/partials/user/header') %>
 
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  html, body { height: auto !important; min-height: 100vh !important; font-family: 'Inter', sans-serif !important; }
+  html { background: #f4f5f8 !important; }
+  body, body.animsition { background: transparent !important; }
+
+
+  /* ── Main content ── */
+  .pf-main {
+    margin-left: 240px;
+    padding: 36px 40px 80px;
+    min-height: 100vh;
+    background: #f4f5f8;
+    box-sizing: border-box;
+  }
+  /* Widen the profile card so it fills the space */
+  .pf-card { max-width: 800px; margin: 0 auto; }
+
+  /* Page title area */
+  .pf-page-header {
+    margin-bottom: 32px;
+  }
+  .pf-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .78rem;
+    color: #aaa;
+    margin-bottom: 8px;
+  }
+  .pf-breadcrumbs a { color: #888; text-decoration: none; transition: color .2s; }
+  .pf-breadcrumbs a:hover { color: #e53935; }
+  .pf-page-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    letter-spacing: -0.4px;
+  }
+
+  /* ── Profile card ── */
+  .pf-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 2px 18px rgba(0,0,0,.07);
+    overflow: hidden;
+    max-width: 780px;
+  }
+
+  /* Banner strip */
+  .pf-card-banner {
+    height: 120px;
+    background: linear-gradient(120deg, #1a1a2e 0%, #16213e 45%, #0f3460 100%);
+    position: relative;
+  }
+  .pf-card-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(229,57,53,.2) 0%, transparent 60%);
+  }
+
+  /* Avatar in card */
+  .pf-avatar-wrap {
+    position: absolute;
+    bottom: -44px;
+    left: 32px;
+  }
+  /* Profile card avatar in banner */
+  .pf-avatar {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    background: linear-gradient(135deg, #e53935, #c62828);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px; font-weight: 800; color: #fff;
+    box-shadow: 0 8px 24px rgba(229,57,53,.3);
+    overflow: hidden;
+  }
+  .pf-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+
+  /* Card body */
+  .pf-card-body {
+    padding: 56px 32px 32px;
+  }
+  .pf-user-name {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+  }
+  .pf-user-email {
+    font-size: .88rem;
+    color: #999;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Info grid */
+  .pf-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 600px) { .pf-info-grid { grid-template-columns: 1fr; } }
+  .pf-info-item {
+    background: #f8f9fc;
+    border-radius: 14px;
+    padding: 16px 20px;
+    border: 1px solid #eef0f6;
+  }
+  .pf-info-label {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #aab;
+    margin-bottom: 6px;
+  }
+  .pf-info-value {
+    font-size: .95rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pf-info-value i { color: #e53935; font-size: 15px; }
+
+  /* Addresses */
+  .pf-section-title {
+    font-size: .95rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pf-section-title i { color: #e53935; }
+  .pf-addresses {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 600px) { .pf-addresses { grid-template-columns: 1fr; } }
+  .pf-address-chip {
+    background: linear-gradient(135deg, #fff3f3, #ffe8e8);
+    border: 1px solid #ffcdd2;
+    border-radius: 12px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .85rem;
+    font-weight: 600;
+    color: #c62828;
+  }
+  .pf-address-chip i { font-size: 16px; }
+
+  /* Edit button */
+  .pf-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #e53935, #c62828);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-size: .88rem;
+    font-weight: 700;
+    transition: opacity .2s, transform .2s;
+    box-shadow: 0 6px 20px rgba(229,57,53,.35);
+  }
+  .pf-edit-btn:hover { opacity: .88; transform: translateY(-1px); color: #fff; text-decoration: none; }
+</style>
 <%- include('../../views/partials/user/profile-sidebar') %>
 
 
-
-<style>
-  .main-content {
-    background-color: rgb(230, 244, 230);
-    margin-left: 16.4%;
-    padding: 40px 30px;
-    margin-top: 0px;
-    border-radius: 8px;
-  }
-
-  h2 {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #333;
-    text-align: center;
-  }
-
-  .profile-display {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 700px;
-    margin: auto;
-    font-size: 16px;
-    color: #444;
-  }
-
-  .profile-display img {
-    display: block;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    margin: 0 auto 20px auto;
-    object-fit: cover;
-    border: 3px solid #4CAF50;
-  }
-
-  .profile-display .detail {
-    margin-bottom: 15px;
-    margin-left: 40%;
-  }
-
-  .profile-display .detail span {
-    font-weight: bold;
-    color: #333;
-  }
-
-  .address-section {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  .address-section h3 {
-    font-size: 20px;
-    margin-bottom: 15px;
-    margin-left: 32%;
-    color: #333;
-    
-  }
-
-  .btn-edit {
-    display: block;
-    width: fit-content;
-    margin: 20px auto;
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
-  }
- 
-
-  .btn-edit:hover {
-    background-color: #45a049;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .main-content {
-      margin-left: 0;
-      padding: 20px;
-    }
-
-    .profile-display {
-      padding: 20px;
-      width: 100%;
-    }
-
-    .address-section {
-      margin-top: 15px;
-    }
-  }
- 
-</style>
-
-<div class="main-content">
-  <div class="container">
-    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-      <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
-        Home
-        <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-      </a>
-  
-      <span class="stext-109 cl4">
-        Profile
-      </span>
+<!-- Main content -->
+<div class="pf-main">
+  <div class="pf-page-header">
+    <div class="pf-breadcrumbs">
+      <a href="/">Home</a>
+      <i class="fa fa-angle-right"></i>
+      <span>My Profile</span>
     </div>
+    <h1 class="pf-page-title">My Profile</h1>
   </div>
-  <!-- Display the content here -->
-  <h2>My Profile</h2>
-  <div class="profile-display">
-    <!-- Profile Image -->
-    <img src="images\1735493350930-cropped-img-1735493280191-1.png" alt="Profile Image">
 
-    <!-- Full Name -->
-    <div class="detail">
-      <span>Name:</span> <%= user.name %>
-    </div>
-
-    <!-- Phone -->
-    <div class="detail">
-      <span>Phone:</span> <%= user.phone %>
-    </div>
-
-    <!-- Email -->
-    <div class="detail">
-      <span>Email:</span> <%= user.email %>
-    </div>
-
-    <!-- Password (Hidden or Masked) -->
-    <!-- <div class="detail">
-      <span>Password:</span> ****** (hidden for security)
-    </div> -->
-
-    <!-- Address Section -->
-    <div class="address-section container mt-4">
-      <h3 class="text-center mb-4 m-r-140">Your Addresses</h3>
-      <div class="row g-3">
-        <% for (let i = 0; i < count; i++) { %>
-          <div class="col-md-6">
-            <div class="card border-success shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title text-success">Address <%= i + 1 %></h5>
-                <p class="card-text"><%= userAddress.address[i].addressType %></p>
-              </div>
-            </div>
-          </div>
-        <% } %>
-        
+  <div class="pf-card">
+    <!-- Banner + avatar -->
+    <div class="pf-card-banner">
+      <div class="pf-avatar-wrap">
+        <div class="pf-avatar">
+          <img src="/uploads/product-images/<%= user._id %>.png?t=<%= Date.now() %>" alt="<%= user.name %>" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;"><%= user.name ? user.name[0].toUpperCase() : 'U' %></span>
+        </div>
       </div>
     </div>
 
-    <!-- Edit Button -->
-    <!-- <a href="/edit-profile" class="btn-edit">Edit Profile</a> -->
+    <!-- Body -->
+    <div class="pf-card-body">
+      <div class="pf-user-name"><%= user.name %></div>
+      <div class="pf-user-email"><i class="zmdi zmdi-email"></i> <%= user.email %></div>
+
+      <!-- Info items -->
+      <div class="pf-info-grid">
+        <div class="pf-info-item">
+          <div class="pf-info-label">Full Name</div>
+          <div class="pf-info-value"><i class="zmdi zmdi-account"></i> <%= user.name %></div>
+        </div>
+        <div class="pf-info-item">
+          <div class="pf-info-label">Phone Number</div>
+          <div class="pf-info-value"><i class="zmdi zmdi-phone"></i> <%= user.phone || 'Not set' %></div>
+        </div>
+        <div class="pf-info-item">
+          <div class="pf-info-label">Email Address</div>
+          <div class="pf-info-value"><i class="zmdi zmdi-email"></i> <%= user.email %></div>
+        </div>
+        <div class="pf-info-item">
+          <div class="pf-info-label">Account Status</div>
+          <div class="pf-info-value" style="color:#2e7d32;"><i class="zmdi zmdi-check-circle"></i> Active</div>
+        </div>
+      </div>
+
+      <!-- Addresses -->
+      <% if (userAddress && count > 0) { %>
+      <div class="pf-section-title">
+        <i class="zmdi zmdi-pin"></i> Saved Addresses
+      </div>
+      <div class="pf-addresses">
+        <% for (let i = 0; i < count; i++) { %>
+        <div class="pf-address-chip">
+          <i class="zmdi zmdi-home"></i>
+          Address <%= i + 1 %> — <%= userAddress.address[i].addressType %>
+        </div>
+        <% } %>
+      </div>
+      <% } %>
+
+      <!-- Edit button -->
+      <a href="/updateProfile" class="pf-edit-btn">
+        <i class="zmdi zmdi-edit"></i> Edit Profile
+      </a>
+    </div>
   </div>
-  <!-- till here -->
 </div>
 
-
-<!-- write the script here -->
-
 <%- include('../../views/partials/user/footer') %>
+
+<script>
+
+</script>

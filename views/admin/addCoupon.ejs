@@ -1,204 +1,525 @@
 <%- include('../../views/partials/admin/header') %>
 
-<style>
-  .main-content {
-    padding: 40px 20px;
-    background-color: #f8f9fa;
-  }
-  .form-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  .form-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .form-group {
-    margin-bottom: 15px;
-  }
-  .form-group label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: block;
-  }
-  .form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-  }
-  .btn {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .btn:hover {
-    background-color: #0056b3;
-  }
-  .table-container {
-    margin: 20px auto;
-    max-width: 90%;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .table th, .table td {
-    padding: 10px;
-    text-align: left;
-    border: 1px solid #dee2e6;
-  }
-  .table th {
-    background-color: #e9ecef;
-    font-weight: bold;
-  }
-  .table-actions button {
-    margin-right: 5px;
-    background-color: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .table-actions button.edit {
-    background-color: #28a745;
-  }
-  .table-actions button:hover {
-    opacity: 0.9;
-  }
-</style>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-<div class="main-content">
-  <!-- Add Coupon Form -->
-  <div class="form-container">
-    <h2>Add Coupon</h2>
-    <form action="/admin/getAddCoupon" method="POST" id="coupon-form">
-      <body onload="setDefaultStartDate(),setDefaultEndDate()">
-        
-      </body>
-      <div class="form-group">
-        <label for="couponName">Coupon Name</label>
-        <input type="text" id="couponName" name="couponName" required>
-        <div id="error-coupon-name" class="error-message"></div>
+    .admin-content {
+      font-family: 'Inter', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      padding: 30px;
+      padding-top: 90px;
+      margin-left: 260px;
+    }
+
+    .page-header {
+      margin-bottom: 30px;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin: 0 0 5px;
+    }
+
+    .breadcrumb-nav {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .breadcrumb-nav a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    .breadcrumb-nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* Panel Card */
+    .panel-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .panel-section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-section-title i {
+      color: #e53935;
+    }
+
+    /* Form Inputs */
+    .form-label-premium {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: #475569;
+      margin-bottom: 8px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .form-control-premium {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      color: #1e293b;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      transition: all 0.25s ease;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .form-control-premium:focus {
+      background: #fff;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+    }
+
+    .input-hint {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+
+    .error-message {
+      color: #ef4444;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+
+    /* Submit Button */
+    .btn-submit-coupon {
+      background: linear-gradient(135deg, #e53935, #c62828);
+      color: #fff;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-submit-coupon:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(229, 57, 53, 0.35);
+    }
+
+    /* Live Coupon Preview */
+    .coupon-preview-wrap {
+      position: sticky;
+      top: 100px;
+    }
+
+    .coupon-preview-card {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-radius: 16px;
+      padding: 28px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .coupon-preview-card::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 160px;
+      height: 160px;
+      background: rgba(229, 57, 53, 0.12);
+      border-radius: 50%;
+    }
+
+    .coupon-preview-card::after {
+      content: '';
+      position: absolute;
+      bottom: -50px;
+      left: -30px;
+      width: 120px;
+      height: 120px;
+      background: rgba(59, 130, 246, 0.08);
+      border-radius: 50%;
+    }
+
+    .preview-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preview-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      min-height: 1.8em;
+      transition: all 0.2s;
+    }
+
+    .preview-code-pill {
+      display: inline-block;
+      background: rgba(229, 57, 53, 0.2);
+      border: 1px solid rgba(229, 57, 53, 0.4);
+      color: #fca5a5;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 6px 18px;
+      border-radius: 8px;
+      letter-spacing: 3px;
+      margin-bottom: 20px;
+      min-height: 1.8em;
+      transition: all 0.2s;
+    }
+
+    .preview-divider {
+      border: none;
+      border-top: 1px dashed rgba(255, 255, 255, 0.15);
+      margin: 16px 0;
+    }
+
+    .preview-stats {
+      display: flex;
+      gap: 0;
+    }
+
+    .preview-stat {
+      flex: 1;
+      text-align: center;
+    }
+
+    .preview-stat+.preview-stat {
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .preview-stat .p-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .preview-stat .p-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      transition: all 0.2s;
+    }
+
+    .preview-dates {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .preview-dates span strong {
+      color: rgba(255, 255, 255, 0.7);
+      display: block;
+      font-size: 0.85rem;
+    }
+
+    .info-tips {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 18px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .info-tips h5 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-tips h5 i {
+      color: #e53935;
+    }
+
+    .info-tips ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #64748b;
+      font-size: 0.83rem;
+      line-height: 1.9;
+    }
+
+    @media (max-width: 991px) {
+      .admin-content {
+        margin-left: 0;
+        padding: 20px;
+        padding-top: 80px;
+      }
+
+      .coupon-preview-wrap {
+        position: static;
+      }
+    }
+  </style>
+
+  <div class="admin-content">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">Create New Coupon</h1>
+      <p class="breadcrumb-nav">
+        <a href="/admin/dashboard">Dashboard</a> /
+        <a href="/admin/displayCoupon">Coupons</a> /
+        <span style="color:#0f172a;">Create</span>
+      </p>
+    </div>
+
+    <div class="row">
+      <!-- Left: Form -->
+      <div class="col-lg-7">
+        <div class="panel-card">
+          <h4 class="panel-section-title">
+            <i class="fas fa-ticket-alt"></i> Coupon Details
+          </h4>
+
+          <form action="/admin/getAddCoupon" method="POST" id="coupon-form">
+
+            <body onload="setDefaultStartDate(),setDefaultEndDate()"></body>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label-premium" for="couponName">Coupon Name</label>
+                <input type="text" id="couponName" name="couponName" class="form-control-premium"
+                  placeholder="e.g. Summer Sale" oninput="updatePreview()" required>
+                <p class="input-hint">Displayed to the customer on checkout</p>
+                <div id="error-coupon-name" class="error-message"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-premium" for="couponCode">Coupon Code</label>
+                <input type="text" id="couponCode" name="couponCode" class="form-control-premium"
+                  placeholder="e.g. SAVE20"
+                  style="text-transform: uppercase; letter-spacing: 2px; font-family: monospace; font-size: 1rem;"
+                  oninput="this.value=this.value.toUpperCase(); updatePreview()" required>
+                <p class="input-hint">Unique code customers will enter</p>
+                <div id="error-coupon-code" class="error-message"></div>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label-premium" for="startingDate">Start Date</label>
+                <input type="date" id="startingDate" name="startDate" class="form-control-premium"
+                  oninput="updatePreview()" required>
+                <div id="error-start-date" class="error-message"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-premium" for="expiringDate">Expiry Date</label>
+                <input type="date" id="expiringDate" name="endDate" class="form-control-premium"
+                  oninput="updatePreview()" required>
+                <div id="error-end-date" class="error-message"></div>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label-premium" for="offerPrice">Discount Amount (₹)</label>
+                <input type="number" id="offerPrice" name="offerPrice" class="form-control-premium" placeholder="0"
+                  oninput="updatePreview()" required>
+                <p class="input-hint">Amount deducted from the total</p>
+                <div id="error-offer-price" class="error-message"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-premium" for="minimumPrice">Minimum Order (₹)</label>
+                <input type="number" id="minimumPrice" name="minimumPrice" class="form-control-premium" placeholder="0"
+                  oninput="updatePreview()" required>
+                <p class="input-hint">Min. cart value to apply coupon</p>
+                <div id="error-minimum-price" class="error-message"></div>
+              </div>
+            </div>
+
+            <div id="err-msg" class="error-message mb-3"></div>
+
+            <button type="submit" onclick="return validateForm(event)" class="btn-submit-coupon">
+              <i class="fas fa-check-circle"></i> Create Coupon
+            </button>
+          </form>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="couponName">Coupon Code</label>
-        <input type="text" id="couponCode" name="couponCode" required>
-        <div id="error-coupon-code" class="error-message"></div>
-      </div>
+      <!-- Right: Live Preview + Tips -->
+      <div class="col-lg-5">
+        <div class="coupon-preview-wrap">
+          <!-- Live Coupon Preview Card -->
+          <div class="panel-card">
+            <h4 class="panel-section-title">
+              <i class="fas fa-eye"></i> Live Preview
+            </h4>
 
-      <div class="form-group">
-        <label for="startingDate">Start Date</label>
-        <input type="date" id="startingDate" name="startDate" required>
-        <div id="error-start-date" class="error-message"></div>
+            <div class="coupon-preview-card">
+              <div class="preview-label"><i class="fas fa-tag"></i> Coupon</div>
+              <div class="preview-name" id="preview-name">Coupon Name</div>
+              <div class="preview-code-pill" id="preview-code">COUPONCODE</div>
 
-      </div>
-      <div class="form-group">
-        <label for="endDate">End Date</label>
-        <input type="date" id="expiringDate" name="endDate" required>
-        <div id="error-end-date" class="error-message"></div>
+              <hr class="preview-divider">
 
-      </div>
-      <div class="form-group">
-        <label for="offerPrice">Offer Price</label>
-        <input type="number" id="offerPrice" name="offerPrice" required>
-        <div id="error-offer-price" class="error-message"></div>
+              <div class="preview-stats">
+                <div class="preview-stat">
+                  <span class="p-label">Discount</span>
+                  <span class="p-value green" id="preview-discount" style="color:#86efac;">₹0</span>
+                </div>
+                <div class="preview-stat">
+                  <span class="p-label">Min. Order</span>
+                  <span class="p-value" id="preview-min">₹0</span>
+                </div>
+              </div>
 
-      </div>
-      <div class="form-group">
-        <label for="minimumPrice">Minimum Price</label>
-        <input type="number" id="minimumPrice" name="minimumPrice" required>
-        <div id="error-minimum-price" class="error-message"></div>
+              <div class="preview-dates">
+                <span><span class="p-label">From</span><strong id="preview-start">—</strong></span>
+                <span style="text-align:right;"><span class="p-label">Until</span><strong
+                    id="preview-end">—</strong></span>
+              </div>
+            </div>
 
+            <!-- Tips -->
+            <div class="info-tips">
+              <h5><i class="fas fa-lightbulb"></i> Tips for a great coupon</h5>
+              <ul>
+                <li>Use uppercase codes for clarity — e.g. <strong>SAVE20</strong></li>
+                <li>Set a minimum order to protect margins</li>
+                <li>Keep the name short and memorable</li>
+                <li>Discount must be less than minimum order</li>
+                <li>Start date must be today or later</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="text-center">
-        <button type="submit" onclick="return validateForm(event)" class="btn">Apply Coupon</button>
-      </div>
-      <div id="err-msg" class="error-message"></div>
-
-    </form>
+    </div>
   </div>
-</div>
 
-<%- include('../../views/partials/admin/footer') %>
-<script>
-  function validateForm() {
-   document.querySelectorAll(".error-message").forEach((element) => (element.innerHTML = ""));
-   const sDate = document.getElementsByName("startDate")[0].value;
-   const eDate = document.getElementsByName("endDate")[0].value;
-   const sDateObj = new Date(sDate);
-   const eDateObj = new Date(eDate);
-   const todayDateObj = new Date();
-   todayDateObj.setHours(0, 0, 0, 0);
+  <%- include('../../views/partials/admin/footer') %>
 
+    <script>
+      // Live preview updater
+      function updatePreview() {
+        const name = document.getElementById('couponName').value || 'Coupon Name';
+        const code = document.getElementById('couponCode').value || 'COUPONCODE';
+        const disc = document.getElementById('offerPrice').value;
+        const minOrd = document.getElementById('minimumPrice').value;
+        const sDate = document.getElementById('startingDate').value;
+        const eDate = document.getElementById('expiringDate').value;
 
-   if (sDateObj > eDateObj) {
-     document.getElementById("error-end-date").innerHTML ="End date should be after the start date";
-     return false;
-   }
+        document.getElementById('preview-name').textContent = name;
+        document.getElementById('preview-code').textContent = code || 'COUPONCODE';
+        document.getElementById('preview-discount').textContent = disc ? `₹${disc}` : '₹0';
+        document.getElementById('preview-min').textContent = minOrd ? `₹${minOrd}` : '₹0';
+        document.getElementById('preview-start').textContent = sDate ? new Date(sDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+        document.getElementById('preview-end').textContent = eDate ? new Date(eDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+      }
+    </script>
 
-
-   if (sDateObj <= todayDateObj) {
-     document.getElementById("error-start-date").innerHTML ="Starting date should be greater than or equal to today's date";
-     return false;
-   }
-
-
-   let name = document.getElementsByName("couponName")[0].value;
-  const nameRegex = /^[A-Za-z0-9\s]{1,50}$/;
-
-  let code = document.getElementsByName('couponCode')[0].value
-
-   if (!nameRegex.test(name)) {
-     document.getElementById("error-coupon-name").innerHTML =
-       "Coupon Name error";
-     return false;
-   }
+    <script>
+      function validateForm() {
+        document.querySelectorAll(".error-message").forEach((element) => (element.innerHTML = ""));
+        const sDate = document.getElementsByName("startDate")[0].value;
+        const eDate = document.getElementsByName("endDate")[0].value;
+        const sDateObj = new Date(sDate);
+        const eDateObj = new Date(eDate);
+        const todayDateObj = new Date();
+        todayDateObj.setHours(0, 0, 0, 0);
 
 
-   const offerPriceInput = document.getElementsByName("offerPrice")[0];
-   const minimumPriceInput = document.getElementsByName("minimumPrice")[0];
+        if (sDateObj > eDateObj) {
+          document.getElementById("error-end-date").innerHTML = "End date should be after the start date";
+          return false;
+        }
 
 
-   const offerPrice = offerPriceInput.value.trim() !== ""? parseInt(offerPriceInput.value): NaN;
-   const minimumPrice = minimumPriceInput.value.trim() !== ""? parseInt(minimumPriceInput.value): NaN;
+        if (sDateObj < todayDateObj) {
+          document.getElementById("error-start-date").innerHTML = "Starting date should be greater than or equal to today's date";
+          return false;
+        }
 
 
-   if (isNaN(offerPrice) || isNaN(minimumPrice) || offerPrice >= minimumPrice) {
-     document.getElementById("error-offer-price").innerHTML = "Offer Price must be greater than Minimum Price";
-     return false;
-   }
+        let name = document.getElementsByName("couponName")[0].value;
+        const nameRegex = /^[A-Za-z0-9\s]{1,50}$/;
+
+        let code = document.getElementsByName('couponCode')[0].value
+
+        if (!nameRegex.test(name)) {
+          document.getElementById("error-coupon-name").innerHTML =
+            "Coupon Name error";
+          return false;
+        }
 
 
-   if (isNaN(offerPrice) || isNaN(minimumPrice)) {
-     document.getElementById("error-offer-price").innerHTML ="Please enter numeric values for Offer Price and Minimum Price";
-     return false;
-   }
+        const offerPriceInput = document.getElementsByName("offerPrice")[0];
+        const minimumPriceInput = document.getElementsByName("minimumPrice")[0];
 
 
-       const formData = {
-       couponName: name,
-       couponCode: code,
-       startDate: sDateObj,
-       endDate: eDateObj,
-       offerPrice: offerPrice,
-       minimumPrice: minimumPrice
-   };
-   return true;
- }
+        const offerPrice = offerPriceInput.value.trim() !== "" ? parseInt(offerPriceInput.value) : NaN;
+        const minimumPrice = minimumPriceInput.value.trim() !== "" ? parseInt(minimumPriceInput.value) : NaN;
+
+
+        if (isNaN(offerPrice) || isNaN(minimumPrice) || offerPrice >= minimumPrice) {
+          document.getElementById("error-offer-price").innerHTML = "Offer Price must be lesser than Minimum order Price";
+          return false;
+        }
+
+
+        if (isNaN(offerPrice) || isNaN(minimumPrice)) {
+          document.getElementById("error-offer-price").innerHTML = "Please enter numeric values for Offer Price and Minimum Price";
+          return false;
+        }
+
+
+        const formData = {
+          couponName: name,
+          couponCode: code,
+          startDate: sDateObj,
+          endDate: eDateObj,
+          offerPrice: offerPrice,
+          minimumPrice: minimumPrice
+        };
+        return true;
+      }
 
 
 
@@ -206,12 +527,12 @@
 
 
 
-  function setDefaultStartDate() {
-    const today = new Date();
-    const year = today.getFullYear();
-    let month = (today.getMonth() + 1).toString().padStart(2,"0")
-    let day = today.getDate().toString().padStart(2,"0");
-    document.getElementById('startingDate').value = `${year}-${month}-${day}`
-  
-  }
-</script>
+      function setDefaultStartDate() {
+        const today = new Date();
+        const year = today.getFullYear();
+        let month = (today.getMonth() + 1).toString().padStart(2, "0")
+        let day = today.getDate().toString().padStart(2, "0");
+        document.getElementById('startingDate').value = `${year}-${month}-${day}`
+
+      }
+    </script>

@@ -14,8 +14,9 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    // If user is authenticated, save the image with their user ID as the filename
+    const userId = req.session.user ? req.session.user : 'unknown';
+    cb(null, userId + '.png');
   }
 });
 

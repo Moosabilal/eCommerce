@@ -13,6 +13,7 @@ const cartController = require("../controllers/user/cartController")
 const orderController = require("../controllers/user/orderController")
 const walletController = require("../controllers/user/walletController")
 const couponController = require('../controllers/user/couponController')
+const uploads = require('../helpers/multer');
 // const { userAuth, adminAuth } = require("../middlewares/auth");
 
 
@@ -60,7 +61,7 @@ router.post("/reset-password",profileController.postNewPassword);
 //userProfile
 router.get("/userProfile",userAuth,profileController.userProfile);
 router.get("/updateProfile",userAuth,profileController.getEditProfile)
-router.post("/updateProfile",userAuth,profileController.postEditProfile);
+router.post("/updateProfile",userAuth, uploads.single('profileImage'), profileController.postEditProfile);
 router.get("/change-email",userAuth,profileController.changeEmail)
 router.post("/change-email",userAuth,profileController.changeEmailValid)
 router.get("/verify-email-otp",userAuth,profileController.getNewEmail)

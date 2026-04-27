@@ -1,58 +1,343 @@
 
 <%- include('../../views/partials/admin/header') %>
 
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-  <div class="content m-t-100" style="margin-left: 17%;width: 80%;">
-    <h2 class="text-center mb-4">Coupons List</h2>
-    <table class="table table-bordered table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th>Coupon Name</th>
-          <th>Coupon Code</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Offer Price</th>
-          <th>Minimum Price</th>
-          <th>List</th>
+  .admin-content {
+    font-family: 'Inter', sans-serif;
+    background: #f1f5f9;
+    min-height: 100vh;
+    padding: 30px;
+    padding-top: 90px;
+    margin-left: 260px;
+  }
 
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if(coupons.length>0){ %>
-      <% for(let i = 0 ; i < coupons.length ; i++){ %>
-            <tr> 
-              <td><%= coupons[i].name %></td>
-              <td><%= coupons[i].couponCode %></td>
-              <td><%= new Date(coupons[i].createdOn).toLocaleDateString('en-US') %></td>
-              <td><%= new Date(coupons[i].expireOn).toLocaleDateString('en-US') %></td>
-              <td><%= coupons[i].offerPrice %></td>
-              <td><%= coupons[i].minimumPrice %></td>
-              <td><%= coupons[i].isList %></td>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
 
-              <td>
-                <a href="/admin/editCoupon?id=<%= coupons[i]._id %>" class="btn btn-sm btn-warning">Edit</a>
-                <button type="submit" class="btn btn-sm btn-danger" onclick="confirmDelete('<%= coupons[i]._id %>')">Delete</button>
-              </td>
-            </tr>
-            <% } } else { %>
-        
-          <tr>
-            <td colspan="6" class="text-center">No coupons found</td>
-          </tr>
-          <% } %>
-  
-      </tbody>
-    </table>
-    <div class="text-end">
-      <a href="/admin/addCoupon" class="btn btn-primary">Add New Coupon</a>
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin: 0;
+  }
+
+  .page-subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 4px 0 0;
+  }
+
+  .btn-add-premium {
+    background: linear-gradient(135deg, #e53935, #c62828);
+    color: #fff;
+    border: none;
+    padding: 11px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(229,57,53,0.25);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-add-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(229,57,53,0.35);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  /* Coupon Cards Grid */
+  .coupons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .coupon-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+  }
+
+  .coupon-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.09);
+  }
+
+  .coupon-card-accent {
+    height: 5px;
+    background: linear-gradient(90deg, #1e293b, #e53935);
+  }
+
+  .coupon-card-body {
+    padding: 22px 24px;
+  }
+
+  .coupon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .coupon-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px;
+  }
+
+  .coupon-code-pill {
+    background: #1e293b;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 8px;
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+
+  .coupon-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .coupon-meta-item strong {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+
+  .coupon-meta-item span {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .coupon-prices {
+    display: flex;
+    gap: 16px;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .price-stat {
+    flex: 1;
+    text-align: center;
+  }
+
+  .price-stat .label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .price-stat .value {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .price-stat .value.green { color: #10b981; }
+  .price-stat .value.blue { color: #3b82f6; }
+
+  .price-divider {
+    width: 1px;
+    background: #e2e8f0;
+  }
+
+  .coupon-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .status-pill {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-listed { background: rgba(16,185,129,0.1); color: #10b981; }
+  .status-unlisted { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+  .coupon-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-coupon-action {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-coupon-action:hover { text-decoration: none; }
+
+  .btn-edit { background: rgba(245,158,11,0.1); color: #d97706; }
+  .btn-edit:hover { background: #f59e0b; color: #fff; }
+
+  .btn-del { background: rgba(239,68,68,0.1); color: #dc2626; }
+  .btn-del:hover { background: #ef4444; color: #fff; }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .empty-state i { font-size: 3rem; color: #cbd5e1; margin-bottom: 16px; }
+  .empty-state p { color: #64748b; font-size: 1rem; }
+
+  @media (max-width: 991px) {
+    .admin-content { margin-left: 0; padding: 20px; }
+    .coupons-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="admin-content">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Coupon Management</h1>
+      <p class="page-subtitle">Create, edit, and manage all promotional discount codes.</p>
     </div>
+    <a href="/admin/addCoupon" class="btn-add-premium">
+      <i class="fas fa-plus"></i> Create Coupon
+    </a>
   </div>
 
+  <% if(coupons.length > 0){ %>
+    <div class="coupons-grid">
+      <% for(let i = 0 ; i < coupons.length ; i++){ %>
+      <div class="coupon-card">
+        <div class="coupon-card-accent"></div>
+        <div class="coupon-card-body">
+          <div class="coupon-header">
+            <div>
+              <p class="coupon-name"><%= coupons[i].name %></p>
+            </div>
+            <span class="coupon-code-pill"><%= coupons[i].couponCode %></span>
+          </div>
+
+          <div class="coupon-prices">
+            <div class="price-stat">
+              <span class="label">Discount</span>
+              <span class="value green">₹<%= coupons[i].offerPrice %></span>
+            </div>
+            <div class="price-divider"></div>
+            <div class="price-stat">
+              <span class="label">Min. Order</span>
+              <span class="value blue">₹<%= coupons[i].minimumPrice %></span>
+            </div>
+          </div>
+
+          <div class="coupon-meta-grid">
+            <div class="coupon-meta-item">
+              <strong>Start Date</strong>
+              <span><%= new Date(coupons[i].createdOn).toLocaleDateString('en-US') %></span>
+            </div>
+            <div class="coupon-meta-item">
+              <strong>Expiry Date</strong>
+              <span style="color: #ef4444;"><%= new Date(coupons[i].expireOn).toLocaleDateString('en-US') %></span>
+            </div>
+          </div>
+
+          <div class="coupon-status-row">
+            <% 
+              const expDate = new Date(coupons[i].expireOn);
+              const isExpired = expDate < new Date();
+              let statusClass = 'status-unlisted';
+              let statusText = 'Inactive';
+              let statusIcon = 'eye-slash';
+              
+              if (isExpired) {
+                statusClass = 'status-unlisted';
+                statusText = 'Expired';
+                statusIcon = 'clock';
+              } else if (coupons[i].isList) {
+                statusClass = 'status-listed';
+                statusText = 'Active';
+                statusIcon = 'check-circle';
+              }
+            %>
+            <span class="status-pill <%= statusClass %>">
+              <i class="fas fa-<%= statusIcon %> mr-1"></i>
+              <%= statusText %>
+            </span>
+            <div class="coupon-actions">
+              <a href="/admin/editCoupon?id=<%= coupons[i]._id %>" class="btn-coupon-action btn-edit">
+                <i class="fas fa-edit"></i> Edit
+              </a>
+              <button type="button" class="btn-coupon-action btn-del" onclick="confirmDelete('<%= coupons[i]._id %>')">
+                <i class="fas fa-trash-alt"></i> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <i class="fas fa-ticket-alt"></i>
+      <p>No coupons found. Create your first discount coupon!</p>
+      <a href="/admin/addCoupon" class="btn-add-premium mt-3">
+        <i class="fas fa-plus"></i> Create Coupon
+      </a>
+    </div>
+  <% } %>
+</div>
 
   <%- include('../../views/partials/admin/footer') %>
 
   <script>
+
     function confirmDelete(couponId) {
    Swal.fire({
      title: "Are you sure?",

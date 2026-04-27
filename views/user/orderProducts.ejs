@@ -1,128 +1,358 @@
 <%- include('../../views/partials/user/header') %>
 <%- include('../../views/partials/user/profile-sidebar') %>
 <style>
+  /* Premium Order Details Styling */
   .main-content {
-    background-color: rgb(230, 244, 230);
-    margin-left: 16.4%;
-    padding: 40px 30px;
-    margin-top: 0px;
+    margin-left: 280px; /* Align with sidebar */
+    padding: 40px;
+    background-color: transparent;
+    min-height: 100vh;
+  }
+
+  .page-title {
+    color: #1e293b;
+    font-weight: 800;
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Typography & Structure */
+  .premium-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
+    margin-bottom: 24px;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .premium-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  }
+  
+  .premium-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 4px;
+    background: linear-gradient(135deg, #1b2138, #111524);
+  }
+
+  .card-header-premium {
+    background: #fff;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 20px 24px;
+  }
+  .card-header-premium h5 {
+    color: #0f172a;
+    font-weight: 700;
+    margin: 0;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-header-premium h5 i {
+    color: #e53935;
+  }
+
+  .card-body-premium {
+    padding: 24px;
+  }
+
+  .product-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+  }
+
+  .detail-row {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: #475569;
+    display: flex;
+    align-items: flex-start;
+  }
+  .detail-label {
+    min-width: 120px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .text-success-premium { color: #10b981 !important; font-weight: 700; }
+  .text-danger-premium { color: #ef4444 !important; font-weight: 700; }
+  .text-primary-premium { color: #e53935 !important; font-weight: 700; }
+
+  /* Product Image */
+  .img-wrapper {
+    background: #f8fafc;
+    padding: 15px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #f1f5f9;
+  }
+  .img-wrapper img {
+    max-height: 220px;
+    object-fit: contain;
     border-radius: 8px;
   }
-  div.bread-crumb.flex-w.p-l-25.p-r-15.p-t-30.p-lr-0-lg{
-    margin-bottom: 20px;
+
+  /* Address Grid */
+  .address-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
   }
-  img.img-fluid.rounded-start{
-    max-width: 60%;
+  .address-item {
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
   }
-  div.container-fluid.main-content.bg-light.p-4{
-    width: 83%;
+  .address-item strong {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 4px;
   }
-  div.col-lg-8.col-md-10{
-    width: 90%;
+  .address-item span {
+    color: #1e293b;
+    font-weight: 500;
   }
-    @media (max-width: 768px) {
-    .main-content {
-      margin-left: 0;
-      padding: 20px;
-    }
+
+  /* Badges */
+  .status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: inline-block;
+  }
+  .status-badge.Pending { background-color: #f59e0b; }
+  .status-badge.Processing { background-color: #3b82f6; }
+  .status-badge.Shipped { background-color: #8b5cf6; }
+  .status-badge.Delivered { background-color: #10b981; }
+  .status-badge.Cancelled { background-color: #ef4444; }
+  .status-badge.Return_Requested { background-color: #f97316; }
+  .status-badge.Returned { background-color: #64748b; }
+  .status-badge.Completed { background-color: #10b981; }
+
+  /* Buttons */
+  .btn-premium-success { 
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border: none;
+    font-weight: 600; 
+    padding: 12px 28px; 
+    border-radius: 50px; 
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  }
+  .btn-premium-success:hover { 
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    color: #fff;
+  }
+  
+  .btn-premium-secondary { 
+    background: #fff; 
+    border: 2px solid #cbd5e1; 
+    color: #475569; 
+    font-weight: 600; 
+    padding: 10px 28px; 
+    border-radius: 50px; 
+    transition: all 0.2s; 
+  }
+  .btn-premium-secondary:hover { 
+    background: #f1f5f9; 
+    color: #1e293b; 
+    border-color: #94a3b8; 
+  }
+
+  .bread-crumb {
+    padding: 0;
+    margin-bottom: 30px;
+  }
+  .stext-109 { font-weight: 500; font-size: 0.9rem; }
+  
+  .wrapper-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 991px) {
+    .main-content { margin-left: 0; padding: 20px; }
+  }
+  @media (max-width: 768px) {
+    .img-wrapper { border-right: none; border-bottom: 1px solid #f1f5f9; }
   }
 </style>
-<div class="container-fluid main-content bg-light p-4">
-  <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg" style="margin-left: 10%;">
-    <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
-      Home
-      <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-    </a>
 
-    <span class="stext-109 cl4">
-      My Orders
-    </span>
-  </div>
-  <% orderDetails.forEach(order => { %>
-    <div class="row justify-content-left ml-5">
-      <div class="col-lg-8 col-md-10">
-        <div class="card shadow-sm">
-          <div class="row g-0">
-            <!-- Product image -->
-            <div class="col-md-4">
-              <img src="/uploads/product-images/<%= order.productDetails.productImage[0] %>" class="img-fluid rounded-start" alt="Product Image">
+<div class="main-content">
+  <div class="wrapper-container">
+    <div class="bread-crumb flex-w">
+      <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+        Home <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+      </a>
+      <a href="/orderHistory" class="stext-109 cl8 hov-cl1 trans-04">
+        My Orders <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+      </a>
+      <span class="stext-109 cl4">Order Summary</span>
+    </div>
+
+    <h2 class="page-title text-center">Order Overview</h2>
+
+    <% orderDetails.forEach(order => { %>
+      <div class="premium-card">
+        <div class="row g-0">
+          <div class="col-md-4">
+            <div class="img-wrapper">
+              <img src="/uploads/product-images/<%= order.productDetails.productImage[0] %>" class="img-fluid" alt="<%= order.productDetails.productName %>">
             </div>
-            <!-- Product details -->
-            <div class="col-md-8">
-              <div class="card-body" style="margin-left: -10%;">
-                <h5 class="card-title"><%= order.productDetails.productName %></h5>
-                <p class="card-text"><strong>Description : </strong> <%= order.productDetails.description %></p>
-                <p class="card-text"><strong>Size : </strong> <%= order.orderItems.size %></p>
-                <p class="card-text"><strong>Quantity : </strong> <%= order.orderItems.quantity %></p>
-                <p class="card-text"><strong>Color :</strong> <%= order.productDetails.color %></p>
-                <p class="card-text text-success"><strong>Price:</strong> &#8377;<%= order.orderItems.price %></p>
-                <p class="card-text text-success"><strong>Total Price:</strong> &#8377;<%= order.orderItems.totalPrice %></p>
+          </div>
+          <div class="col-md-8">
+            <div class="card-body-premium">
+              <h4 class="product-title"><%= order.productDetails.productName %></h4>
+              
+              <div class="detail-row">
+                <span class="detail-label">Description:</span>
+                <span><%= order.productDetails.description %></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Size:</span>
+                <span><%= order.orderItems.size %></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Quantity:</span>
+                <span><%= order.orderItems.quantity %></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Color:</span>
+                <span><%= order.productDetails.color %></span>
+              </div>
+              
+              <hr style="border-color: #f1f5f9; margin: 16px 0;">
+              
+              <div class="detail-row">
+                <span class="detail-label">Unit Price:</span>
+                <span class="text-success-premium">&#8377;<%= order.orderItems.price %></span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Total Product Price:</span>
+                <span class="text-success-premium">&#8377;<%= order.orderItems.totalPrice %></span>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  <% }); %>
+    <% }); %>
 
-  <!-- Order Summary -->
-  <div class="row justify-content-left ml-5 mt-4">
-    <div class="col-lg-8 col-md-10">
-      <div class="card shadow-sm">
-        <div class="card-header">
-          <h5>Order Summary</h5>
+    <div class="row">
+      <!-- Order Summary Component -->
+      <div class="col-md-6 mb-4">
+        <div class="premium-card h-100">
+          <div class="card-header-premium">
+            <h5><i class="fa fa-receipt"></i> Payment Summary</h5>
+          </div>
+          <div class="card-body-premium">
+            <div class="detail-row">
+              <span class="detail-label" style="min-width: 140px;">Order ID:</span>
+              <span class="fw-bold text-muted">#<%= orderDetails[0].orderId %></span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label" style="min-width: 140px;">Order Status:</span>
+              <span class="status-badge <%= orderDetails[0].status %>"><%= orderDetails[0].status %></span>
+            </div>
+            <div class="detail-row mt-3">
+              <span class="detail-label" style="min-width: 140px;">Payment Method:</span>
+              <span class="fw-bolder"><%= orderDetails[0].paymentMethod %></span>
+            </div>
+            <div class="detail-row mt-1">
+              <span class="detail-label" style="min-width: 140px;">Payment Status:</span>
+              <span class="fw-bold" style="color: #10b981;"><%= orderDetails[0].paymentStatus || 'Pending' %></span>
+            </div>
+            <div class="detail-row mt-1">
+              <span class="detail-label" style="min-width: 140px;">Shipping (<%= (orderDetails[0].shipping || 'standard').toUpperCase() %>):</span>
+              <span class="text-muted">&#8377;<%= orderDetails[0].shipping === 'express' ? 15 : 5 %></span>
+            </div>
+            <div class="detail-row mt-1">
+              <span class="detail-label" style="min-width: 140px;">Tax (GST):</span>
+              <span class="text-muted"><%= orderDetails[0].tax %>%</span>
+            </div>
+            <div class="detail-row mt-1">
+              <span class="detail-label" style="min-width: 140px;">Discount:</span>
+              <span class="text-danger">-&#8377;<%= orderDetails[0].discount || 0 %></span>
+            </div>
+            <hr style="border-color: #f1f5f9; margin: 16px 0;">
+            <div class="detail-row pb-2" style="font-size: 1.1rem;">
+              <span class="detail-label" style="min-width: 140px; color: #1e293b;">Final Payment:</span>
+              <span class="text-primary-premium">&#8377;<%= orderDetails[0].finalAmount %></span>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <p class="card-text"><strong>Order ID:</strong> <%= orderDetails[0].orderId %></p>
-          <p class="card-text"><strong>Status :</strong> <span class="text-primary fw-bolder"><%= orderDetails[0].status %></span></p>
-          <p class="card-text"><strong>Payment Method :</strong> <span class="fw-bolder"><%= orderDetails[0].paymentMethod %></span></p>
-          <p class="card-text"><strong>Total Amount To Pay (Including Discount and Tax):</strong> &#8377;<%= orderDetails[0].finalAmount %></p>
+      </div>
+
+      <!-- Shipping Address Component -->
+      <div class="col-md-6 mb-4">
+        <div class="premium-card h-100">
+          <div class="card-header-premium">
+            <h5><i class="fa fa-map-marker-alt"></i> Delivery Address</h5>
+          </div>
+          <div class="card-body-premium">
+            <% if (addressDetails.length > 0) { %>
+              <% addressDetails.forEach(address => { %>
+                <div class="address-detail-grid">
+                  <div class="address-item">
+                    <strong>Destination</strong>
+                    <span><%= address.address.addressType %></span>
+                  </div>
+                  <div class="address-item">
+                    <strong>Recipient</strong>
+                    <span><%= address.address.name %></span>
+                  </div>
+                  <div class="address-item" style="grid-column: span 2;">
+                    <strong>Location</strong>
+                    <span><%= address.address.landMark %>, <%= address.address.city %>, <%= address.address.state %> - <%= address.address.pincode %></span>
+                  </div>
+                  <div class="address-item">
+                    <strong>Primary Phone</strong>
+                    <span><%= address.address.phone %></span>
+                  </div>
+                  <% if(address.address.altPhone) { %>
+                  <div class="address-item">
+                    <strong>Alt Phone</strong>
+                    <span><%= address.address.altPhone %></span>
+                  </div>
+                  <% } %>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <div class="text-center py-4">
+                <i class="fa fa-map-marker-alt" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 10px;"></i>
+                <p class="text-danger-premium m-0">Shipping info missing for this order.</p>
+              </div>
+            <% } %>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="row justify-content-left ml-5 mt-4">
-    <div class="col-lg-8 col-md-10">
-      <div class="card shadow-sm">
-        <div class="card-header">
-          <h5>Shipping Address</h5>
-        </div>
-        <div class="card-body">
-          <% if (addressDetails.length > 0) { %>
-            <% addressDetails.forEach(address => { %>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>Type&nbsp;:&nbsp;</strong> <%= address.address.addressType %></li>
-                <li class="list-group-item"><strong>Name&nbsp;:&nbsp;</strong> <%= address.address.name %></li>
-                <li class="list-group-item"><strong>City&nbsp;:&nbsp;</strong> <%= address.address.city %></li>
-                <li class="list-group-item"><strong>Landmark&nbsp;:&nbsp;</strong> <%= address.address.landMark %></li>
-                <li class="list-group-item"><strong>State&nbsp;:&nbsp;</strong> <%= address.address.state %></li>
-                <li class="list-group-item"><strong>Pincode&nbsp;:&nbsp;</strong> <%= address.address.pincode %></li>
-                <li class="list-group-item"><strong>Phone&nbsp;:&nbsp;</strong> <%= address.address.phone %></li>
-                <li class="list-group-item"><strong>Alternate Phone&nbsp;:&nbsp;</strong> <%= address.address.altPhone %></li>
-              </ul>
-            <% }); %>
-          <% } else { %>
-            <p class="text-danger">No address information available.</p>
-          <% } %>
-        </div>
-      </div>
+    <!-- Actions -->
+    <div class="text-center mt-3 mb-5 d-flex justify-content-center gap-3">
+      <a href="/orderHistory" class="btn btn-premium-secondary"><i class="fa fa-arrow-left"></i> Back to Orders</a>
+      <% if (orderDetails[0].status === 'Delivered'){ %>
+        <a href="/download-invoice/<%= orderDetails[0].orderId %>" class="btn btn-premium-success"><i class="fa fa-file-pdf"></i> Download Invoice</a>
+      <% } %>
     </div>
-  </div>
-  <% if (orderDetails[0].status === 'Delivered'){ %>
-  <div class="row justify-content-left ml-5 mt-4">
-    <div class="col-lg-8 col-md-10 text-center">
-        <a href="/download-invoice/<%= orderDetails[0].orderId %>" class="btn btn-success">Download Invoice as PDF</a>
-    </div>
-</div>
-<% } %>
 
-
-  <div class="row justify-content-left ml-5 mt-4">
-    <div class="col-lg-8 col-md-10 text-center">
-      <!-- Back button -->
-      <a href="/orderHistory" class="btn btn-primary">Back to Orders</a>
-    </div>
   </div>
 </div>
 

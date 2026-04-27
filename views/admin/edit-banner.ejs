@@ -4,83 +4,241 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    .thumbnail {
-        display: inline-block;
-        margin: 10px;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    .admin-content {
+        font-family: 'Inter', sans-serif;
+        background: #f1f5f9;
+        min-height: 100vh;
+        padding: 30px;
+        padding-top: 90px;
+        margin-left: 260px;
+    }
+
+    .page-header {
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 5px;
+    }
+
+    .breadcrumb-nav {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .breadcrumb-nav a { color: #3b82f6; text-decoration: none; }
+    .breadcrumb-nav a:hover { text-decoration: underline; }
+
+    /* Panel Card */
+    .panel-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .panel-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 12px;
+    }
+
+    .form-label-premium {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #475569;
+        margin-bottom: 6px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control-premium {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background-color: #f8fafc;
+        padding: 10px 14px;
+        font-size: 0.95rem;
+        color: #1e293b;
+        width: 100%;
+        transition: all 0.2s;
+    }
+
+    .form-control-premium:focus {
+        background-color: #fff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    /* Current Image */
+    #currentImageContainer {
         position: relative;
+        display: inline-block;
+        margin-bottom: 15px;
     }
-    .thumbnail img {
-        width: 100px;
-        height: auto;
-        border-radius: 5px;
+
+    #currentImageContainer img {
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        max-width: 350px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
-    .remove-icon {
+
+    .btn-remove-image {
         position: absolute;
-        top: -5px;
-        right: -5px;
-        background: red;
-        color: white;
+        top: -10px;
+        right: -10px;
+        background: #ef4444;
+        color: #fff;
+        border: none;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
-        padding: 2px 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.8rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: transform 0.2s;
+        z-index: 10;
+    }
+
+    .btn-remove-image:hover {
+        transform: scale(1.1);
+        background: #dc2626;
+    }
+
+    /* Cropper */
+    #imagePreviewContainer, #croppedImgContainer {
+        display: none;
+        margin-top: 15px;
+        padding: 15px;
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    #imgView { max-width: 100%; max-height: 400px; border-radius: 8px; }
+    #croppedImg { max-width: 100%; max-height: 250px; border-radius: 8px; border: 1px solid #e2e8f0; display: none; margin: 0 auto; }
+
+    .btn-action-premium {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+
+    .btn-action-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+    }
+
+    .btn-save-crop {
+        background: #10b981;
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 12px;
         cursor: pointer;
     }
-    #croppedImgContainer {
-        display: none;
-        margin-top: 10px;
-    }
-    #croppedImg {
-        width: 200px;
-        display: none;
+
+    @media (max-width: 768px) {
+        .admin-content { margin-left: 0; padding: 20px; padding-top: 80px; }
     }
 </style>
 
-<div class="content mt-100">
-    <h2 class="text-center mb-4">Edit Banner</h2>
+<div class="admin-content">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Edit Banner</h1>
+            <p class="breadcrumb-nav">
+                <a href="/admin/dashboard">Dashboard</a> /
+                <a href="/admin/banner">Banners</a> /
+                <span style="color:#0f172a;">Edit</span>
+            </p>
+        </div>
+    </div>
 
-    <!-- Form to Edit Banner -->
-    <div class="card shadow p-4 mb-4">
-        <h4 class="mb-3">Update Banner</h4>
+    <div class="panel-card" style="max-width: 800px;">
+        <h4 class="panel-title"><i class="fas fa-edit mr-2"></i> Update Banner Details</h4>
         <form id="bannerForm" enctype="multipart/form-data">
-            <input type="hidden" name="bannerId" value="<%= banner._id %>"> <!-- Hidden ID -->
+            <input type="hidden" name="bannerId" value="<%= banner._id %>">
 
-            <div class="mb-3">
-                <label for="title" class="form-label">Banner Title:</label>
-                <input type="text" class="form-control" name="title" value="<%= banner.title %>" required>
+            <div class="mb-4">
+                <label for="title" class="form-label-premium">Banner Title</label>
+                <input type="text" class="form-control-premium" name="title" value="<%= banner.title %>" required>
             </div>
         
-            <div class="mb-3">
-                <label for="description" class="form-label">Description:</label>
-                <input type="text" class="form-control" name="description" value="<%= banner.description %>" required>
+            <div class="mb-4">
+                <label for="description" class="form-label-premium">Description</label>
+                <input type="text" class="form-control-premium" name="description" value="<%= banner.description %>" required>
             </div>
 
             <!-- Show Existing Image -->
-            <div class="mb-3">
-                <label class="form-label">Current Banner Image:</label>
+            <div class="mb-4">
+                <label class="form-label-premium">Current Banner Image</label>
+                <div>
                 <% if (banner.image) { %>
                     <div id="currentImageContainer">
-                        <img src="/uploads/product-images/<%= banner.image %>" id="currentBannerImg" name="image" class="img-thumbnail" width="300">
-                        <button type="button" id="removeImageBtn" class="btn btn-danger btn-sm">Remove Image</button>
+                        <img src="/uploads/product-images/<%= banner.image %>" id="currentBannerImg" name="image" alt="Current Banner">
+                        <button type="button" id="removeImageBtn" class="btn-remove-image" title="Remove image">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
+                <% } else { %>
+                    <p style="color: #64748b; font-size: 0.9rem;">No current image.</p>
                 <% } %>
+                </div>
             </div>
         
-            <div class="mb-3">
-                <label for="imageInput" class="form-label">Upload New Banner Image:</label>
-                <input type="file" class="form-control" id="imageInput" name="image" accept="image/*">
+            <div class="mb-4">
+                <label for="imageInput" class="form-label-premium">Upload New Banner Image</label>
+                <input type="file" class="form-control-premium" id="imageInput" name="image" accept="image/*" style="padding: 8px;">
             </div>
         
-            <div id="imagePreviewContainer" style="display: none;">
-                <h5>Crop Image</h5>
-                <img id="imgView" class="img-fluid">
-                <button type="button" id="saveButton" class="btn btn-success mt-2" style="display: none;">Save Cropped Image</button>
+            <div id="imagePreviewContainer">
+                <label class="form-label-premium mb-2">Crop Image</label>
+                <div style="background: #e2e8f0; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                    <img id="imgView" class="img-fluid">
+                </div>
+                <button type="button" id="saveButton" class="btn-save-crop" style="display: none;"><i class="fas fa-crop"></i> Save Cropped Image</button>
             </div>
         
             <div id="croppedImgContainer">
-                <h5>Final Cropped Image</h5>
-                <img id="croppedImg" class="img-thumbnail">
+                <label class="form-label-premium mb-2">Final Cropped Preview</label>
+                <img id="croppedImg">
             </div>
-            <input type="hidden" name="bannerId" value="<%= banner._id %>">
-            <button type="submit" id="uploadBannerButton" class="btn btn-primary w-100 mt-3">Update Banner</button>
+
+            <div class="mt-5 text-right">
+                <button type="submit" id="uploadBannerButton" class="btn-action-premium">
+                    <i class="fas fa-check-circle"></i> Update Banner
+                </button>
+            </div>
         </form>
     </div>
 </div>
