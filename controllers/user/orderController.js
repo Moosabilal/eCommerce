@@ -28,9 +28,9 @@ const generateInvoice = (order, res) => {
     doc.pipe(res);
 
     // ---------- HEADER ----------
-    doc.image('public/images/logo.png', 50, 40, { width: 100 });    
+    doc.image('public/images/logo.png', 50, 40, { width: 100 });
     doc.fillColor('#000').fontSize(20).font('Helvetica-Bold').text('INVOICE', 400, 50)
-    
+
     doc.fontSize(10).text(`Invoice #: ${order.orderId}`, 400, 80);
     doc.text(`Date: ${new Date(order.createdOn).toLocaleString()}`, 400, 105);
     doc.moveDown(2);
@@ -85,7 +85,7 @@ const generateInvoice = (order, res) => {
     doc.text('Tax (5%):', 400, rowY + 20);
     doc.text('Discount:', 400, rowY + 40);
     doc.text('Total Amount:', 400, rowY + 60);
-    
+
     doc.fillColor('#000').fontSize(12).font('Helvetica');
     doc.text(`₹${order.finalAmount - order.tax}`, 480, rowY);
     doc.text(`₹${order.tax}`, 480, rowY + 20);
@@ -123,7 +123,7 @@ const generateInvoice = (order, res) => {
 
 const PostPlaceOrder = async (req, res) => {
     try {
-        const {addressId, shipping, payment, parentAddressId, finalAmount, subtotal, shippingValue, discountValue, taxValue, paymentMethod, paymentStatus, razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
+        const { addressId, shipping, payment, parentAddressId, finalAmount, subtotal, shippingValue, discountValue, taxValue, paymentMethod, paymentStatus, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
         console.log(req.body)
 
         const user = req.session.user;
@@ -137,47 +137,47 @@ const PostPlaceOrder = async (req, res) => {
         }
         const findProduct = cart.items.map(product => product.productId);
         const products = await Product.find({ _id: { $in: findProduct } });
-        if(payment == "Card"){
+        if (payment == "Card") {
             const wallet = await Wallet.findOne({ userId: user });
             if (!wallet) {
-                return res.status(404).json({success:false,message:"wallet not Found"});
+                return res.status(404).json({ success: false, message: "wallet not Found" });
             }
 
-        const orderItems = cart.items.map((item)=>{
-            return{
-                productId:item.productId._id,
-                size:item.stock[0].size,
-                quantity:item.stock[0].quantity,
-                price:item.price,
-                totalPrice:item.totalPrice
-            }
-        })
+            const orderItems = cart.items.map((item) => {
+                return {
+                    productId: item.productId._id,
+                    size: item.stock[0].size,
+                    quantity: item.stock[0].quantity,
+                    price: item.price,
+                    totalPrice: item.totalPrice
+                }
+            })
 
-        const newOrder = new Order({
-            orderItems,
-            userId: user,
-            finalAmount: finalAmount,
-            paymentMethod: payment,
-            paymentStatus: 'Completed',
-            addressId: parentAddressId,
-            parentAddressId:addressId[1],
-            shipping: shipping,
-            discount:discountValue,
-            tax:taxValue,
-            status: 'Pending',
-            couponApplied: couponApplied,
-            razorpay_order_id: razorpay_order_id,
-            razorpay_payment_id: razorpay_payment_id,
-            razorpay_signature: razorpay_signature,
+            const newOrder = new Order({
+                orderItems,
+                userId: user,
+                finalAmount: finalAmount,
+                paymentMethod: payment,
+                paymentStatus: 'Completed',
+                addressId: parentAddressId,
+                parentAddressId: addressId,
+                shipping: shipping,
+                discount: discountValue,
+                tax: taxValue,
+                status: 'Pending',
+                couponApplied: couponApplied,
+                razorpay_order_id: razorpay_order_id,
+                razorpay_payment_id: razorpay_payment_id,
+                razorpay_signature: razorpay_signature,
 
 
-        })
-            
-        await newOrder.save();
+            })
 
-        const findOrderId = await Order.findOne({ userId: user }).sort({createdOn:-1});
-        const orderId = findOrderId.orderId;
-        
+            await newOrder.save();
+
+            const findOrderId = await Order.findOne({ userId: user }).sort({ createdOn: -1 });
+            const orderId = findOrderId.orderId;
+
             wallet.balance -= finalAmount;
             wallet.balance = wallet.balance.toFixed(2);
             wallet.transactions.push({
@@ -190,43 +190,43 @@ const PostPlaceOrder = async (req, res) => {
             await wallet.save();
 
 
-    }else{
-
-       
-        const orderItems = cart.items.map((item)=>{
-            return{
-                productId:item.productId._id,
-                size:item.stock[0].size,
-                quantity:item.stock[0].quantity,
-                price:item.price,
-                totalPrice:item.totalPrice
-            }
-        })
-
-        const newOrder = new Order({
-            orderItems,
-            userId: user,
-            finalAmount: finalAmount,
-            paymentMethod: payment,
-            paymentStatus:paymentStatus,
-            addressId: parentAddressId,
-            parentAddressId:addressId[1],
-            shipping: shipping,
-            discount:discountValue,
-            tax:taxValue,
-            status: 'Pending',
-            couponApplied: couponApplied,
-            razorpay_order_id: razorpay_order_id,
-            razorpay_payment_id: razorpay_payment_id,
-            razorpay_signature: razorpay_signature,
+        } else {
 
 
-        })
-            
-        await newOrder.save();
+            const orderItems = cart.items.map((item) => {
+                return {
+                    productId: item.productId._id,
+                    size: item.stock[0].size,
+                    quantity: item.stock[0].quantity,
+                    price: item.price,
+                    totalPrice: item.totalPrice
+                }
+            })
 
-    }
-    let findSize = cart.items.map((item) => item.stock[0].size);
+            const newOrder = new Order({
+                orderItems,
+                userId: user,
+                finalAmount: finalAmount,
+                paymentMethod: payment,
+                paymentStatus: paymentStatus,
+                addressId: parentAddressId,
+                parentAddressId: addressId,
+                shipping: shipping,
+                discount: discountValue,
+                tax: taxValue,
+                status: 'Pending',
+                couponApplied: couponApplied,
+                razorpay_order_id: razorpay_order_id,
+                razorpay_payment_id: razorpay_payment_id,
+                razorpay_signature: razorpay_signature,
+
+
+            })
+
+            await newOrder.save();
+
+        }
+        let findSize = cart.items.map((item) => item.stock[0].size);
         products.forEach((product) => {
             product.stock.forEach((stock) => {
                 if (findSize.includes(stock.size)) {
@@ -243,68 +243,75 @@ const PostPlaceOrder = async (req, res) => {
         await cart.save();
         res.redirect('/shop');
 
-                                  
+
     } catch (error) {
         console.error("Error creating order:", error);
-        res.redirect('pageNotFound') 
-       }
+        res.redirect('pageNotFound')
+    }
 };
 
-const getOrderHistory = async (req,res)=>{
+const getOrderHistory = async (req, res) => {
     try {
         const userId = req.session.user;
         const userData = await User.findById(userId)
+
         const addressDetails = await Address.aggregate([
-            {$match: {userId: new mongoose.Types.ObjectId(userId)} },
-            { $unwind:"$address"},
+            { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+            { $unwind: "$address" },
         ]);
         const orderDetails = await Order.aggregate([
-            { $match:{userId:new mongoose.Types.ObjectId(userId)}},
-            { $unwind:"$orderItems"},
-            { $lookup:{
-                from: 'products',
-                localField: 'orderItems.productId',
-                foreignField: '_id',
-                as: 'productDetails'
-            }},
-            { $unwind:"$productDetails"},
-            { $project:{
-                _id:1,
-                "orderId":1,
-                "parentAddressId":1,
-                "orderItems.size":1,
-                "orderItems.quantity":1,
-                "orderItems.productId":1,
-                "orderItems.price":1,
-                "orderItems.totalPrice":1,
-                "finalAmount":1,
-                "parentAddressid":1,
-                "shipping":1,
-                "status":1,
-                "paymentStatus":1,
-                "razorpay_order_id":1,
-                "razorpay_payment_id":1,
-                "razorpay_signature":1,
-                "orderId":1,
-                "createdOn":1,
-                "productDetails._id":1,
-                "productDetails.productName":1,
-                "productDetails.description":1,
-                "productDetails.productOffer":1,
-                "productDetails.color":1,
-                "productDetails.productImage":1,
-            }},
-            {$sort:{createdOn:-1}}
+            { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+            { $unwind: "$orderItems" },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'orderItems.productId',
+                    foreignField: '_id',
+                    as: 'productDetails'
+                }
+            },
+            { $unwind: "$productDetails" },
+            {
+                $project: {
+                    _id: 1,
+                    "orderId": 1,
+                    "parentAddressId": 1,
+                    "orderItems.size": 1,
+                    "orderItems.quantity": 1,
+                    "orderItems.productId": 1,
+                    "orderItems.price": 1,
+                    "orderItems.totalPrice": 1,
+                    "finalAmount": 1,
+                    "parentAddressid": 1,
+                    "shipping": 1,
+                    "status": 1,
+                    "paymentStatus": 1,
+                    "razorpay_order_id": 1,
+                    "razorpay_payment_id": 1,
+                    "razorpay_signature": 1,
+                    "orderId": 1,
+                    "createdOn": 1,
+                    "discount": 1,
+                    "tax": 1,
+                    "productDetails._id": 1,
+                    "productDetails.productName": 1,
+                    "productDetails.description": 1,
+                    "productDetails.productOffer": 1,
+                    "productDetails.color": 1,
+                    "productDetails.productImage": 1,
+                }
+            },
+            { $sort: { createdOn: -1 } }
         ])
-        res.render('order-details',{
-            orders:orderDetails,
-            user:userData,
-            addressData:addressDetails,
+        res.render('order-details', {
+            orders: orderDetails,
+            user: userData,
+            addressData: addressDetails,
         })
     } catch (error) {
-        console.log("Error when rendering order-details",error)
+        console.log("Error when rendering order-details", error)
         res.redirect("/pageNotFound")
-        
+
     }
 }
 
@@ -318,8 +325,8 @@ const cancelOrder = async (req, res) => {
         if (!existingOrder) {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
-        let orderIdValue = existingOrder.orderId; 
-        if(existingOrder.status === "Processing" || existingOrder.status === "Shipped"){
+        let orderIdValue = existingOrder.orderId;
+        if (existingOrder.status === "Processing" || existingOrder.status === "Shipped") {
             return res.status(200).json({ success: false, message: "You can't cancel this order when it is in pending, processing or shipped" });
         }
         if (existingOrder.status === "Cancelled") {
@@ -337,7 +344,7 @@ const cancelOrder = async (req, res) => {
                         amount: refundAmount,
                         status: "Success",
                         date: new Date(),
-                        orderId:orderIdValue,
+                        orderId: orderIdValue,
                     },
                 },
             },
@@ -349,7 +356,7 @@ const cancelOrder = async (req, res) => {
             // }
         );
 
-        
+
 
         existingOrder.status = "Cancelled";
         await existingOrder.save();
@@ -385,8 +392,8 @@ const returnOrder = async (req, res) => {
         if (!existingOrder) {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
-        let orderIdValue = existingOrder.orderId; 
-        if(existingOrder.status === "Pending" || existingOrder.status === "Processing" || existingOrder.status === "Shipped"){
+        let orderIdValue = existingOrder.orderId;
+        if (existingOrder.status === "Pending" || existingOrder.status === "Processing" || existingOrder.status === "Shipped") {
             return res.status(200).json({ success: false, message: "You can't Return this order when it is in pending, processing or shipped" });
         }
 
@@ -396,11 +403,11 @@ const returnOrder = async (req, res) => {
         if (existingOrder.status === "Cancelled") {
             return res.status(200).json({ success: false, message: "our order is already cancelled, courier will pickup soon" });
         }
-        if(existingOrder.status === "Delivered"){
-        existingOrder.status = "Return_Requested";
-        const returnStatus = existingOrder.status
-        await existingOrder.save();
-        return res.status(200).json ({ success: true,returnStatus });
+        if (existingOrder.status === "Delivered") {
+            existingOrder.status = "Return_Requested";
+            const returnStatus = existingOrder.status
+            await existingOrder.save();
+            return res.status(200).json({ success: true, returnStatus });
         }
 
         if (existingOrder.nModified === 0) {
@@ -415,7 +422,7 @@ const returnOrder = async (req, res) => {
     }
 };
 
-const orderedProductDetails = async (req,res)=>{
+const orderedProductDetails = async (req, res) => {
     try {
         const userId = req.session.user;
         const size = req.query.size
@@ -424,55 +431,61 @@ const orderedProductDetails = async (req,res)=>{
         const orderId = req.query.orderId
         const userData = await User.findById(userId);
         const addressDetails = await Address.aggregate([
-            {$match: {userId: new mongoose.Types.ObjectId(userId)} },
-            { $unwind:"$address"},
-            { $match: { "address._id": new mongoose.Types.ObjectId(parentAddressId) }}
+            { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+            { $unwind: "$address" },
+            { $match: { "address._id": new mongoose.Types.ObjectId(parentAddressId) } }
         ])
 
         const orderDetails = await Order.aggregate([
-            { $match:{_id:new mongoose.Types.ObjectId(orderId)}},
-            { $unwind:"$orderItems"},
-            { $lookup:{
-                from: 'products',
-                localField: 'orderItems.productId',
-                foreignField: '_id',
-                as: 'productDetails'
-            }},
-            { $unwind:"$productDetails"},
-           
-            { $project:{
-                _id:1,
-                "parentAddressId":1,
-                "orderItems.size":1,
-                "orderItems.quantity":1,
-                "orderItems.productId":1,
-                "orderItems.price":1,
-                "orderItems.totalPrice":1,
-                "paymentMethod":1,
-                "finalAmount":1,
-                "parentAddressid":1,
-                "shipping":1,
-                "status":1,
-                "orderId":1,
-                "createdOn":1,
-                "productDetails._id":1,
-                "productDetails.productName":1,
-                "productDetails.description":1,
-                "productDetails.productOffer":1,
-                "productDetails.color":1,
-                "productDetails.productImage":1,
-            }}
+            { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
+            { $unwind: "$orderItems" },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'orderItems.productId',
+                    foreignField: '_id',
+                    as: 'productDetails'
+                }
+            },
+            { $unwind: "$productDetails" },
+
+            {
+                $project: {
+                    _id: 1,
+                    "orderItems.size": 1,
+                    "orderItems.quantity": 1,
+                    "orderItems.productId": 1,
+                    "orderItems.price": 1,
+                    "orderItems.totalPrice": 1,
+                    "paymentMethod": 1,
+                    "finalAmount": 1,
+                    "parentAddressId": 1,
+                    "shipping": 1,
+                    "status": 1,
+                    "orderId": 1,
+                    "createdOn": 1,
+                    "paymentStatus": 1,
+                    "discount": 1,
+                    "tax": 1,
+                    "productDetails._id": 1,
+                    "productDetails.productName": 1,
+                    "productDetails.description": 1,
+                    "productDetails.productOffer": 1,
+                    "productDetails.color": 1,
+                    "productDetails.productImage": 1,
+                }
+            }
         ])
-        res.render('orderProducts',{
-            user:userData,
-            orderDetails:orderDetails,
-            addressDetails:addressDetails,
-            orderId:orderId
+        res.render('orderProducts', {
+            user: userData,
+            orderDetails: orderDetails,
+            addressDetails: addressDetails,
+            orderId: orderId
         })
     } catch (error) {
-        console.log("Error when rendering ordered product details",error)
+        console.log("Error when rendering ordered product details", error)
         res.redirect("/pageNotFound")
-        
+
     }
 }
 
@@ -486,9 +499,9 @@ const createOrder = async (req, res) => {
         const amountInPaise = Math.round(parseFloat(amount) * 100);
 
         const options = {
-            amount: amountInPaise,  
+            amount: amountInPaise,
             currency: currency || 'INR',
-            receipt: `receipt_${Date.now()}`, 
+            receipt: `receipt_${Date.now()}`,
         };
 
         const order = await razorpay.orders.create(options);
@@ -501,7 +514,7 @@ const createOrder = async (req, res) => {
             success: true,
             orderId: order.id,
             amount: order.amount,
-            order:order // This is already in paise
+            order: order // This is already in paise
         });
 
     } catch (error) {
@@ -512,34 +525,34 @@ const createOrder = async (req, res) => {
 
 const verifyPayment = async (req, res) => {
     try {
-        
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-    const body = razorpay_order_id + '|' + razorpay_payment_id;
-    const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET) 
-        .update(body.toString())
-        .digest('hex');
-    if (expectedSignature === razorpay_signature) {
-        const order = await Order.findOne({ razorpay_order_id });
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+        const body = razorpay_order_id + '|' + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(body.toString())
+            .digest('hex');
+        if (expectedSignature === razorpay_signature) {
+            const order = await Order.findOne({ razorpay_order_id });
             if (order) {
 
-            order.razorpay_payment_id = razorpay_payment_id;
-            order.razorpay_signature = razorpay_signature;
-            order.paymentStatus = "Completed";
-            await order.save();
+                order.razorpay_payment_id = razorpay_payment_id;
+                order.razorpay_signature = razorpay_signature;
+                order.paymentStatus = "Completed";
+                await order.save();
 
-            return res.status(200).json({ success: true, message: "Payment verified and order updated" });
+                return res.status(200).json({ success: true, message: "Payment verified and order updated" });
             } else {
                 res.status(200).json({ success: true, message: 'Payment verified!' });
 
             }
-    } else {
-        res.status(400).json({ success: false, message: 'Invalid signature!' });
-    }
+        } else {
+            res.status(400).json({ success: false, message: 'Invalid signature!' });
+        }
     } catch (error) {
         console.error("Razorpay Payment Verification Error: ", error);
-        res.status(500).json({ success: false, message: "Failed to verify payment" });          
+        res.status(500).json({ success: false, message: "Failed to verify payment" });
     }
 };
 
@@ -567,7 +580,7 @@ const checkWalletBalance = async (req, res) => {
     }
 };
 
-const downloadInvoice  = async (req, res)=>{
+const downloadInvoice = async (req, res) => {
     try {
         const order = await Order.findOne({ orderId: req.params.orderId }).populate('userId orderItems.productId userId.addressId');
         if (!order) return res.status(404).json({ error: 'Order not found' });

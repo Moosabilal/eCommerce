@@ -140,11 +140,14 @@ const deleteOrder = async (req, res) => {
 
 const orderedDetailsPage = async (req,res)=>{
     try {
-        const userId = req.session.user;
         const size = req.query.size
         const productId = req.query.productId
         const parentAddressId = req.query.parentAddressId
         const orderId = req.query.orderId
+        
+        const orderRecord = await Order.findById(orderId);
+        const userId = orderRecord.userId;
+        
         const userData = await User.findById(userId);
         const addressDetails = await Address.aggregate([
             {$match: {userId: new mongoose.Types.ObjectId(userId)} },
@@ -179,6 +182,8 @@ const orderedDetailsPage = async (req,res)=>{
                 "orderId":1,
                 "createdOn":1,
                 "paymentStatus":1,
+                "discount":1,
+                "tax":1,
                 "productDetails._id":1,
                 "productDetails.productName":1,
                 "productDetails.description":1,

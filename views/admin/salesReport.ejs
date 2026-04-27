@@ -1,151 +1,495 @@
 
-<%-include('../../views/partials/admin/header')  %>
+<%- include('../../views/partials/admin/header') %>
 
-    <style>
-        
-        .report-table {
-            margin-top: 20px;
-        }
-        .btn-custom {
-            background-color: #007bff;
-            color: white;
-            border: none;
-        }
-        .btn-custom:hover {
-            background-color: #0056b3;
-        }
-        .header-text {
-            font-size: 24px;
-            font-weight: bold;
-            color: #007bff;
-        }
-        
-    </style>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    <div class="content">
-        <h1 class="header-text text-center mb-4">Sales Report</h1>
+  .admin-content {
+    font-family: 'Inter', sans-serif;
+    background: #f1f5f9;
+    min-height: 100vh;
+    padding: 30px;
+    padding-top: 90px;
+    margin-left: 260px;
+  }
 
-        <div class="container-fluid mt-4">
-          
-            <!-- Summary Cards -->
-            <div class="row">
-              <div class="col-md-4">
-                <div class="card text-white bg-primary mb-3">
-                  <div class="card-body">
-                    <h5 class="card-title">Total Sales</h5>
-                    <p class="card-text"><span id="totalSales"><%= totalSales %></span></p>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="col-md-4">
-                <div class="card text-white bg-warning mb-3">
-                  <div class="card-body">
-                    <h5 class="card-title">Total Orders</h5>
-                    <p class="card-text"><span id="totalOrders"><%= totalOrders %></span> Orders</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card text-white bg-success mb-3">
-                  <div class="card-body">
-                    <h5 class="card-title">Total Discount</h5>
-                    <p class="card-text">₹<span id="totalProfit"><%= totalDiscountPrice %></span></p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card text-white bg-success mb-3">
-                  <div class="card-body">
-                    <h5 class="card-title">Total Coupon Used</h5>
-                    <p class="card-text"><span id="totalProfit"><%= totalDiscountCount %></span></p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card text-white bg-danger mb-3">
-                  <div class="card-body">
-                    <h5 class="card-title">Customers</h5>
-                    <p class="card-text"><span id="totalCustomers"><%= totalUser %></span> Customers</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            </div>
-    
-        <!-- Filter Form -->
-        
-            <div class="form-row align-items-center justify-content-between">
-                <form method="GET" action="/filter-report">
-    <div class="col-auto">
-        <label for="period">Select Period:</label>
-        <select id="period" name="period" class="form-control">
+  .page-header {
+    margin-bottom: 28px;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin: 0 0 5px;
+  }
+
+  .page-subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  /* KPI Cards */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .kpi-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 22px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  }
+
+  .kpi-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .ic-sales   { background: rgba(59,130,246,0.1); color: #3b82f6; }
+  .ic-orders  { background: rgba(245,158,11,0.1); color: #f59e0b; }
+  .ic-disc    { background: rgba(16,185,129,0.1); color: #10b981; }
+  .ic-coupon  { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+  .ic-users   { background: rgba(239,68,68,0.1);  color: #ef4444; }
+
+  .kpi-info h5 {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 4px;
+  }
+
+  .kpi-info p {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  /* Filter Panel */
+  .filter-panel {
+    background: #fff;
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+  }
+
+  .filter-panel-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-panel-title i { color: #e53935; }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .filter-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .filter-control {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+    font-size: 0.9rem;
+    color: #1e293b;
+    background: #f8fafc;
+    outline: none;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .filter-control:focus {
+    border-color: #3b82f6;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+
+  select.filter-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    min-width: 160px;
+    cursor: pointer;
+  }
+
+  .btn-apply {
+    background: #1e293b;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .btn-apply:hover { background: #0f172a; transform: translateY(-1px); }
+
+  .btn-clear {
+    background: #fff;
+    color: #64748b;
+    border: 1.5px solid #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn-clear:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.05); }
+
+  /* Download Buttons */
+  .download-row {
+    display: flex;
+    gap: 12px;
+    margin-left: auto;
+  }
+
+  .btn-download {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .btn-pdf {
+    background: rgba(239,68,68,0.1);
+    color: #dc2626;
+  }
+  .btn-pdf:hover { background: #ef4444; color: #fff; }
+
+  .btn-excel {
+    background: rgba(16,185,129,0.1);
+    color: #059669;
+  }
+  .btn-excel:hover { background: #10b981; color: #fff; }
+
+  /* Report Table */
+  .table-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 25px;
+  }
+
+  .table-card-header {
+    padding: 18px 24px;
+    border-bottom: 2px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .table-card-header h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+
+  .premium-table th {
+    background: #f8fafc;
+    padding: 14px 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .premium-table td {
+    padding: 15px 20px;
+    font-size: 0.9rem;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+
+  .premium-table tbody tr:last-child td { border-bottom: none; }
+  .premium-table tbody tr { transition: background 0.15s; }
+  .premium-table tbody tr:hover { background: #f8fafc; }
+
+  /* Cell styling */
+  .order-id-chip {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    background: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: 6px;
+    color: #334155;
+    display: inline-block;
+  }
+
+  .coupon-yes {
+    background: rgba(16,185,129,0.1);
+    color: #059669;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .coupon-no {
+    background: #f1f5f9;
+    color: #94a3b8;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .status-chip {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    display: inline-block;
+  }
+
+  .status-Delivered  { background: rgba(16,185,129,0.1); color: #10b981; }
+  .status-Pending    { background: rgba(245,158,11,0.1);  color: #f59e0b; }
+  .status-Cancelled  { background: rgba(239,68,68,0.1);   color: #ef4444; }
+  .status-Processing { background: rgba(59,130,246,0.1);  color: #3b82f6; }
+  .status-Shipped    { background: rgba(139,92,246,0.1);  color: #8b5cf6; }
+  .status-Returned   { background: rgba(156,163,175,0.15); color: #6b7280; }
+  .status-default    { background: #f1f5f9; color: #64748b; }
+
+  .amount-cell {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 991px) {
+    .admin-content { margin-left: 0; padding: 20px; padding-top: 80px; }
+    .filter-row { flex-direction: column; align-items: stretch; }
+    .download-row { width: 100%; }
+  }
+</style>
+
+<div class="admin-content">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Sales Report</h1>
+    <p class="page-subtitle">Analytics and financial overview of all completed transactions.</p>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon ic-sales"><i class="fas fa-rupee-sign"></i></div>
+      <div class="kpi-info">
+        <h5>Total Revenue</h5>
+        <p><span id="totalSales"><%= totalSales %></span></p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon ic-orders"><i class="fas fa-shopping-bag"></i></div>
+      <div class="kpi-info">
+        <h5>Total Orders</h5>
+        <p><span id="totalOrders"><%= totalOrders %></span></p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon ic-disc"><i class="fas fa-tags"></i></div>
+      <div class="kpi-info">
+        <h5>Total Discount</h5>
+        <p>₹<span id="totalProfit"><%= totalDiscountPrice %></span></p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon ic-coupon"><i class="fas fa-percentage"></i></div>
+      <div class="kpi-info">
+        <h5>Coupons Used</h5>
+        <p><span id="totalProfit"><%= totalDiscountCount %></span></p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon ic-users"><i class="fas fa-users"></i></div>
+      <div class="kpi-info">
+        <h5>Customers</h5>
+        <p><span id="totalCustomers"><%= totalUser %></span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Download Panel -->
+  <div class="filter-panel">
+    <div class="filter-panel-title"><i class="fas fa-filter"></i> Filter Report</div>
+    <form method="GET" action="/filter-report">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label class="filter-label" for="period">Report Period</label>
+          <select id="period" name="period" class="filter-control">
             <option value="day">1 Day</option>
             <option value="week">1 Week</option>
             <option value="month">1 Month</option>
             <option value="year">1 Year</option>
-            <option value="custom">Custom Date Range</option>
-        </select>
-    </div>
-    <div class="col-auto" id="custom-date-range" style="display:none;">
-        <div class="d-flex flex-column">
-            <label for="startDate">Start Date:</label>
-            <input type="date" id="startDate" name="startDate" class="form-control mb-2">
-            <label for="endDate">End Date:</label>
-            <input type="date" id="endDate" name="endDate" class="form-control">
+            <option value="custom">Custom Range</option>
+          </select>
         </div>
+
+        <div id="custom-date-range" style="display:none;" class="d-flex gap-3 flex-wrap">
+          <div class="filter-group">
+            <label class="filter-label" for="startDate">Start Date</label>
+            <input type="date" id="startDate" name="startDate" class="filter-control">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="endDate">End Date</label>
+            <input type="date" id="endDate" name="endDate" class="filter-control">
+          </div>
+        </div>
+
+        <div class="filter-group" style="justify-content: flex-end;">
+          <label class="filter-label" style="opacity:0;">Action</label>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn-apply" onclick="applyFilter()">
+              <i class="fas fa-play"></i> Apply Filter
+            </button>
+            <button type="button" class="btn-clear" onclick="clearFilter()">
+              <i class="fas fa-times"></i> Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="download-row" style="margin-left: auto; align-self: flex-end;">
+          <button id="download-pdf" type="button" class="btn-download btn-pdf" onclick="downloadPDF()">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button id="download-excel" type="button" class="btn-download btn-excel" onclick="downloadExcel()">
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Sales Table -->
+  <div class="table-card table-responsive">
+    <div class="table-card-header">
+      <i class="fas fa-table" style="color: #e53935;"></i>
+      <h4>Transaction Details</h4>
     </div>
-    <div class=" col-auto">
-        <button type="button" class="btn btn-custom mt-4" onclick="applyFilter()">Apply Change</button>
+    <div class="report-table">
+      <table class="premium-table table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Items Sold</th>
+            <th>Order Amount (₹)</th>
+            <th>Coupon Applied</th>
+            <th>Discount (₹)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.map((order)=>{ %>
+          <tr>
+            <td><span class="order-id order-id-chip">#<%= order.orderId.slice(-6) %></span></td>
+            <td class="cust-name" style="font-weight: 600; color: #0f172a;"><%= order.customerName %></td>
+            <td class="order-sales" style="font-weight: 600; text-align: center;"><%= order.salesCount %></td>
+            <td class="order-amount amount-cell">₹<%= order.orderAmount %></td>
+            <td class="order-coupon">
+              <% if(order.discount){ %>
+                <span class="coupon-yes"><i class="fas fa-check-circle mr-1"></i> Yes</span>
+              <% } else { %>
+                <span class="coupon-no">No</span>
+              <% } %>
+            </td>
+            <td class="order-discount" style="color: #10b981; font-weight: 700;">
+              <% if(order.discount){ %>₹<% } %><%= order.discount %>
+            </td>
+            <td class="order-status">
+              <span class="status-chip status-<%= order.status %> status-default">
+                <%= order.status %>
+              </span>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
     </div>
-</form>
-<div class="d-flex justify-content-end mt-4">
-    <button id="download-pdf" class="btn btn-custom" onclick="downloadPDF()">Download PDF <i class="fas fa-download"></i></button>
-    <button id="download-excel" class="btn btn-success ml-3" onclick="downloadExcel()">Download Excel <i class="fas fa-file-excel"></i></button>
+  </div>
 </div>
- </div>
-        
-       
-    
-     
-            
-              
-    
-        <!-- Sales Report Table -->
-        <div class="report-table mt-4">
-            <h3 class="text-center">Report Details</h3>
-            <table class="table table-hover table-bordered">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">Order ID</th>
-                        <th scope="col">Customer</th>
-                        <th scope="col">Sales Count</th>
-                        <th scope="col">Order Amount (in &#8377;)</th>
-                        <th scope="col">Coupon Applied</th>
-                        <th scope="col">Discount</th>
-                        <th scope="col">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% orders.map((order)=>{ %>
-                    <tr>
-                        <td class="order-id"><%= order.orderId.slice(-6) %></td>
-                        <td class="cust-name"><%= order.customerName %></td>
-                        <td class="order-sales"><%= order.salesCount %></td>
-                        <td class="order-amount"><%= order.orderAmount %></td>
-                        <td class="order-coupon"><%= order.discount?'Yes':'No' %></td>
-                        <td class="order-discount"><%= order.discount %></td>
-                        <td class="order-status"><%= order.status %></td>
-                    </tr>
-                    <% }); %>
-                    
-                </tbody>
-            </table>
-        </div>
-        
-    </div>
-    
-    <%-include('../../views/partials/admin/footer')  %>
+
+<%- include('../../views/partials/admin/footer') %>
+
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
@@ -163,7 +507,57 @@
             }
         });
 
+    function clearFilter() {
+        // Reset period dropdown
+        const periodEl = document.getElementById('period');
+        periodEl.value = 'day';
+
+        // Hide custom date range
+        document.getElementById('custom-date-range').style.display = 'none';
+
+        // Clear date inputs
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+
+        // Re-fetch with no filters (default period)
+        fetch('/admin/filter-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ period: 'all', startDate: '', endDate: '' }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            const tableBody = document.querySelector('tbody');
+            tableBody.innerHTML = '';
+            if (!data.orders || data.orders.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 30px; color: #94a3b8; font-weight: 600;">No orders found.</td></tr>';
+                return;
+            }
+            data.orders.forEach((order) => {
+                const couponBadge = order.discount
+                    ? `<span class="coupon-yes"><i class="fas fa-check-circle"></i> Yes</span>`
+                    : `<span class="coupon-no">No</span>`;
+                const discountVal = order.discount ? `₹${order.discount}` : '—';
+                tableBody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><span class="order-id order-id-chip">#${order.orderId.slice(-6)}</span></td>
+                        <td class="cust-name" style="font-weight:600;color:#0f172a;">${order.customerName}</td>
+                        <td class="order-sales" style="font-weight:600;text-align:center;">${order.salesCount}</td>
+                        <td class="order-amount amount-cell">₹${order.orderAmount}</td>
+                        <td class="order-coupon">${couponBadge}</td>
+                        <td class="order-discount" style="color:#10b981;font-weight:700;">${discountVal}</td>
+                        <td class="order-status"><span class="status-chip status-${order.status} status-default">${order.status}</span></td>
+                    </tr>
+                `);
+            });
+        })
+        .catch(err => {
+            console.error('Clear filter error:', err);
+        });
+    }
+
     async function applyFilter() {
+
         const period = document.getElementById('period').value;
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;

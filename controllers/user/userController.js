@@ -34,52 +34,64 @@ const loadHomepage = async (req, res) => {
     try {
         const user = req.session.user;
         const userData = await User.findOne({ _id: user });
-        let findProducts = await Product.find({ isBlocked: false }).sort({ createdAt: -1 }).lean();
 
-        const banners = await Banner.find({ isActive: true })
+        const banners = await Banner.find({ isActive: true });
         const categories = await Category.find({ isListed: true });
+
+        // Fetch latest product image for each category
+        const categoriesWithImage = await Promise.all(
+            categories.map(async (cat) => {
+                const latestProduct = await Product.findOne({
+                    isBlocked: false,
+                    category: cat._id
+                }).sort({ createdAt: -1 }).lean();
+                return {
+                    ...cat.toObject(),
+                    categoryImage: latestProduct && latestProduct.productImage && latestProduct.productImage[0]
+                        ? latestProduct.productImage[0]
+                        : null
+                };
+            })
+        );
+
         let productData = await Product.find({
             isBlocked: false,
             category: { $in: categories.map(category => category._id) },
         }).sort({ createdAt: -1 }).lean();
         productData = productData.slice(0, 4);
+
         if (user) {
             const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
             let wallet = await Wallet.findOne({ userId: user });
             if (!wallet) {
                 const transactions = [];
-
-                const newWallet = new Wallet({
-                    userId: user,
-                    balance: 0,
-                    transactions
-                });
-
-                // Save the new wallet to the database
+                const newWallet = new Wallet({ userId: user, balance: 0, transactions });
                 wallet = await newWallet.save();
             }
 
             res.render("home", {
                 user: userData || null,
                 products: productData,
-                category: categories,
+                category: categoriesWithImage,
                 colors: uniqueColors,
                 banners
-            })
+            });
 
         } else {
+            const uniqueColors = await Product.find({ isBlocked: false }).distinct('color');
             return res.render('home', {
                 products: productData,
-                category: categories,
+                category: categoriesWithImage,
                 colors: uniqueColors,
                 banners
-            })
+            });
         }
     } catch (error) {
         console.log('home page not found');
-        res.status(500).send('server error')
+        res.status(500).send('server error');
     }
 }
+
 
 
 

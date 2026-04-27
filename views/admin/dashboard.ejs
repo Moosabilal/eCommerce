@@ -11,218 +11,381 @@
 />
 
 <style>
-  /* Smaller card styling */
-  .card-custom-small {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .card-custom-small:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  }
-  /* Gradient backgrounds */
-  .card-gradient-blue-small {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff;
-  }
-  .card-gradient-warning-small {
-    background: linear-gradient(135deg, #f6d365, #fda085);
-    color: #fff;
-  }
-  .card-gradient-success-small {
-    background: linear-gradient(135deg, #89f7fe, #66a6ff);
-    color: #fff;
-  }
-  .card-gradient-danger-small {
-    background: linear-gradient(135deg, #ff758c, #ff7eb3);
-    color: #fff;
-  }
-  /* Icon and text sizing */
-  .card-icon-small {
-    font-size: 1.5rem;
-    margin-bottom: 5px;
-  }
-  .card-title-small {
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
-  }
-  .card-text-small {
-    font-size: 0.9rem;
-    margin-bottom: 0;
-  }
-  /* Adjust spacing in grid */
-  .row-small > [class*="col-"] {
-    padding: 0.5rem;
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  .content {
+    font-family: 'Inter', sans-serif;
+    background: #f1f5f9;
+    min-height: 100vh;
+    padding: 30px;
+    padding-top: 90px;
+    margin-left: 260px; /* Assumes admin sidebar */
   }
 
-  /* chart css */
-  body {
-    background: #f4f6f9;
+  .dashboard-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 25px;
+    letter-spacing: -0.5px;
   }
-  .dashboard-card {
-    border-radius: 8px;
-    padding: 1rem;
+
+  /* Premium KPI Cards */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .kpi-card {
     background: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin-bottom: 1rem;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .dashboard-header {
-    margin-bottom: 2rem;
+
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
-  .list-title {
+
+  .kpi-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  /* Specific Card Colors */
+  .ic-sales { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+  .ic-orders { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+  .ic-discount { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+  .ic-coupon { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+  .ic-users { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+  .kpi-details h5 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    margin: 0 0 4px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .kpi-details p {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  /* Main Dashboard Panels */
+  .panel-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+    height: 100%;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .panel-title {
     font-size: 1.1rem;
-    font-weight: bold;
-    margin-bottom: .5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .custom-select-premium {
+    padding: 8px 36px 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #334155;
+    background-color: #f8fafc;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  .custom-select-premium:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Ledger Box */
+  .ledger-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #fff;
+    border-radius: 16px;
+    height: 100%;
+  }
+  
+  .ledger-box h4 {
+    font-weight: 700;
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+  }
+  
+  .ledger-box p {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+  }
+
+  .btn-premium-action {
+    background: #e53935;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+  }
+
+  .btn-premium-action:hover {
+    background: #c62828;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(229, 57, 53, 0.4);
+    color: #fff;
+  }
+
+  /* Top 10 Lists */
+  .top-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .top-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+  }
+  .top-list-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .top-list-item:first-child {
+    padding-top: 0;
+  }
+
+  .item-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .rank-badge {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .item-count {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .badge-success-soft { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+  .badge-danger-soft { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+  @media (max-width: 991px) {
+    .content { margin-left: 0; padding: 20px; }
   }
 </style>
-<!-- Content Area -->
-<!-- Dashboard Content -->
+
 <div class="content">
-    <div class="container-fluid">
-      <h2 class="mb-4">Admin Dashboard</h2>
-  
-      <!-- Summary Cards -->
-      <div class="row row-small">
-  <div class="col-md-4 col-sm-6">
-    <div class="card card-custom-small card-gradient-blue-small">
-      <div class="card-body text-center p-2">
-        <div class="card-icon-small">
-          <i class="fas fa-dollar-sign"></i>
+  <div class="container-fluid">
+    <h1 class="dashboard-title">Dashboard Overview</h1>
+    
+    <!-- KPI Grid -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon ic-sales"><i class="fas fa-dollar-sign"></i></div>
+        <div class="kpi-details">
+          <h5>Total Sales</h5>
+          <p>₹<span id="totalSales"><%= totalSales %></span></p>
         </div>
-        <h5 class="card-title-small">Total Sales</h5>
-        <p class="card-text-small"><span id="totalSales"><%= totalSales %></span></p>
+      </div>
+      
+      <div class="kpi-card">
+        <div class="kpi-icon ic-orders"><i class="fas fa-shopping-cart"></i></div>
+        <div class="kpi-details">
+          <h5>Total Orders</h5>
+          <p><span id="totalOrders"><%= totalOrders %></span></p>
+        </div>
+      </div>
+      
+      <div class="kpi-card">
+        <div class="kpi-icon ic-discount"><i class="fas fa-tags"></i></div>
+        <div class="kpi-details">
+          <h5>Total Discount</h5>
+          <p>₹<span id="totalProfit"><%= totalDiscountPrice %></span></p>
+        </div>
+      </div>
+      
+      <div class="kpi-card">
+        <div class="kpi-icon ic-coupon"><i class="fas fa-percentage"></i></div>
+        <div class="kpi-details">
+          <h5>Coupons Used</h5>
+          <p><span id="totalProfit"><%= totalDiscountCount %></span></p>
+        </div>
+      </div>
+      
+      <div class="kpi-card">
+        <div class="kpi-icon ic-users"><i class="fas fa-users"></i></div>
+        <div class="kpi-details">
+          <h5>Customers</h5>
+          <p><span id="totalCustomers"><%= totalUser %></span></p>
+        </div>
       </div>
     </div>
-  </div>
-  
-  <div class="col-md-4 col-sm-6">
-    <div class="card card-custom-small card-gradient-warning-small">
-      <div class="card-body text-center p-2">
-        <div class="card-icon-small">
-          <i class="fas fa-shopping-cart"></i>
-        </div>
-        <h5 class="card-title-small">Total Orders</h5>
-        <p class="card-text-small"><span id="totalOrders"><%= totalOrders %></span> Orders</p>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-md-4 col-sm-6">
-    <div class="card card-custom-small card-gradient-success-small">
-      <div class="card-body text-center p-2">
-        <div class="card-icon-small">
-          <i class="fas fa-tags"></i>
-        </div>
-        <h5 class="card-title-small">Total Discount</h5>
-        <p class="card-text-small">₹<span id="totalProfit"><%= totalDiscountPrice %></span></p>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-md-4 col-sm-6">
-    <div class="card card-custom-small card-gradient-success-small">
-      <div class="card-body text-center p-2">
-        <div class="card-icon-small">
-          <i class="fas fa-percentage"></i>
-        </div>
-        <h5 class="card-title-small">Total Coupon Used</h5>
-        <p class="card-text-small"><span id="totalProfit"><%= totalDiscountCount %></span></p>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-md-4 col-sm-6">
-    <div class="card card-custom-small card-gradient-danger-small">
-      <div class="card-body text-center p-2">
-        <div class="card-icon-small">
-          <i class="fas fa-users"></i>
-        </div>
-        <h5 class="card-title-small">Customers</h5>
-        <p class="card-text-small"><span id="totalCustomers"><%= totalUser %></span> Customers</p>
-      </div>
-    </div>
-  </div>
-</div>
-  
 
-
-
-<div class="container-fluid">
-  <div class="dashboard-header text-center my-4">
-    <h1>Admin Dashboard</h1>
-  </div>
-  <div class="row">
-    <!-- Chart with Filter -->
-    <div class="col-md-8">
-      <div class="dashboard-card">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h4>Sales Chart</h4>
-          <select id="chartFilter" class="form-control w-auto">
-            <option value="yearly">Yearly</option>
-            <option value="monthly">Monthly</option>
-            <option value="weekly">Weekly</option>
-          </select>
+    <!-- Analytics & Ledger Row -->
+    <div class="row">
+      <div class="col-lg-8 mb-4">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h4 class="panel-title">Revenue Analytics</h4>
+            <select id="chartFilter" class="custom-select-premium">
+              <option value="yearly">Yearly View</option>
+              <option value="monthly">Monthly View</option>
+              <option value="weekly">Weekly View</option>
+            </select>
+          </div>
+          <div style="position: relative; height: 300px;">
+            <canvas id="salesChart"></canvas>
+          </div>
         </div>
-        <canvas id="salesChart" height="200"></canvas>
       </div>
-    </div>
-    <!-- Ledger Book Generator -->
-    <div class="col-md-4">
-      <div class="dashboard-card text-center">
-        <h4>Ledger Book</h4>
-        <p>Generate a detailed ledger report.</p>
-        <button id="generateLedger" class="btn btn-primary">
-          <i class="fas fa-file-alt"></i> Generate Ledger
-        </button>
-      </div>
-    </div>
-  </div>
-  
-  <div class="row">
-    <!-- Best Selling Products -->
-    <div class="col-md-4">
-      <div class="dashboard-card">
-        <div class="list-title">Top 10 Best Selling Products</div>
-        <ul class="list-group">
-          <% mostSoldProduct.forEach(function(product, index) { %>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <%= index+1 %>. <%= product.productDetails.productName %>
-              <span class="badge badge-primary badge-pill"><%= product.count %></span>
-            </li>
-          <% }); %>
-        </ul>
+      
+      <div class="col-lg-4 mb-4">
+        <div class="ledger-box">
+          <div style="font-size: 3rem; color: #38bdf8; margin-bottom: 15px;">
+            <i class="fas fa-file-invoice-dollar"></i>
+          </div>
+          <h4>Ledger Book</h4>
+          <p>Generate and export a highly detailed PDF report of all financial ledger records.</p>
+          <button id="generateLedger" class="btn-premium-action">
+            <i class="fas fa-download"></i> Generate PDF
+          </button>
+        </div>
       </div>
     </div>
     
-    <!-- Best Selling Categories -->
-    <div class="col-md-4">
-      <div class="dashboard-card">
-        <div class="list-title">Top 10 Best Selling Categories</div>
-        <ul class="list-group">
-          <% bestSellingCategory.forEach(function(category, index) { %>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <%= index+1 %>. <%= category.categoryDetails.name %>
-              <span class="badge badge-success badge-pill"><%= category.count %></span>
-            </li>
-          <% }); %>
-        </ul>
+    <!-- Top 10 Metrics Row -->
+    <div class="row">
+      <!-- Best Selling Products -->
+      <div class="col-lg-4 mb-4">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h4 class="panel-title"><i class="fas fa-box-open mr-2 text-primary"></i> Top Selling Articles</h4>
+          </div>
+          <ul class="top-list">
+            <% mostSoldProduct.forEach(function(product, index) { %>
+              <li class="top-list-item">
+                <div class="item-name">
+                  <span class="rank-badge"><%= index+1 %></span>
+                  <%= product.productDetails.productName %>
+                </div>
+                <span class="item-count"><%= product.count %></span>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
       </div>
-    </div>
-    
-    <!-- Best Selling Brands -->
-    <div class="col-md-4">
-      <div class="dashboard-card">
-        <div class="list-title">Top 10 Best Selling Brands</div>
-        <ul class="list-group">
-          <% bestSellingBrand.forEach(function(brand, index) { %>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <%= index+1 %>. <%= brand.brandName %>
-              <span class="badge badge-danger badge-pill"><%= brand.count %></span>
-            </li>
-          <% }); %>
-        </ul>
+      
+      <!-- Best Selling Categories -->
+      <div class="col-lg-4 mb-4">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h4 class="panel-title"><i class="fas fa-layer-group mr-2 text-success"></i> Top Categories</h4>
+          </div>
+          <ul class="top-list">
+            <% bestSellingCategory.forEach(function(category, index) { %>
+              <li class="top-list-item">
+                <div class="item-name">
+                  <span class="rank-badge"><%= index+1 %></span>
+                  <%= category.categoryDetails.name %>
+                </div>
+                <span class="item-count badge-success-soft"><%= category.count %></span>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Best Selling Brands -->
+      <div class="col-lg-4 mb-4">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h4 class="panel-title"><i class="fas fa-copyright mr-2 text-danger"></i> Top Brands</h4>
+          </div>
+          <ul class="top-list">
+            <% bestSellingBrand.forEach(function(brand, index) { %>
+              <li class="top-list-item">
+                <div class="item-name">
+                  <span class="rank-badge"><%= index+1 %></span>
+                  <%= brand.brandName %>
+                </div>
+                <span class="item-count badge-danger-soft"><%= brand.count %></span>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

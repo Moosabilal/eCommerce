@@ -106,8 +106,8 @@ const addProductOffer = async (req, res) => {
     try {
         const { productId, percentage } = req.body;
 
-        if (!productId || !percentage) {
-            return res.status(400).json({ status: false, message: "Invalid data provided." });
+        if (!productId || !percentage || isNaN(percentage) || percentage <= 0 || percentage > 99) {
+            return res.status(400).json({ status: false, message: "Offer percentage must be between 1 and 99." });
         }
 
         const findProduct = await Product.findOne({ _id: productId });
@@ -124,17 +124,16 @@ const addProductOffer = async (req, res) => {
             return res.json({ status: false, message: "This product category already has a category offer" });
         }
 
-        findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice * (percentage / 100));
-        findProduct.productOffer = parseInt(percentage);
-        await findProduct.save();
-
-        findCategory.categoryOffer = 0; // Reset category offer
-        await findCategory.save();
+        const salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice * (percentage / 100));
+        const productOffer = parseInt(percentage);
+        
+        await Product.updateOne({ _id: productId }, { $set: { salePrice, productOffer }});
+        await Category.updateOne({ _id: findCategory._id }, { $set: { categoryOffer: 0 }});
 
         res.json({ status: true });
     } catch (error) {
-        console.error("Error in addProductOffer:", error); // Debugging server error
-        res.status(500).json({ status: false, message: "Internal Server Error" });
+        console.error("Error in addProductOffer:", error);
+        res.status(500).json({ status: false, message: error.message || error.toString() });
     }
 };
 
@@ -146,15 +145,18 @@ const removeProductOffer = async (req,res)=>{
             return res.status(400).json({ status: false, message: "Invalid data provided." });
         }
         const findProduct = await Product.findOne({_id:productId});
-        const percentage = findProduct.productOffer;
-        findProduct.salePrice = findProduct.salePrice+Math.ceil(findProduct.regularPrice*(percentage/100));
-        findProduct.productOffer = 0;
-        await findProduct.save();
+        if (!findProduct) {
+             return res.status(404).json({ status: false, message: "Product not found." });
+        }
+        const percentage = findProduct.productOffer || 0;
+        const salePrice = findProduct.salePrice + Math.ceil(findProduct.regularPrice * (percentage / 100));
+        
+        await Product.updateOne({ _id: productId }, { $set: { salePrice, productOffer: 0 }});
         res.json({status:true})
 
     } catch (error) {
             console.error("Error in removeProductOffer:", error);
-            res.status(500).json({ status: false, message: "Internal Server Error" });
+            res.status(500).json({ status: false, message: error.message || error.toString() });
     }
 }
 

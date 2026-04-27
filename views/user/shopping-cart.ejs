@@ -1,273 +1,603 @@
-<%-include('../../views/partials/user/header')%>
+<%- include('../../views/partials/user/header') %>
+
 <style>
-/* Button Styling */
-.btn-remove {
-    background-color: #ff4d4d;
-    color: #fff; 
-    border: none;
-    border-radius: 5px;
-    padding: 8px 16px; 
-    font-size: 14px; 
-    cursor: pointer; 
-    transition: all 0.3s ease; 
-}
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-.btn-remove:hover {
-    background-color: #e60000; 
-    transform: scale(1.05); 
-}
+  html, body { height: auto !important; min-height: 100vh !important; }
+  html { background: #f4f5f8 !important; }
+  body, body.animsition { background: transparent !important; font-family: 'Inter', sans-serif !important; }
 
-/* Container fixes */
-.wrap-table-shopping-cart {
-    width: 100%;
-    overflow-x: hidden; /* Prevent horizontal scroll */
-    border: 1px solid #e6e6e6;
-    border-radius: 10px;
+  /* ── Hero strip ── */
+  .cart-hero {
+    background: linear-gradient(120deg, #1a1a2e 0%, #16213e 45%, #0f3460 100%);
+    padding: 42px 0 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cart-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 75% 50%, rgba(229,57,53,.18) 0%, transparent 60%);
+  }
+  .cart-hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+  .cart-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    font-size: .8rem;
+    color: rgba(255,255,255,.5);
+  }
+  .cart-breadcrumb a { color: rgba(255,255,255,.6); text-decoration: none; transition: color .2s; }
+  .cart-breadcrumb a:hover { color: #ff8a80; }
+  .cart-hero h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    margin: 0;
+  }
+  .cart-hero h1 span { color: #ff8a80; }
+  .cart-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(229,57,53,.2);
+    border: 1px solid rgba(229,57,53,.35);
+    color: #ff8a80;
+    border-radius: 50px;
+    padding: 5px 14px;
+    font-size: .8rem;
+    font-weight: 600;
+    margin-top: 12px;
+    backdrop-filter: blur(6px);
+  }
+
+  /* ── Page layout ── */
+  .cart-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 20px 80px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 1024px) { .cart-main { grid-template-columns: 1fr; } }
+
+  /* ── Cart items panel ── */
+  .cart-items-panel {
     background: #fff;
-}
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 18px rgba(0,0,0,.07);
+  }
+  .cart-panel-header {
+    padding: 22px 28px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cart-panel-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    letter-spacing: -0.2px;
+  }
+  .cart-panel-count {
+    font-size: .78rem;
+    color: #aaa;
+    font-weight: 500;
+  }
 
-/* TABLET & MOBILE ALIGNMENT FIX (Up to 991px) */
-@media (max-width: 991px) {
-    .table-shopping-cart {
-        display: block;
-        width: 100%;
-    }
-    .table-shopping-cart tr.table_head {
-        display: none; 
-    }
-    .table-shopping-cart tr.table_row {
-        display: flex;
-        flex-direction: column;
-        padding: 25px;
-        border-bottom: 8px solid #f8f9fa; /* Visual separation of items */
-        height: auto !important;
-        max-width: 550px; /* Prevents the "stretched" look on tablets */
-        margin: 0 auto; /* Centers the card */
-    }
-    .table-shopping-cart td {
-        display: flex;
-        justify-content: space-between; /* Keeps Label left and Value right */
-        align-items: center;
-        padding: 10px 0 !important;
-        border: none !important;
-        width: 100% !important;
-    }
-    /* The Labels (Product, Price, etc) */
-    .table-shopping-cart td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        font-size: 14px;
-        color: #555;
-        text-transform: uppercase;
-        flex: 1;
-        text-align: left;
-    }
-    /* The Values */
-    .table-shopping-cart td.column-2, 
-    .table-shopping-cart td.column-3,
-    .table-shopping-cart td.column-4,
-    .table-shopping-cart td.column-5,
-    .table-shopping-cart td.column-6 {
-        flex: 2;
-        justify-content: flex-end;
-        text-align: right;
-    }
+  /* ── Single cart item ── */
+  .cart-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 28px;
+    border-bottom: 1px solid #f7f7f7;
+    transition: background .2s;
+  }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-item:hover { background: #fafafa; }
 
-    .how-itemcart1 {
-        margin: 0 auto 20px !important;
-        width: 120px;
-        height: 150px;
-    }
-    .table-shopping-cart td.column-1 {
-        justify-content: center;
-        padding-bottom: 20px !important;
-        border-bottom: 1px solid #eee !important;
-        margin-bottom: 10px;
-    }
-    .table-shopping-cart td.column-1::before {
-        display: none;
-    }
+  /* Image */
+  .cart-item-img {
+    width: 88px;
+    height: 88px;
+    border-radius: 14px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f5f5f5;
+  }
+  .cart-item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .4s;
+  }
+  .cart-item:hover .cart-item-img img { transform: scale(1.06); }
 
-    .wrap-num-product {
-        margin-left: auto !important;
-        margin-right: 0 !important;
-    }
-}
+  /* Info */
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-name {
+    font-size: .92rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cart-item-meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: .78rem;
+    color: #999;
+    margin-bottom: 12px;
+  }
+  .cart-item-size {
+    background: #f4f5f8;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-weight: 600;
+    color: #555;
+    font-size: .75rem;
+  }
+  .cart-item-unit-price {
+    font-size: .82rem;
+    color: #e53935;
+    font-weight: 700;
+  }
 
-/* Totals Box Alignment */
-@media (max-width: 991px) {
-    .cart-totals-container {
-        padding: 20px;
-    }
-    .bor10 {
-        max-width: 550px;
-        margin: 20px auto !important;
-    }
-}
+  /* Quantity stepper */
+  .qty-stepper {
+    display: inline-flex;
+    align-items: center;
+    background: #f4f5f8;
+    border-radius: 50px;
+    overflow: hidden;
+    height: 34px;
+  }
+  .qty-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #555;
+    transition: background .2s, color .2s;
+    flex-shrink: 0;
+  }
+  .qty-btn:hover { background: #e53935; color: #fff; }
+  .qty-input {
+    width: 38px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: .9rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Right section: price + remove */
+  .cart-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .cart-item-total {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1a1a2e;
+  }
+  .cart-remove-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff3f3;
+    border: 1.5px solid #ffcdd2;
+    color: #e53935;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background .2s, border-color .2s;
+  }
+  .cart-remove-btn:hover { background: #e53935; border-color: #e53935; color: #fff; }
+
+  /* ── Empty cart state ── */
+  .cart-empty {
+    padding: 80px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .cart-empty-icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fff3f3, #ffe8e8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    color: #e53935;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 28px rgba(229,57,53,.18);
+  }
+  .cart-empty h3 { font-size: 1.5rem; font-weight: 800; color: #1a1a2e; margin-bottom: 8px; }
+  .cart-empty p  { font-size: .92rem; color: #888; margin-bottom: 28px; }
+  .cart-empty-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #e53935, #c62828);
+    color: #fff;
+    border-radius: 50px;
+    padding: 13px 32px;
+    font-size: .9rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(229,57,53,.35);
+    transition: transform .25s, box-shadow .25s;
+  }
+  .cart-empty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(229,57,53,.45);
+    color: #fff; text-decoration: none;
+  }
+
+  /* ── Order Summary card ── */
+  .cart-summary {
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px 28px 32px;
+    box-shadow: 0 2px 18px rgba(0,0,0,.07);
+    position: sticky;
+    top: 24px;
+  }
+  .summary-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .summary-row-label {
+    font-size: .88rem;
+    color: #888;
+    font-weight: 500;
+  }
+  .summary-row-value {
+    font-size: .9rem;
+    color: #1a1a2e;
+    font-weight: 700;
+  }
+  .summary-divider {
+    height: 1px;
+    background: #f0f0f0;
+    margin: 18px 0;
+  }
+  .summary-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .summary-total-label {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1a1a2e;
+  }
+  .summary-total-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #e53935;
+  }
+  .checkout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #e53935, #c62828);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 16px 24px;
+    font-size: .95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .2s, transform .2s;
+    box-shadow: 0 8px 24px rgba(229,57,53,.35);
+    font-family: 'Inter', sans-serif;
+  }
+  .checkout-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+  .summary-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .75rem;
+    color: #aaa;
+    margin-top: 14px;
+    justify-content: center;
+  }
+
+  /* ── Continue shopping link ── */
+  .continue-link {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    font-size: .82rem;
+    color: #888;
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .continue-link:hover { color: #e53935; }
+
+  /* Mobile responsive */
+  @media (max-width: 640px) {
+    .cart-item { padding: 18px 18px; gap: 14px; }
+    .cart-item-img { width: 72px; height: 72px; }
+    .cart-item-name { font-size: .85rem; }
+    .cart-hero h1 { font-size: 1.8rem; }
+  }
 </style>
 
-<div class="container">
-    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-        <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
-            Home <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-        </a>
-        <span class="stext-109 cl4">Shopping Cart</span>
+<!-- Hero -->
+<div class="cart-hero">
+  <div class="cart-hero-inner">
+    <div class="cart-breadcrumb">
+      <a href="/">Home</a>
+      <i class="fa fa-angle-right"></i>
+      <span>Shopping Cart</span>
     </div>
+    <h1>Shopping <span>Cart</span></h1>
+    <div class="cart-count-badge">
+      <i class="zmdi zmdi-shopping-cart"></i>
+      <% const itemCount = (cart && cart.items) ? cart.items.length : 0; %>
+      <%= itemCount %> item<%= itemCount !== 1 ? 's' : '' %> in your cart
+    </div>
+  </div>
 </div>
 
-<form class="bg0 p-t-75 p-b-85">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 col-xl-8 m-b-50">
-                <div class="wrap-table-shopping-cart">
-                    <table class="table-shopping-cart">
-                        <thead>
-                            <tr class="table_head">
-                                <th class="column-1">Product</th>
-                                <th class="column-2">Name</th>
-                                <th class="column-3">Price</th>
-                                <th class="column-4">Size</th>
-                                <th class="column-5">Quantity</th>
-                                <th class="column-6">Total</th>
-                                <th class="column-7">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% if (cart && cart.items.length > 0) { %>
-                                <% for (let i = 0; i < cart.items.length; i++) { 
-                                    let item = cart.items[i];
-                                    let product = products.find(p => p._id.toString() === item.productId.toString());
-                                %>
-                                <tr class="table_row">
-                                    <% if (product) { %> 
-                                    <td class="column-1">
-                                        <div class="how-itemcart1">
-                                            <img src="uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>">
-                                        </div>
-                                    </td>
-                                    <td class="column-2" data-label="Product"><%= product.productName %></td>
-                                    <td class="column-3" data-label="Price">&#8377;<%= product.salePrice %></td>
-                                    <td class="column-4" data-label="Size">
-                                        <% item.stock.forEach(pSize => { %>
-                                            <span><%= pSize.size %></span>
-                                        <% }) %>
-                                    </td>
-                                    <td class="column-5" data-label="Quantity">
-                                        <div class="wrap-num-product flex-w">
-                                            <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m" onclick="decQuantity('<%= item.stock[0].size %>', '<%= product._id %>')">
-                                                <i class="fs-16 zmdi zmdi-minus"></i>
-                                            </div>
-                                            <input id="product-quantity-<%= product._id %>" class="mtext-104 cl3 txt-center num-product" type="number" data-id="<%= product._id %>" data-size="<%= item.stock[0].size %>" data-price="<%= product.salePrice %>" value="<%= item.stock[0].quantity %>" readonly>
-                                            <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="incQuantity('<%= item.stock[0].size %>', '<%= product._id %>')">
-                                                <i class="fs-16 zmdi zmdi-plus"></i>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="column-6 total-price" data-label="Total" data-id="<%= product._id %>" data-size="<%= item.stock[0].size %>">₹<%= item.totalPrice %></td>
-                                    <td class="column-7" data-label="Action">
-                                        <button class="btn-remove" onclick="removeFromCart('<%= product._id %>', event)">Remove</button>
-                                    </td>
-                                    <% } %>
-                                </tr>
-                                <% } %>
-                            <% } else { %>
-                                <tr><td colspan="7" class="text-center p-all-40">Your cart is empty.</td></tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<!-- Main layout -->
+<form class="cart-main" onsubmit="return false;">
 
-            <div class="col-md-12 col-lg-8 col-xl-4 m-lr-auto m-b-50 cart-totals-container">
-                <div class="bor10 p-lr-40 p-t-30 p-b-40 p-lr-15-sm shadow-sm">
-                    <h4 class="mtext-109 cl2 p-b-30">Order Summary</h4>
-                    <div class="flex-w flex-t p-t-27 p-b-33 border-top">
-                        <div class="size-208"><span class="mtext-101 cl2">Grand Total:</span></div>
-                        <div class="size-209"><span class="mtext-110 cl2" id="subtotal">&#8377;<%= totalPrice %></span></div>
-                    </div>
-                    <button class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer" onclick="event.preventDefault(); proceedToCheckout();">
-                        Proceed to Checkout
-                    </button>
-                </div>
+  <!-- Left: Cart items -->
+  <div>
+    <div class="cart-items-panel">
+      <div class="cart-panel-header">
+        <div class="cart-panel-title">Your Items</div>
+        <div class="cart-panel-count"><%= itemCount %> product<%= itemCount !== 1 ? 's' : '' %></div>
+      </div>
+
+      <% if (cart && cart.items.length > 0) { %>
+        <% for (let i = 0; i < cart.items.length; i++) {
+             let item = cart.items[i];
+             let product = products.find(p => p._id.toString() === item.productId.toString());
+        %>
+        <% if (product) { %>
+        <div class="cart-item">
+
+          <!-- Image -->
+          <div class="cart-item-img">
+            <a href="/productDetails?id=<%= product._id %>">
+              <img src="uploads/product-images/<%= product.productImage[0] %>"
+                   alt="<%= product.productName %>">
+            </a>
+          </div>
+
+          <!-- Info + stepper -->
+          <div class="cart-item-info">
+            <div class="cart-item-name"><%= product.productName %></div>
+            <div class="cart-item-meta">
+              <span>Size:</span>
+              <span class="cart-item-size"><%= item.stock[0].size %></span>
+              <span class="cart-item-unit-price">&#8377;<%= product.salePrice.toLocaleString('en-IN') %> each</span>
             </div>
+            <!-- Quantity stepper -->
+            <div class="qty-stepper">
+              <button type="button" class="qty-btn"
+                      onclick="decQuantity('<%= item.stock[0].size %>', '<%= product._id %>')">
+                <i class="zmdi zmdi-minus"></i>
+              </button>
+              <input  id="product-quantity-<%= product._id %>"
+                      class="qty-input num-product"
+                      type="number"
+                      data-id="<%= product._id %>"
+                      data-size="<%= item.stock[0].size %>"
+                      data-price="<%= product.salePrice %>"
+                      value="<%= item.stock[0].quantity %>"
+                      readonly>
+              <button type="button" class="qty-btn"
+                      onclick="incQuantity('<%= item.stock[0].size %>', '<%= product._id %>')">
+                <i class="zmdi zmdi-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Total + remove -->
+          <div class="cart-item-right">
+            <div class="cart-item-total total-price"
+                 data-id="<%= product._id %>"
+                 data-size="<%= item.stock[0].size %>">
+              &#8377;<%= item.totalPrice.toLocaleString('en-IN') %>
+            </div>
+            <button type="button" class="cart-remove-btn"
+                    onclick="removeFromCart('<%= product._id %>', event)"
+                    title="Remove">
+              <i class="zmdi zmdi-delete"></i>
+            </button>
+          </div>
         </div>
+        <% } %>
+        <% } %>
+
+      <% } else { %>
+      <div class="cart-empty">
+        <div class="cart-empty-icon">
+          <i class="zmdi zmdi-shopping-cart"></i>
+        </div>
+        <h3>Your cart is empty</h3>
+        <p>Looks like you haven't added anything yet. Start exploring our collections!</p>
+        <a href="/shop" class="cart-empty-btn">
+          <i class="zmdi zmdi-shopping"></i> Browse Products
+        </a>
+      </div>
+      <% } %>
     </div>
+  </div>
+
+  <!-- Right: Order Summary -->
+  <div>
+    <div class="cart-summary">
+      <div class="summary-title">Order Summary</div>
+
+      <div class="summary-row">
+        <span class="summary-row-label">Subtotal (<%= itemCount %> items)</span>
+        <span class="summary-row-value" id="subtotal">&#8377;<%= totalPrice.toLocaleString('en-IN') %></span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-row-label">Shipping</span>
+        <span class="summary-row-value" style="color:#2e7d32;">Free</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-row-label">Tax</span>
+        <span class="summary-row-value">Included</span>
+      </div>
+
+      <div class="summary-divider"></div>
+
+      <div class="summary-total-row">
+        <span class="summary-total-label">Grand Total</span>
+        <span class="summary-total-value" id="grandTotal">&#8377;<%= totalPrice.toLocaleString('en-IN') %></span>
+      </div>
+
+      <button type="button" class="checkout-btn"
+              onclick="proceedToCheckout()">
+        <i class="zmdi zmdi-lock"></i> Proceed to Checkout
+      </button>
+
+      <div class="summary-note">
+        <i class="zmdi zmdi-lock-outline"></i>
+        Secure checkout guaranteed
+      </div>
+
+      <a href="/shop" class="continue-link">
+        <i class="zmdi zmdi-arrow-left"></i> Continue Shopping
+      </a>
+    </div>
+  </div>
+
 </form>
 
-<%-include('../../views/partials/user/footer')%>
+<%- include('../../views/partials/user/footer') %>
 
 <script>
-    // Logic functions remain standard for full functionality
-    function removeFromCart(productId,event) {
-        event.preventDefault();
-        Swal.fire({
-            title: "Remove item?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, remove"
-        }).then((result) => {
-            if(result.isConfirmed) window.location.href=`/removeFromCart/?productId=${productId}`;
-        });
+  function removeFromCart(productId, event) {
+    event.preventDefault();
+    Swal.fire({
+      title: "Remove item?",
+      text: "This item will be removed from your cart.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: '#e53935',
+      cancelButtonColor: '#aaa',
+      confirmButtonText: "Yes, remove",
+      cancelButtonText: "Keep it"
+    }).then((result) => {
+      if (result.isConfirmed) window.location.href = `/removeFromCart/?productId=${productId}`;
+    });
+  }
+
+  async function decQuantity(stockSize, productId) {
+    const input = document.querySelector(`input[data-id="${productId}"][data-size="${stockSize}"]`);
+    const current = parseInt(input.value);
+    if (current <= 1) return;
+
+    const res  = await fetch('/decreaseQuantity', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, stockSize })
+    });
+    const data = await res.json();
+    if (data.status) {
+      input.value = current - 1;
+      updateItemTotal(productId, stockSize, input.value, input.dataset.price);
     }
+  }
 
-    async function decQuantity(stockSize, productId) {
-        const input = document.querySelector(`input[data-id="${productId}"][data-size="${stockSize}"]`);
-        const current = parseInt(input.value);
-        if(current <= 1) return;
+  async function incQuantity(stockSize, productId) {
+    const input = document.querySelector(`input[data-id="${productId}"][data-size="${stockSize}"]`);
+    const current = parseInt(input.value);
+    if (current >= 10) { Swal.fire("Max Limit", "Limit is 10 units per item.", "info"); return; }
 
-        const res = await fetch('/decreaseQuantity', {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId, stockSize })
-        });
-        const data = await res.json();
-        if(data.status) {
-            input.value = current - 1;
-            updateItemTotal(productId, stockSize, input.value, input.dataset.price);
-        }
+    const res  = await fetch('/increaseQuantity', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, stockSize })
+    });
+    const data = await res.json();
+    if (data.status) {
+      input.value = current + 1;
+      updateItemTotal(productId, stockSize, input.value, input.dataset.price);
+    } else {
+      Swal.fire("Stock Alert", data.message, "warning");
     }
+  }
 
-    async function incQuantity(stockSize, productId) {
-        const input = document.querySelector(`input[data-id="${productId}"][data-size="${stockSize}"]`);
-        const current = parseInt(input.value);
-        if(current >= 10) {
-            Swal.fire("Max Limit", "Limit is 10 units", "info");
-            return;
-        }
+  function updateItemTotal(id, size, qty, price) {
+    const el = document.querySelector(`.total-price[data-id="${id}"][data-size="${size}"]`);
+    if (el) el.textContent = `₹${(qty * parseFloat(price)).toLocaleString('en-IN')}`;
+    updateSubtotal();
+  }
 
-        const res = await fetch('/increaseQuantity', {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId, stockSize })
-        });
-        const data = await res.json();
-        if(data.status) {
-            input.value = current + 1;
-            updateItemTotal(productId, stockSize, input.value, input.dataset.price);
-        } else {
-            Swal.fire("Stock Alert", data.message, "warning");
-        }
+  function updateSubtotal() {
+    let sub = 0;
+    document.querySelectorAll('.total-price').forEach(el => {
+      sub += parseFloat(el.textContent.replace(/[₹,]/g, ''));
+    });
+    const fmt = sub.toLocaleString('en-IN');
+    document.getElementById('subtotal').textContent   = `₹${fmt}`;
+    document.getElementById('grandTotal').textContent = `₹${fmt}`;
+  }
+
+  function proceedToCheckout() {
+    if (document.querySelectorAll('.cart-item').length === 0) {
+      Swal.fire("Cart Empty", "Please add some items before checkout.", "warning");
+    } else {
+      window.location.href = '/checkout';
     }
-
-    function updateItemTotal(id, size, qty, price) {
-        const el = document.querySelector(`.total-price[data-id="${id}"][data-size="${size}"]`);
-        if(el) el.textContent = `₹${qty * parseFloat(price)}`;
-        updateSubtotal();
-    }
-
-    function updateSubtotal() {
-        let sub = 0;
-        document.querySelectorAll('.total-price').forEach(el => {
-            sub += parseFloat(el.textContent.replace('₹', ''));
-        });
-        document.getElementById('subtotal').textContent = `₹${sub}`;
-    }
-
-    function proceedToCheckout() {
-        if(document.querySelectorAll('.table_row').length === 0) {
-            Swal.fire("Cart Empty", "Add items first", "warning");
-        } else {
-            window.location.href = '/checkout';
-        }
-    }
+  }
 </script>

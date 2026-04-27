@@ -21,12 +21,18 @@ const addToWishlist = async (req, res) => {
         const productId = req.body.productId;
         const userId = req.session.user;
         const user = await User.findById(userId);
-        if(user.wishlist.includes(productId)){
-            return res.status(200).json({status:false,message:"Product Already in Wishlist"})
+        
+        const isExisting = user.wishlist.some(id => id.toString() === productId);
+        
+        if(isExisting){
+            // Remove from wishlist
+            user.wishlist = user.wishlist.filter(id => id.toString() !== productId);
+            await user.save();
+            return res.status(200).json({status:true, action: "removed", message:"Product removed from wishlist"})
         }
         user.wishlist.push(productId);
         await user.save();
-        return res.status(200).json({status:true,message:"Product added to wishlist"})
+        return res.status(200).json({status:true, action: "added", message:"Product added to wishlist"})
     } catch (error) {
         console.error("Error in saving to wishlist",error);
         return res.status(500).json({status:false,message:"Server Error"})

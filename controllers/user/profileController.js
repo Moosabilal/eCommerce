@@ -217,17 +217,19 @@ const getEditProfile = async (req,res)=>{
     }
 }
 
-const postEditProfile = async (req,res)=>{
+const postEditProfile = async (req, res) => {
     try {
-        const {name, phone} = req.body;
+        console.log("req.body:", req.body);
+        console.log("req.file:", req.file);
+        const { name, phone } = req.body;
         const userId = req.session.user;
-        const userData = await User.findById(userId)
-        await User.findByIdAndUpdate(userId,{name:name,phone:phone})
-        res.redirect("/userProfile")
+        const updateData = { name, phone };
 
+        await User.findByIdAndUpdate(userId, updateData);
+        res.redirect("/userProfile");
     } catch (error) {
-        console.log("Error in updating user profile",error);
-        res.redirect("/pageerror")
+        console.log("Error in updating user profile", error);
+        res.redirect("/pageerror");
     }
 }
 

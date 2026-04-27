@@ -1,95 +1,339 @@
 <%-include('../../views/partials/admin/header') %>
 
-<div class="content">
-  <h3>Category</h3>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-  <!-- Search Bar Form -->
-  <form method="GET" action="/admin/category">
-    <div class="form-group d-flex">
-      <input 
-        type="text" 
-        name="search" 
-        class="form-control" 
-        placeholder="Search for Category..." 
-        value=""
-      >
-      <button type="submit" class="btn btn-primary ml-2">Search</button>
-    </div>
-  </form>
+  .admin-content {
+    font-family: 'Inter', sans-serif;
+    background: #f8fafc;
+    min-height: 100vh;
+    padding: 30px;
+    padding-top: 90px;
+    margin-left: 260px; /* Assumes admin sidebar */
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin: 0;
+  }
+
+  /* Panel Card for forms/sections */
+  .panel-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    margin-bottom: 25px;
+  }
   
-  <!-- Add Category Form -->
-  <form method="POST" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
-    <div class="form-group">
-      <label for="categoryName">Category Name</label>
-      <input type="text" class="form-control" id="product_name" name="name" placeholder="Enter category name" >
-      <div id="name-error" class="error-message text-danger" ></div>
-    </div>
-    
-    <div class="form-group">
-      <label for="categoryDescription">Description</label>
-      <textarea class="form-control" id="descriptionId" name="description" rows="3" placeholder="Enter category description" ></textarea>
-      <div id="description-error" class="error-message text-danger"></div>
-    </div>
-    <button type="submit" class="btn btn-primary">Add Category</button>
-  </form>
+  .panel-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Search Bar Styling */
+  .search-input-premium {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 20px 12px 45px;
+    border-radius: 50px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95rem;
+    color: #1e293b;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 18px center;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  .search-input-premium:focus {
+    background-color: #fff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+
+  .btn-search-premium {
+    background: #1e293b;
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    margin-left: 12px;
+  }
+  .btn-search-premium:hover {
+    background: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+  }
+
+  /* Form Styling */
+  .form-control-premium {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  .form-control-premium:focus {
+    outline: none;
+    background: #fff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
   
-  <hr>
+  .form-label-premium {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #475569;
+    margin-bottom: 8px;
+  }
 
-  <!-- Categories Table -->
-  <h4>Category List</h4>
-  <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Offer</th>
-        <th>Status</th>
-        <th>List/Unlist</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% cat.reverse().forEach((category, index) => { %>
-      <tr>
-        <td><%= category.name %></td>
-        <td><%= category.description %></td>
-        <td>
-          <% if(category.categoryOffer){ %>
-             <p> <%= category.categoryOffer %> %</p>
-            <% }else{ %>
-              0%
-              <% } %>
-        </td>
-        <td>
-          <% if(category.categoryOffer===0){ %>
-            <a href="#" onclick="addOffer('<%= category._id %>')" class="text-white"><button class="btn btn-success btn-sm ">Add Offer</button></a>
-          <% }else{ %>
-            <a href="#" onclick="removeOffer('<%= category._id %>')" class="text-white"><button class="btn btn-danger btn-sm">Remove Offer</button></a>
-          <% } %>
-        </td>
-        <td>
-          <% if(category.isListed){ %>
-            <span>Listed</span>
-          <% }else{ %>
-            <span>Unlisted</span>
-          <% } %>
-        </td>
-        <td>
-          <% if (category.isListed) { %>
-            <a href="/admin/listCategory?id=<%= category._id %>" class="text-white"><button class="btn btn-danger btn-sm">Unlist</button></a>
-          <% } else { %>
-            <a href="/admin/unlistCategory?id=<%= category._id %>" class="text-white"><button class="btn btn-success btn-sm">List</button></a>
-          <% } %>
-        </td>
-        <td>
-          <a href="/admin/editCategory?id=<%= category._id %>"><button class="btn btn-warning btn-sm">Edit</button></a>
-        </td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
+  .btn-submit-premium {
+    background: #10b981;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+  }
+  .btn-submit-premium:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+  }
 
-  <%-include('../../views/partials/admin/pagination') %>
+  /* Table Style */
+  .table-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 25px;
+  }
+
+  .premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+
+  .premium-table th {
+    background: #f8fafc;
+    padding: 16px 24px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+  }
+
+  .premium-table td {
+    padding: 18px 24px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+
+  .premium-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+
+  .premium-table tbody tr:hover {
+    background-color: #f8fafc;
+  }
+
+  .desc-text {
+    color: #64748b;
+    font-size: 0.9rem;
+    max-width: 250px;
+  }
+
+  /* Status Badges */
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+  }
+  .badge-listed { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+  .badge-unlisted { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+  /* Action Buttons */
+  .btn-action-sm {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 5px;
+  }
+
+  .btn-action-sm:hover { color: #fff; text-decoration: none; }
+
+  .btn-success-soft { background: rgba(16, 185, 129, 0.1); color: #059669; }
+  .btn-success-soft:hover { background: #10b981; color: #fff; }
+
+  .btn-danger-soft { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+  .btn-danger-soft:hover { background: #ef4444; color: #fff; }
+
+  .btn-warning-soft { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+  .btn-warning-soft:hover { background: #f59e0b; color: #fff; }
+
+  @media (max-width: 991px) {
+    .admin-content { margin-left: 0; padding: 20px; }
+  }
+</style>
+
+<div class="admin-content">
+  <div class="page-header">
+    <h1 class="page-title">Manage Categories</h1>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-4 mb-4">
+      <!-- Add Category Form -->
+      <div class="panel-card">
+        <h4 class="panel-title"><i class="fas fa-plus-circle text-primary"></i> Create Category</h4>
+        <form method="POST" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
+          <div class="form-group mb-3">
+            <label for="product_name" class="form-label-premium">Category Name</label>
+            <input type="text" class="form-control-premium" id="product_name" name="name" placeholder="e.g. Graphic Tees">
+            <div id="name-error" class="error-message text-danger" style="display:none; font-size:0.85rem; margin-top:5px;"></div>
+          </div>
+          
+          <div class="form-group mb-4">
+            <label for="descriptionId" class="form-label-premium">Description</label>
+            <textarea class="form-control-premium" id="descriptionId" name="description" rows="4" placeholder="Short description of this category"></textarea>
+            <div id="description-error" class="error-message text-danger" style="display:none; font-size:0.85rem; margin-top:5px;"></div>
+          </div>
+          <button type="submit" class="btn-submit-premium w-100">Add Category</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-8 mb-4">
+      <!-- Search & Filters -->
+      <div class="panel-card mb-4" style="padding: 16px 24px;">
+        <form method="GET" action="/admin/category" class="d-flex align-items-center m-0">
+          <input 
+            type="text" 
+            name="search" 
+            class="search-input-premium" 
+            placeholder="Search by category name..." 
+            value="<%= typeof search !== 'undefined' ? search : '' %>"
+          >
+          <button type="submit" class="btn-search-premium">Search</button>
+        </form>
+      </div>
+
+      <!-- Categories Table -->
+      <div class="table-card table-responsive">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Categories Details</th>
+              <th>Current Offer</th>
+              <th>Store Status</th>
+              <th>Manage Access</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% cat.reverse().forEach((category, index) => { %>
+            <tr>
+              <td>
+                <div style="font-weight: 600; font-size: 1rem; color: #0f172a;"><%= category.name %></div>
+                <div class="desc-text text-truncate"><%= category.description %></div>
+              </td>
+              
+              <td>
+                <% if(category.categoryOffer){ %>
+                  <span style="font-weight: 700; color: #10b981; font-size: 1.1rem;"><%= category.categoryOffer %>% OFF</span>
+                  <div class="mt-2">
+                    <a href="#" onclick="removeOffer('<%= category._id %>')" class="btn-action-sm btn-danger-soft">
+                      <i class="fas fa-times"></i> Remove
+                    </a>
+                  </div>
+                <% }else{ %>
+                  <span style="font-weight: 600; color: #94a3b8;">No Active Offer</span>
+                  <div class="mt-2">
+                    <a href="#" onclick="addOffer('<%= category._id %>')" class="btn-action-sm btn-success-soft">
+                      <i class="fas fa-plus"></i> Add Promo
+                    </a>
+                  </div>
+                <% } %>
+              </td>
+              
+              <td>
+                <% if(category.isListed){ %>
+                  <span class="status-badge badge-listed"><i class="fas fa-check-circle mr-1"></i> Listed</span>
+                <% }else{ %>
+                  <span class="status-badge badge-unlisted"><i class="fas fa-eye-slash mr-1"></i> Hidden</span>
+                <% } %>
+              </td>
+              
+              <td>
+                <div class="d-flex flex-wrap gap-2">
+                  <% if (category.isListed) { %>
+                    <a href="/admin/listCategory?id=<%= category._id %>" class="btn-action-sm btn-danger-soft">
+                      <i class="fas fa-eye-slash"></i> Unlist
+                    </a>
+                  <% } else { %>
+                    <a href="/admin/unlistCategory?id=<%= category._id %>" class="btn-action-sm btn-success-soft">
+                      <i class="fas fa-eye"></i> List
+                    </a>
+                  <% } %>
+                  
+                  <a href="/admin/editCategory?id=<%= category._id %>" class="btn-action-sm btn-warning-soft">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                </div>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      
+      <%-include('../../views/partials/admin/pagination') %>
+    </div>
+  </div>
 </div>
 
 

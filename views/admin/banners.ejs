@@ -1,72 +1,205 @@
 <%- include('../../views/partials/admin/header') %>
 
 <style>
-    .bannerActive{
-        background-color: green;
-        color: white;
-    }
-    .bannerInactive{
-        background-color: red;
-        color: white;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  .admin-content {
+    font-family: 'Inter', sans-serif;
+    background: #f8fafc;
+    min-height: 100vh;
+    padding: 30px;
+    padding-top: 90px;
+    margin-left: 260px; /* Assumes admin sidebar */
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin: 0;
+  }
+
+  .btn-premium-action {
+    background: #1e293b;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
+  }
+
+  .btn-premium-action:hover {
+    background: #0f172a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(15, 23, 42, 0.25);
+    color: #fff;
+  }
+
+  /* Table Card Setup */
+  .table-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 25px;
+  }
+
+  .premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+
+  .premium-table th {
+    background: #f8fafc;
+    padding: 16px 24px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+  }
+
+  .premium-table td {
+    padding: 18px 24px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+
+  .premium-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+
+  .premium-table tbody tr:hover {
+    background-color: #f8fafc;
+  }
+
+  .bannerActive {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  
+  .bannerInactive {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /* Action Buttons */
+  .btn-action-sm {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 5px;
+  }
+
+  .btn-warning-soft { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+  .btn-warning-soft:hover { background: #f59e0b; color: #fff; }
+
+  .btn-info-soft { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+  .btn-info-soft:hover { background: #3b82f6; color: #fff; }
+
+  .btn-danger-soft { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+  .btn-danger-soft:hover { background: #ef4444; color: #fff; }
+
+  .thumbnail-wrapper img {
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  @media (max-width: 991px) {
+    .admin-content { margin-left: 0; padding: 20px; }
+  }
 </style>
 
-<!-- Display Existing Banners -->
-<div class="content mt-100">
-<!-- Display Existing Banners -->
-<div class="card shadow p-4">
-    <div class="mb-4 d-flex justify-content-between align-items-center"> 
-    <h4 class="mb-3">Existing Banners</h4>
-    <button class="btn btn-primary mb-3" onclick="newBanner()">Add Banner</button>
-    </div>
-    <table class="table table-bordered text-center align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>Image</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (banners.length > 0) { %>
-                <% banners.forEach(banner => { %>
-                    <tr>
-                        <td>
-                            <img src="/uploads/product-images/<%= banner.image %>" width="100" class="img-thumbnail">
-                        </td>
-                        <td><%= banner.title %></td>
-                        <td><%= banner.description %></td>
-                        <td>
-                            <span class="badge <%= banner.isActive ? 'bannerActive' : 'bannerInactive' %>" 
-                                  data-id="<%= banner._id %>">
-                                <%= banner.isActive ? 'Active' : 'Inactive' %>
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" data-id="<%= banner._id %>" 
-                                    onclick="bannerActivation('<%= banner._id %>')">
-                                Toggle Status
-                            </button>
-                            <button class="btn btn-info btn-sm" onclick="window.location.href='/admin/edit-banner/<%= banner._id %>'">
-                                Edit
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteBanner('<%= banner._id %>')">
-                                Delete
-                            </button>
+<div class="admin-content">
+  <div class="page-header">
+    <h1 class="page-title">Manage Banners</h1>
+    <button class="btn-premium-action" onclick="newBanner()">
+      <i class="fas fa-plus"></i> Add New Banner
+    </button>
+  </div>
 
-                        </td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
-                <tr>
-                    <td colspan="5">No banners found</td>
-                </tr>
-            <% } %>
-        </tbody>
+  <div class="table-card table-responsive">
+    <table class="premium-table">
+      <thead>
+        <tr>
+          <th>Banner Image</th>
+          <th>Title & Info</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (banners.length > 0) { %>
+          <% banners.forEach(banner => { %>
+            <tr>
+              <td>
+                <div class="thumbnail-wrapper">
+                  <img src="/uploads/product-images/<%= banner.image %>" width="120" alt="Banner Image">
+                </div>
+              </td>
+              <td style="font-weight: 600;"><%= banner.title %></td>
+              <td style="color: #64748b;"><%= banner.description %></td>
+              <td>
+                <span class="<%= banner.isActive ? 'bannerActive' : 'bannerInactive' %>" 
+                      data-id="<%= banner._id %>">
+                    <%= banner.isActive ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+              <td>
+                <button class="btn-action-sm btn-warning-soft" data-id="<%= banner._id %>" 
+                        onclick="bannerActivation('<%= banner._id %>')">
+                    Toggle Status
+                </button>
+                <button class="btn-action-sm btn-info-soft" onclick="window.location.href='/admin/edit-banner/<%= banner._id %>'">
+                    Edit
+                </button>
+                <button class="btn-action-sm btn-danger-soft" onclick="deleteBanner('<%= banner._id %>')">
+                    Delete
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 30px; color: #94a3b8;">No banners correctly found in the database. Please add a new one.</td>
+          </tr>
+        <% } %>
+      </tbody>
     </table>
-</div>
+  </div>
 </div>
 <%- include('../../views/partials/admin/footer') %>
 
