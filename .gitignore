@@ -1,2 +1,28 @@
+# Environment
 .env
+.env.*
+!.env.example
+
+# Dependencies
 node_modules/
+
+# PM2 Logs
+logs/
+*.log
+
+# Uploaded files (manage separately on server)
+uploads/
+
+# Test/Debug scripts (should not be deployed)
+query_order.js
+test-aggregate.js
+test-aggregate2.js
+test_order.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
