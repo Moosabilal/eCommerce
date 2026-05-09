@@ -189,7 +189,7 @@ const signup = async (req, res) => {
         const emailSent = await sendVerificationEmail(email, otp);
         console.log('emailerror', emailSent)
         if (!emailSent) {
-            return res.json("email-error")
+            return res.render("signup", { message: "Failed to send OTP. Please use a valid email address and try again." })
         }
 
         req.session.userOtp = otp;
