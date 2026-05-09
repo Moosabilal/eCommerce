@@ -302,6 +302,12 @@
     </div>
   </div>
 
+  <% if (locals.message) { %>
+    <div class="alert alert-danger" style="background: #fee2e2; color: #ef4444; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; border: 1px solid #fca5a5;">
+       <i class="fas fa-exclamation-triangle mr-2"></i> <%= message %>
+    </div>
+  <% } %>
+
   <form method="POST" action="/admin/editProduct/<%= product._id %>" enctype="multipart/form-data" onsubmit="return validateForm()">
     <div class="row">
       <!-- Left Column: Core Details -->
@@ -346,27 +352,33 @@
             </div>
           </div>
 
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label-premium">Add/Update Size</label>
-              <select class="form-control-premium" name="size" id="size">
-                <option value="" disabled selected>Select size</option>
-                <option value="S">S – Small</option>
-                <option value="M">M – Medium</option>
-                <option value="L">L – Large</option>
-                <option value="XL">XL – Extra Large</option>
-              </select>
-              <div id="size-error" class="error-message"></div>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label-premium">Quantity</label>
-              <input type="number" class="form-control-premium" name="quantity" id="quantity" placeholder="0">
-              <div id="quantity-error" class="error-message"></div>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label-premium">Color</label>
-              <input type="text" class="form-control-premium" name="color" id="color" value="<%= product.color %>">
-              <div id="color-error" class="error-message"></div>
+          <div class="mb-4">
+            <label class="form-label-premium">Color</label>
+            <input type="text" class="form-control-premium" name="color" id="color" value="<%= product.color %>">
+            <div id="color-error" class="error-message"></div>
+          </div>
+
+          <div id="size-container">
+            <div class="row g-3 mb-3 size-row">
+              <div class="col-md-5">
+                <label class="form-label-premium">Add/Update Size</label>
+                <select class="form-control-premium" name="size" id="size">
+                  <option value="" disabled selected>Select size</option>
+                  <option value="S">S – Small</option>
+                  <option value="M">M – Medium</option>
+                  <option value="L">L – Large</option>
+                  <option value="XL">XL – Extra Large</option>
+                </select>
+                <div class="size-error error-message" id="size-error"></div>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label-premium">Quantity</label>
+                <input type="number" class="form-control-premium" name="quantity" id="quantity" placeholder="0">
+                <div class="quantity-error error-message" id="quantity-error"></div>
+              </div>
+              <div class="col-md-2 d-flex align-items-end">
+                <button type="button" class="btn-publish" style="padding: 12px; margin-top: 0; min-width: 45px;" onclick="addSizeRow()">+</button>
+              </div>
             </div>
           </div>
         </div>
@@ -486,15 +498,39 @@
 
 function validateAndSubmit() {
     if (validateForm()) {
-        Swal.fire({
-            icon: "success",
-            title: "Product edited successfully",
-            showConfirmButton: false,
-            timer: 1500,
-        }).then(() => {
-            document.forms[0].submit(); // Submit the form after the Swal completes
-        });
+        document.forms[0].submit();
     }
+}
+
+function addSizeRow() {
+    const container = document.getElementById('size-container');
+    const rowCount = container.getElementsByClassName('size-row').length;
+    if (rowCount >= 4) {
+        Swal.fire({ icon: 'warning', title: 'Maximum 4 sizes allowed', showConfirmButton: false, timer: 1500 });
+        return;
+    }
+    const row = document.createElement('div');
+    row.className = 'row g-3 mb-3 size-row';
+    row.innerHTML = `
+      <div class="col-md-5">
+        <select class="form-control-premium" name="size">
+          <option value="" disabled selected>Select size</option>
+          <option value="S">S – Small</option>
+          <option value="M">M – Medium</option>
+          <option value="L">L – Large</option>
+          <option value="XL">XL – Extra Large</option>
+        </select>
+        <div class="size-error error-message"></div>
+      </div>
+      <div class="col-md-5">
+        <input type="number" class="form-control-premium" name="quantity" placeholder="0">
+        <div class="quantity-error error-message"></div>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="button" class="btn-publish" style="padding: 12px; margin-top: 0; min-width: 45px; background: linear-gradient(135deg, #ef4444, #b91c1c);" onclick="this.parentElement.parentElement.remove()">X</button>
+      </div>
+    `;
+    container.appendChild(row);
 }
 
             function viewImage1(event) {
@@ -652,12 +688,10 @@ function validateAndSubmit() {
               const saleprice = document.getElementsByName('salePrice')[0].value;
               const color = document.getElementsByName('color')[0].value;
               const category = document.getElementsByName('category')[0].value;
-              const images = document.getElementById('input1')
-              const quantity=document.getElementsByName('quantity')[0].value
-              console.log(quantity)
-              const sizeElement = document.getElementsByName('size')[0]; // Get the first element with name 'Size'
-              const size = sizeElement.value;      
-              let isValid = true
+              const sizes = document.getElementsByName('size');
+              const quantities = document.getElementsByName('quantity');
+              let isValid = true;
+              
               if (name.trim() === "") {
       displayErrorMessage('productName-error', 'Please enter a product name.');
       isValid = false;
@@ -670,17 +704,31 @@ function validateAndSubmit() {
       displayErrorMessage('description-error', 'Please enter a product description.');
       isValid = false;
    } else {
-      isValid = true;
+      isValid = isValid !== false;
    }
-  
-                if(size === "") {
-                    displayErrorMessage('size-error', 'Please select a size.');
-                    isValid = false;
-                }
-                
-              if ( parseInt(quantity) < 0) {
-                  displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-                  isValid = false;
+   
+              const selectedSizes = [];
+              for (let i = 0; i < sizes.length; i++) {
+                  if (sizes[i].value !== "" || quantities[i].value !== "") {
+                      if (sizes[i].value === "") {
+                          sizes[i].nextElementSibling.innerText = 'Please select a size.';
+                          sizes[i].nextElementSibling.style.display = "block";
+                          isValid = false;
+                      } else {
+                          if (selectedSizes.includes(sizes[i].value)) {
+                              sizes[i].nextElementSibling.innerText = 'Duplicate size selected.';
+                              sizes[i].nextElementSibling.style.display = "block";
+                              isValid = false;
+                          } else {
+                              selectedSizes.push(sizes[i].value);
+                          }
+                      }
+                      if (quantities[i].value === "" || parseInt(quantities[i].value) < 0) {
+                          quantities[i].nextElementSibling.innerText = 'Please enter a valid quantity.';
+                          quantities[i].nextElementSibling.style.display = "block";
+                          isValid = false;
+                      }
+                  }
               }
   
               if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
@@ -705,10 +753,18 @@ function validateAndSubmit() {
               }
   
   
-            //   if (images.files.length === 0) {
-            //       displayErrorMessage("images-error",'Please select an image.');
-            //       isValid = false;
-            //   }
+              const existingImagesCount = document.querySelectorAll('.current-image-wrapper').length;
+              const input1 = document.getElementById('input1') ? document.getElementById('input1').files.length : 0;
+              const input2 = document.getElementById('input2') ? document.getElementById('input2').files.length : 0;
+              const input3 = document.getElementById('input3') ? document.getElementById('input3').files.length : 0;
+              const input4 = document.getElementById('input4') ? document.getElementById('input4').files.length : 0;
+              const totalNewImages = input1 + input2 + input3 + input4;
+              const totalImages = existingImagesCount + totalNewImages;
+
+              if (totalImages !== 4) {
+                  displayErrorMessage("images-error", `You must have exactly 4 images in total. Currently you have ${totalImages}.`);
+                  isValid = false;
+              }
               return isValid;
           }
 
