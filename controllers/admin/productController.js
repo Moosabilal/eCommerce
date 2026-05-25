@@ -76,7 +76,7 @@ const addProducts = async (req, res) => {
                 status: "Available",
             })
             await newProduct.save();
-            return res.redirect("/admin/Products")
+            return res.redirect("/admin/products?success=product-added")
 
         } else {
             const category = await Category.find({ isListed: true });
@@ -296,7 +296,7 @@ const editProduct = async (req, res) => {
         }
 
         await Product.findByIdAndUpdate(id, updateFields, { new: true });
-        res.redirect("/admin/products");
+        res.redirect("/admin/products?success=product-updated");
     } catch (error) {
         console.error(error)
         res.redirect("/admin/pageerror")
