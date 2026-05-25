@@ -439,5 +439,25 @@
         }
       }
 
-
+      document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+        if (success === 'product-added') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Product Added Successfully!',
+            text: 'Your new product has been successfully created and published.',
+            confirmButtonColor: '#1e293b'
+          });
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (success === 'product-updated') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Product Updated Successfully!',
+            text: 'The product details have been successfully updated.',
+            confirmButtonColor: '#1e293b'
+          });
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      });
     </script>
