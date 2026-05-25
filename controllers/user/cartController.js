@@ -153,6 +153,9 @@ const decreaseQuantity = async (req, res) => {
 
         let itemFound = false;
         for (const item of userCart.items) {
+            if (item.productId.toString() !== productId.toString()) {
+                continue;
+            }
             const stockIndex = item.stock.findIndex(stock => stock.size === stockSize);
             if (stockIndex !== -1) {
                 itemFound = true;
@@ -198,6 +201,9 @@ const increaseQuantity = async (req, res) => {
 
         let itemFound = false;
         for (const item of userCart.items) {
+            if (item.productId.toString() !== productId.toString()) {
+                continue;
+            }
             const stockIndex = item.stock.findIndex(stock => stock.size === stockSize);
             if (stockIndex !== -1) {
                 itemFound = true;

@@ -13,12 +13,6 @@ logs/
 # Uploaded files (manage separately on server)
 uploads/
 
-# Test/Debug scripts (should not be deployed)
-query_order.js
-test-aggregate.js
-test-aggregate2.js
-test_order.js
-
 # OS files
 .DS_Store
 Thumbs.db
