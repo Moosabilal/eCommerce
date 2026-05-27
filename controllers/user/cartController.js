@@ -74,7 +74,6 @@ const addToCart = async (req, res) => {
             });
         }
 
-        // If the user doesn't have a cart, create a new one
         if (!userCart) {
             const newCart = new Cart({
                 userId: userData._id,
@@ -91,21 +90,18 @@ const addToCart = async (req, res) => {
             return res.status(200).json({ status: true, message: "Product added to cart" });
         }
 
-        // Check if the product and size already exist in the cart
         const itemIndex = userCart.items.findIndex(item =>
             item.productId.toString() === productId.toString() &&
             item.stock.some(stock => stock.size === size)
         );
 
         if (itemIndex !== -1) {
-            // If the product and size already exist, return an appropriate response
             return res.status(200).json({
                 status: false,
                 message: `Product with size: ${size} is already in the cart`
             });
         }
 
-        // Add the product and size to the cart as a new item
         userCart.items.push({
             productId: productId,
             stock: [{ size, quantity }],

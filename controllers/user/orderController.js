@@ -14,14 +14,13 @@ const path = require('path');
 
 
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID, // Replace with your test Key ID
-    key_secret: process.env.RAZORPAY_KEY_SECRET, // Replace with your test Key Secret
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 const generateInvoice = (order, res) => {
     const doc = new PDFDocument({ size: 'A4', margin: 40 });
 
-    // Set response headers for PDF download
     res.setHeader('Content-Disposition', `attachment; filename=invoice_${order.orderId}.pdf`);
     res.setHeader('Content-Type', 'application/pdf');
 
@@ -320,7 +319,7 @@ const cancelOrder = async (req, res) => {
         const userId = req.session.user;
         const { orderId, productId, orderQuantity, orderSize } = req.body;
 
-        const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });
+        const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });  // add userId
 
         if (!existingOrder) {
             return res.status(404).json({ success: false, message: "Order not found" });
