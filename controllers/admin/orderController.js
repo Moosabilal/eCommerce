@@ -70,47 +70,80 @@ const statusSelection = async (req,res)=>{
         }
 
         order.status = status;
+        order.orderItems.forEach(item => {
+            if (item.status !== "Cancelled" && item.status !== "Returned") {
+                item.status = status;
+            }
+        });
         await order.save();
 
-        const finalAmount = parseFloat(order.finalAmount.toFixed(2));
         const user = order.userId;
 
         if (status === "Returned") {
             const id = order.orderId;
-        const wallet = await Wallet.findOneAndUpdate(
-            { userId: new mongoose.Types.ObjectId(user) },
-            {
-            $inc: { balance: finalAmount },
-            $push: {
-                transactions: {
-                transactionType: "Credit",
-                amount: finalAmount,
-                status: "Success",
-                date: new Date(),
-                orderId:id,
-                },
-            },
+            const activeItems = order.orderItems.filter(item => item.status === "Returned");
+            
+            if (activeItems.length > 0) {
+                const orderSubtotal = order.orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
+                let refundAmount = 0;
+                
+                for (const item of activeItems) {
+                    if (orderSubtotal > 0) {
+                        const itemShare = item.totalPrice / orderSubtotal;
+                        const discountShare = order.discount * itemShare;
+                        const taxShare = item.totalPrice * (order.tax / 100); // tax is stored as percentage
+                        refundAmount += (item.totalPrice - discountShare + taxShare);
+                    } else {
+                        refundAmount += item.totalPrice;
+                    }
+                }
+
+                // Check if all items in the order are now either Cancelled or Returned
+                const allInactive = order.orderItems.every(item => 
+                    item.status === "Cancelled" || item.status === "Returned"
+                );
+                if (allInactive) {
+                    const shippingFee = order.shipping === 'express' ? 15 : 5;
+                    refundAmount += shippingFee;
+                }
+                
+                refundAmount = Math.max(0, parseFloat(refundAmount.toFixed(2)));
+
+                const wallet = await Wallet.findOneAndUpdate(
+                    { userId: new mongoose.Types.ObjectId(user) },
+                    {
+                        $inc: { balance: refundAmount },
+                        $push: {
+                            transactions: {
+                                transactionType: "Credit",
+                                amount: refundAmount,
+                                status: "Success",
+                                date: new Date(),
+                                orderId: id,
+                            },
+                        },
+                    }
+                );
+
+                if (!wallet) {
+                    return res.status(404).json({ success: false, message: "Failed to credit the amount to the user wallet" });
+                }
+
+                for (const item of activeItems) {
+                    const productId = item.productId;
+                    const orderSize = item.size;
+                    const orderQuantity = item.quantity;
+
+                    const product = await Product.updateOne(
+                        { _id: new mongoose.Types.ObjectId(productId), "stock.size": orderSize },
+                        { $inc: { "stock.$.quantity": orderQuantity } }
+                    );
+
+                    if (product.nModified === 0) {
+                        return res.status(404).json({ success: false, message: `Failed to update stock for product ${productId} with size ${orderSize}` });
+                    }
+                }
             }
-        );
-
-        if (!wallet) {
-            return res.status(404).json({ success: false, message: "Failed to credit the amount to the user wallet" });
-        }
-
-        for (const item of order.orderItems) {
-            const productId = item.productId;
-            const orderSize = item.size;
-            const orderQuantity = item.quantity;
-
-            const product = await Product.updateOne(
-            { _id: new mongoose.Types.ObjectId(productId), "stock.size": orderSize },
-            { $inc: { "stock.$.quantity": orderQuantity } }
-            );
-
-            if (product.nModified === 0) {
-            return res.status(404).json({ success: false, message: `Failed to update stock for product ${productId} with size ${orderSize}` });
-            }
-        }
         }
 
         res.status(200).json({ success: true, message: "Order status updated successfully" });
@@ -174,6 +207,7 @@ const orderedDetailsPage = async (req,res)=>{
                 "orderItems.productId":1,
                 "orderItems.price":1,
                 "orderItems.totalPrice":1,
+                "orderItems.status":1,
                 "paymentMethod":1,
                 "finalAmount":1,
                 "parentAddressid":1,
@@ -205,10 +239,112 @@ const orderedDetailsPage = async (req,res)=>{
     }
 }
 
+const approveReturnItem = async (req, res) => {
+    try {
+        const { orderId, productId, orderSize, orderQuantity } = req.body;
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        // Find the specific item
+        const targetItem = order.orderItems.find(item => 
+            item.productId.toString() === productId.toString() && 
+            item.size === orderSize
+        );
+
+        if (!targetItem) {
+            return res.status(404).json({ success: false, message: "Item not found in order" });
+        }
+
+        if (targetItem.status !== "Return_Requested") {
+            return res.status(400).json({ success: false, message: `Item status is ${targetItem.status}, expected Return_Requested` });
+        }
+
+        // Calculate proportional refund
+        const orderSubtotal = order.orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
+        let refundAmount = 0;
+
+        if (orderSubtotal > 0) {
+            const itemShare = targetItem.totalPrice / orderSubtotal;
+            const discountShare = order.discount * itemShare;
+            const taxShare = targetItem.totalPrice * (order.tax / 100);
+            refundAmount = targetItem.totalPrice - discountShare + taxShare;
+
+            // Check if this is the last active item in the order (all others are Cancelled or Returned)
+            const activeItemsCount = order.orderItems.filter(item => 
+                item.status !== "Cancelled" && item.status !== "Returned"
+            ).length;
+
+            if (activeItemsCount === 1) {
+                const shippingFee = order.shipping === 'express' ? 15 : 5;
+                refundAmount += shippingFee;
+            }
+        } else {
+            refundAmount = targetItem.totalPrice;
+        }
+
+        refundAmount = Math.max(0, parseFloat(refundAmount.toFixed(2)));
+
+        // Update wallet
+        const user = order.userId;
+        const wallet = await Wallet.findOneAndUpdate(
+            { userId: new mongoose.Types.ObjectId(user) },
+            {
+                $inc: { balance: refundAmount },
+                $push: {
+                    transactions: {
+                        transactionType: "Credit",
+                        amount: refundAmount,
+                        status: "Success",
+                        date: new Date(),
+                        orderId: order.orderId,
+                    },
+                },
+            },
+            { new: true, upsert: true }
+        );
+
+        if (!wallet) {
+            return res.status(404).json({ success: false, message: "Failed to credit the amount to the user wallet" });
+        }
+
+        // Restore stock
+        const product = await Product.updateOne(
+            { _id: new mongoose.Types.ObjectId(productId), "stock.size": orderSize },
+            { $inc: { "stock.$.quantity": parseInt(orderQuantity) } }
+        );
+
+        if (product.nModified === 0) {
+            return res.status(404).json({ success: false, message: `Failed to update stock for product ${productId} with size ${orderSize}` });
+        }
+
+        // Update item status
+        targetItem.status = "Returned";
+
+        // Check if all items in orderItems are now cancelled or returned
+        const allInactive = order.orderItems.every(item => 
+            item.status === "Cancelled" || item.status === "Returned"
+        );
+        if (allInactive) {
+            order.status = "Returned";
+        }
+
+        await order.save();
+
+        res.status(200).json({ success: true, message: "Item return approved successfully" });
+    } catch (error) {
+        console.error("Error approving item return:", error);
+        res.status(500).json({ success: false, message: "Failed to approve item return" });
+    }
+};
+
 module.exports = {
     getOrders,
     statusSelection,
     deleteOrder,
     orderedDetailsPage,
+    approveReturnItem,
 };
 

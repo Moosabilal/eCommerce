@@ -177,6 +177,23 @@
     border-color: #94a3b8; 
   }
 
+  .btn-premium-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 50px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+    cursor: pointer;
+  }
+  .btn-premium-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
+    color: #fff;
+  }
+
   .bread-crumb {
     padding: 0;
     margin-bottom: 30px;
@@ -249,6 +266,37 @@
                 <span class="detail-label">Total Product Price:</span>
                 <span class="text-success-premium">&#8377;<%= order.orderItems.totalPrice %></span>
               </div>
+              <div class="detail-row align-items-center">
+                <span class="detail-label">Item Status:</span>
+                <% const itemStatus = order.orderItems.status || order.status; %>
+                <span class="status-badge <%= itemStatus %>"><%= itemStatus %></span>
+              </div>
+
+              <% if ((itemStatus === 'Pending' || itemStatus === 'Processing') && order.status !== 'Shipped' && order.status !== 'Delivered' && order.status !== 'Returned' && order.status !== 'Cancelled') { %>
+                <div class="mt-3">
+                  <button class="btn btn-premium-danger cancel-item-btn"
+                          data-order-id="<%= order._id %>"
+                          data-product-id="<%= order.productDetails._id %>"
+                          data-product-size="<%= order.orderItems.size %>"
+                          data-product-qty="<%= order.orderItems.quantity %>"
+                          data-product-name="<%= order.productDetails.productName %>">
+                    Cancel Item
+                  </button>
+                </div>
+              <% } %>
+
+              <% if (itemStatus === 'Delivered' && order.status !== 'Returned' && order.status !== 'Cancelled') { %>
+                <div class="mt-3">
+                  <button class="btn btn-premium-danger return-item-btn"
+                          data-order-id="<%= order._id %>"
+                          data-product-id="<%= order.productDetails._id %>"
+                          data-product-size="<%= order.orderItems.size %>"
+                          data-product-qty="<%= order.orderItems.quantity %>"
+                          data-product-name="<%= order.productDetails.productName %>">
+                    Return Item
+                  </button>
+                </div>
+              <% } %>
             </div>
           </div>
         </div>
@@ -265,7 +313,7 @@
           <div class="card-body-premium">
             <div class="detail-row">
               <span class="detail-label" style="min-width: 140px;">Order ID:</span>
-              <span class="fw-bold text-muted">#<%= orderDetails[0].orderId %></span>
+              <span class="fw-bold text-muted">#<%= orderDetails[0].orderId.slice(0, 6) %></span>
             </div>
             <div class="detail-row">
               <span class="detail-label" style="min-width: 140px;">Order Status:</span>
@@ -357,4 +405,154 @@
 </div>
 
 <%- include('../../views/partials/user/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.cancel-item-btn').forEach(button => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        const orderId = this.getAttribute('data-order-id');
+        const productId = this.getAttribute('data-product-id');
+        const orderSize = this.getAttribute('data-product-size');
+        const orderQuantity = this.getAttribute('data-product-qty');
+        const productName = this.getAttribute('data-product-name');
+
+        Swal.fire({
+          title: 'Cancel Item?',
+          text: `Are you sure you want to cancel the item: "${productName}" (Size: ${orderSize}, Qty: ${orderQuantity})?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#94a3b8',
+          confirmButtonText: 'Yes, cancel it!',
+          input: 'text',
+          inputPlaceholder: 'Enter reason for cancellation (optional)',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const reason = result.value || '';
+
+            fetch('/cancelOrder', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId,
+                productId,
+                orderQuantity,
+                orderSize,
+                reason
+              }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  title: 'Cancelled!',
+                  text: 'The item has been successfully cancelled.',
+                  icon: 'success',
+                  timer: 1500,
+                  showConfirmButton: false
+                }).then(() => {
+                  window.location.reload();
+                });
+              } else {
+                Swal.fire({
+                  title: 'Error',
+                  text: data.message || 'There was a problem cancelling the item. Please try again.',
+                  icon: 'error'
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire({
+                title: 'Error',
+                text: 'Something went wrong. Please try again.',
+                icon: 'error'
+              });
+            });
+          }
+        });
+      });
+    });
+
+    document.querySelectorAll('.return-item-btn').forEach(button => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        const orderId = this.getAttribute('data-order-id');
+        const productId = this.getAttribute('data-product-id');
+        const orderSize = this.getAttribute('data-product-size');
+        const orderQuantity = this.getAttribute('data-product-qty');
+        const productName = this.getAttribute('data-product-name');
+
+        Swal.fire({
+          title: 'Return Item?',
+          text: `Are you sure you want to return the item: "${productName}" (Size: ${orderSize}, Qty: ${orderQuantity})?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#94a3b8',
+          confirmButtonText: 'Yes, return it!',
+          input: 'text',
+          inputPlaceholder: 'Enter reason for return (required)',
+          inputValidator: (value) => {
+            if (!value) {
+              return 'You need to provide a reason!';
+            }
+          }
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const reason = result.value;
+
+            fetch('/returnOrderItem', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId,
+                productId,
+                orderQuantity,
+                orderSize,
+                reason
+              }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  title: 'Return Requested!',
+                  text: 'The return request has been submitted successfully.',
+                  icon: 'success',
+                  timer: 1500,
+                  showConfirmButton: false
+                }).then(() => {
+                  window.location.reload();
+                });
+              } else {
+                Swal.fire({
+                  title: 'Error',
+                  text: data.message || 'There was a problem requesting return. Please try again.',
+                  icon: 'error'
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire({
+                title: 'Error',
+                text: 'Something went wrong. Please try again.',
+                icon: 'error'
+              });
+            });
+          }
+        });
+      });
+    });
+  });
+</script>
 

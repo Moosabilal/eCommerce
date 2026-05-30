@@ -330,7 +330,7 @@
                 <!-- Order Info Section -->
                 <div class="order-info-section">
                   <h5>Order ID: <span class="text-primary">
-                      <%= order.orderId %>
+                      <%= order.orderId.slice(0, 6) %>
                     </span></h5>
                   <p><strong>Final Amount:</strong> <span class="text-primary">₹<%= order.finalAmount %></span></p>
                   <p><strong>Address Type:</strong>

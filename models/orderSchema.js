@@ -35,6 +35,12 @@ const orderSchema = new Schema({
             type: Number,
             required: true
         },
+        status: {
+            type: String,
+            required: true,
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return_Requested', 'Returned'],
+            default: 'Pending'
+        },
 
         
     }],

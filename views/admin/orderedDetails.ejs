@@ -151,7 +151,6 @@
   .price-unit {
     font-size: 0.85rem;
     color: #94a3b8;
-    text-decoration: line-through;
   }
 
   /* Summary Table */
@@ -197,6 +196,13 @@
     color: #3b82f6;
     letter-spacing: 0.5px;
   }
+  .status-badge.Pending { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+  .status-badge.Processing { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+  .status-badge.Shipped { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+  .status-badge.Delivered { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+  .status-badge.Cancelled { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+  .status-badge.Return_Requested { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+  .status-badge.Returned { background: rgba(100, 116, 139, 0.1); color: #64748b; }
 
   /* Address Box */
   .address-box {
@@ -268,7 +274,7 @@
       <p class="breadcrumb-nav">
         <a href="/admin/dashboard">Dashboard</a> /
         <a href="/admin/orders">Orders</a> /
-        <span style="color:#0f172a;">#<%= orderDetails[0].orderId %></span>
+        <span style="color:#0f172a;">#<%= orderDetails[0].orderId.slice(0, 6) %></span>
       </p>
     </div>
     <a href="/admin/orders" class="btn-back-orders">
@@ -296,7 +302,25 @@
                 <span class="meta-pill"><i class="fas fa-ruler-combined"></i> Size: <%= order.orderItems.size %></span>
                 <span class="meta-pill"><i class="fas fa-palette"></i> Color: <%= order.productDetails.color %></span>
                 <span class="meta-pill"><i class="fas fa-layer-group"></i> Qty: <%= order.orderItems.quantity %></span>
+                <span class="meta-pill">
+                  <i class="fas fa-info-circle"></i> Status: 
+                  <% const itemStatus = order.orderItems.status || order.status; %>
+                  <span class="status-badge <%= itemStatus %>" style="font-size: 0.72rem; padding: 2px 8px;"><%= itemStatus %></span>
+                </span>
               </div>
+              
+              <% if (itemStatus === 'Return_Requested') { %>
+                <div style="margin-top: 10px;">
+                  <button class="btn btn-sm btn-success approve-return-btn"
+                          style="font-size: 0.75rem; padding: 4px 10px; background-color: #10b981; border-color: #10b981; color: white;"
+                          data-order-id="<%= order._id %>"
+                          data-product-id="<%= order.productDetails._id %>"
+                          data-product-size="<%= order.orderItems.size %>"
+                          data-product-qty="<%= order.orderItems.quantity %>">
+                    <i class="fas fa-check-circle"></i> Approve Return
+                  </button>
+                </div>
+              <% } %>
             </div>
 
             <div class="item-price-block">
@@ -318,7 +342,7 @@
         <ul class="summary-list">
           <li>
             <span>Order ID</span>
-            <span class="val" style="font-family: monospace; font-size: 0.9rem;"><%= orderDetails[0].orderId %></span>
+            <span class="val" style="font-family: monospace; font-size: 0.9rem;"><%= orderDetails[0].orderId.slice(0, 6) %></span>
           </li>
           <li>
             <span>Order Status</span>
@@ -383,4 +407,73 @@
 </div>
 
 <%- include('../../views/partials/admin/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.approve-return-btn').forEach(button => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        const orderId = this.getAttribute('data-order-id');
+        const productId = this.getAttribute('data-product-id');
+        const orderSize = this.getAttribute('data-product-size');
+        const orderQuantity = this.getAttribute('data-product-qty');
+
+        Swal.fire({
+          title: 'Approve Return?',
+          text: `Are you sure you want to approve return and refund this item?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#10b981',
+          cancelButtonColor: '#94a3b8',
+          confirmButtonText: 'Yes, approve it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch('/admin/approveReturnItem', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId,
+                productId,
+                orderSize,
+                orderQuantity
+              }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  title: 'Approved!',
+                  text: 'The return has been approved and amount refunded to user\'s wallet.',
+                  icon: 'success',
+                  timer: 1500,
+                  showConfirmButton: false
+                }).then(() => {
+                  window.location.reload();
+                });
+              } else {
+                Swal.fire({
+                  title: 'Error',
+                  text: data.message || 'There was a problem approving the return. Please try again.',
+                  icon: 'error'
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire({
+                title: 'Error',
+                text: 'Something went wrong. Please try again.',
+                icon: 'error'
+              });
+            });
+          }
+        });
+      });
+    });
+  });
+</script>
 

@@ -75,6 +75,7 @@ router.get("/orders",isAuthenticated,orderController.getOrders)
 router.post('/statusSelection',isAuthenticated,orderController.statusSelection);
 router.post('/deleteOrder',isAuthenticated,orderController.deleteOrder)
 router.get('/orderedDetailsPage',isAuthenticated,orderController.orderedDetailsPage)
+router.post('/approveReturnItem',isAuthenticated,orderController.approveReturnItem)
 
 
 //coupon management

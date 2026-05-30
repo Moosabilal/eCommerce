@@ -221,7 +221,7 @@
         <tr>
           <td>
             <a href="/admin/orderedDetailsPage?parentAddressId=<%= orders[i].parentAddress._id %>&orderId=<%=orders[i]._id%>" class="order-id-link">
-              <%= orders[i].orderId %>
+              <%= orders[i].orderId.slice(0, 6) %>
             </a>
           </td>
           <td><span class="customer-name"><%= orders[i].userId.name%></span></td>

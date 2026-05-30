@@ -109,6 +109,7 @@ router.post("/placeOrder", userAuth, orderController.PostPlaceOrder);
 router.get("/orderHistory", userAuth, orderController.getOrderHistory);
 router.post("/cancelOrder", userAuth, orderController.cancelOrder)
 router.post('/returnOrder', userAuth, orderController.returnOrder)
+router.post('/returnOrderItem', userAuth, orderController.returnOrderItem)
 router.get('/orderedProducts', userAuth, orderController.orderedProductDetails)
 router.post('/create-order', userAuth, orderController.createOrder);
 router.post('/verify-payment', userAuth, orderController.verifyPayment);

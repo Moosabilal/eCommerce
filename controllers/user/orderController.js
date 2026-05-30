@@ -280,6 +280,7 @@ const getOrderHistory = async (req, res) => {
                     "orderItems.productId": 1,
                     "orderItems.price": 1,
                     "orderItems.totalPrice": 1,
+                    "orderItems.status": 1,
                     "finalAmount": 1,
                     "parentAddressid": 1,
                     "shipping": 1,
@@ -319,54 +320,106 @@ const cancelOrder = async (req, res) => {
         const userId = req.session.user;
         const { orderId, productId, orderQuantity, orderSize } = req.body;
 
-        const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });  // add userId
+        const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });
 
         if (!existingOrder) {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
         let orderIdValue = existingOrder.orderId;
-        if (existingOrder.status === "Processing" || existingOrder.status === "Shipped") {
-            return res.status(200).json({ success: false, message: "You can't cancel this order when it is in pending, processing or shipped" });
-        }
+
+        // If the overall order is already cancelled, shipped, returned, or delivered, we cannot cancel individual items
         if (existingOrder.status === "Cancelled") {
             return res.status(200).json({ success: false, message: "Order is already cancelled" });
         }
-
-        let refundAmount = existingOrder.finalAmount;
-        const wallet = await Wallet.findOneAndUpdate(
-            { userId: new mongoose.Types.ObjectId(userId) },
-            {
-                $inc: { balance: refundAmount },
-                $push: {
-                    transactions: {
-                        transactionType: "Credit",
-                        amount: refundAmount,
-                        status: "Success",
-                        date: new Date(),
-                        orderId: orderIdValue,
-                    },
-                },
-            },
-            // {
-            //     new: true,
-            //     upsert: true,
-            //     setDefaultsOnInsert: false,
-            //     runValidators: true,
-            // }
-        );
-
-
-
-        existingOrder.status = "Cancelled";
-        await existingOrder.save();
-
-        if (existingOrder.nModified === 0) {
-            return res.status(404).json({ success: false, message: "Order not found" });
+        if (existingOrder.status === "Shipped" || existingOrder.status === "Delivered" || existingOrder.status === "Returned") {
+            return res.status(200).json({ success: false, message: `You can't cancel items when the order status is ${existingOrder.status}` });
         }
 
+        // Find the specific item in orderItems
+        const targetItem = existingOrder.orderItems.find(item => 
+            item.productId.toString() === productId.toString() && 
+            item.size === orderSize
+        );
+
+        if (!targetItem) {
+            return res.status(404).json({ success: false, message: "Item not found in order" });
+        }
+
+        // Check if the item's individual status is already Cancelled or Returned
+        const currentItemStatus = targetItem.status || existingOrder.status;
+        if (currentItemStatus === "Cancelled") {
+            return res.status(200).json({ success: false, message: "This item is already cancelled" });
+        }
+        if (currentItemStatus === "Returned") {
+            return res.status(200).json({ success: false, message: "This item is already returned" });
+        }
+
+        // Calculate proportional refund amount
+        const orderSubtotal = existingOrder.orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+        let refundAmount = 0;
+        if (orderSubtotal > 0) {
+            const itemShare = targetItem.totalPrice / orderSubtotal;
+            const discountShare = existingOrder.discount * itemShare;
+            const taxShare = targetItem.totalPrice * (existingOrder.tax / 100); // tax is stored as percentage (e.g. 5 for 5%)
+            
+            refundAmount = targetItem.totalPrice - discountShare + taxShare;
+
+            // Check if this is the last active item being cancelled
+            const activeItemsCount = existingOrder.orderItems.filter(item => 
+                item.status !== "Cancelled" && item.status !== "Returned"
+            ).length;
+            if (activeItemsCount === 1) {
+                const shippingFee = existingOrder.shipping === 'express' ? 15 : 5;
+                refundAmount += shippingFee;
+            }
+        } else {
+            refundAmount = targetItem.totalPrice;
+        }
+
+        // Round to 2 decimal places and ensure non-negative
+        refundAmount = Math.max(0, parseFloat(refundAmount.toFixed(2)));
+
+        // If payment status is Completed, refund the amount to wallet
+        if (existingOrder.paymentStatus === "Completed") {
+            const wallet = await Wallet.findOneAndUpdate(
+                { userId: new mongoose.Types.ObjectId(userId) },
+                {
+                    $inc: { balance: refundAmount },
+                    $push: {
+                        transactions: {
+                            transactionType: "Credit",
+                            amount: refundAmount,
+                            status: "Success",
+                            date: new Date(),
+                            orderId: orderIdValue,
+                        },
+                    },
+                },
+                { new: true, upsert: true }
+            );
+
+            if (!wallet) {
+                return res.status(404).json({ success: false, message: "Failed to credit the amount to the user wallet" });
+            }
+        }
+
+        // Update the item's status to Cancelled
+        targetItem.status = "Cancelled";
+
+        // Check if all items in orderItems are now cancelled
+        const allCancelled = existingOrder.orderItems.every(item => item.status === "Cancelled");
+        if (allCancelled) {
+            existingOrder.status = "Cancelled";
+        }
+
+        // Save order updates
+        await existingOrder.save();
+
+        // Restore stock
         const product = await Product.updateOne(
             { _id: new mongoose.Types.ObjectId(productId), "stock.size": orderSize },
-            { $inc: { "stock.$.quantity": orderQuantity } }
+            { $inc: { "stock.$.quantity": parseInt(orderQuantity) } }
         );
 
         if (product.nModified === 0) {
@@ -375,8 +428,8 @@ const cancelOrder = async (req, res) => {
 
         res.status(200).json({ success: true });
     } catch (error) {
-        console.log("Error when cancelling order", error);
-        res.redirect("/pageNotFound");
+        console.log("Error when cancelling order item", error);
+        res.status(500).json({ success: false, message: "Failed to cancel item" });
     }
 };
 
@@ -404,7 +457,13 @@ const returnOrder = async (req, res) => {
         }
         if (existingOrder.status === "Delivered") {
             existingOrder.status = "Return_Requested";
-            const returnStatus = existingOrder.status
+            existingOrder.orderItems.forEach(item => {
+                const itemStatus = item.status || "Delivered";
+                if (itemStatus === "Delivered") {
+                    item.status = "Return_Requested";
+                }
+            });
+            const returnStatus = existingOrder.status;
             await existingOrder.save();
             return res.status(200).json({ success: true, returnStatus });
         }
@@ -413,11 +472,58 @@ const returnOrder = async (req, res) => {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
 
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.log("Error when returning order", error);
+        res.status(500).json({ success: false, message: "Failed to return order" });
+    }
+};
+
+const returnOrderItem = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { orderId, productId, orderSize, reason } = req.body;
+
+        const existingOrder = await Order.findOne({ _id: new mongoose.Types.ObjectId(orderId) });
+
+        if (!existingOrder) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        // Find the specific item in orderItems
+        const targetItem = existingOrder.orderItems.find(item => 
+            item.productId.toString() === productId.toString() && 
+            item.size === orderSize
+        );
+
+        if (!targetItem) {
+            return res.status(404).json({ success: false, message: "Item not found in order" });
+        }
+
+        const currentItemStatus = targetItem.status || existingOrder.status;
+
+        if (currentItemStatus === "Return_Requested") {
+            return res.status(200).json({ success: false, message: "Return request already sent for this item" });
+        }
+        if (currentItemStatus === "Returned") {
+            return res.status(200).json({ success: false, message: "This item is already returned" });
+        }
+        if (currentItemStatus === "Cancelled") {
+            return res.status(200).json({ success: false, message: "This item is cancelled" });
+        }
+
+        // Set individual item status to Return_Requested
+        targetItem.status = "Return_Requested";
+
+        // Also update overall status to Return_Requested to notify admin
+        existingOrder.status = "Return_Requested";
+
+        await existingOrder.save();
 
         res.status(200).json({ success: true });
     } catch (error) {
-        console.log("Error when cancelling order", error);
-        res.redirect("/pageNotFound");
+        console.log("Error when requesting item return", error);
+        res.status(500).json({ success: false, message: "Failed to request return" });
     }
 };
 
@@ -456,6 +562,7 @@ const orderedProductDetails = async (req, res) => {
                     "orderItems.productId": 1,
                     "orderItems.price": 1,
                     "orderItems.totalPrice": 1,
+                    "orderItems.status": 1,
                     "paymentMethod": 1,
                     "finalAmount": 1,
                     "parentAddressId": 1,
@@ -599,6 +706,7 @@ module.exports = {
     getOrderHistory,
     cancelOrder,
     returnOrder,
+    returnOrderItem,
     orderedProductDetails,
     createOrder,
     verifyPayment,

@@ -228,7 +228,7 @@
                                     </span>
                                 </td>
                                 <td data-label="OrderId">
-                                    <small><%= transaction.orderId ? transaction.orderId : 'N/A' %></small>
+                                    <small><%= transaction.orderId ? transaction.orderId.slice(0, 6) : 'N/A' %></small>
                                 </td>
                                 <td data-label="Amount" class="fw-bold">
                                     ₹<%= transaction.amount.toFixed(2) %>
@@ -293,7 +293,7 @@
                 <td>${transactionDate.toLocaleDateString()}</td>
                 <td>${transactionDate.toLocaleTimeString()}</td>
                 <td>${data.transaction.transactionType}</td>
-                <td>${data.transaction.orderId || 'N/A'}</td>
+                <td>${data.transaction.orderId ? data.transaction.orderId.substring(0, 6) : 'N/A'}</td>
                 <td>₹${data.transaction.amount.toFixed(2)}</td>
                 <td>${data.transaction.status}</td>
             `;
