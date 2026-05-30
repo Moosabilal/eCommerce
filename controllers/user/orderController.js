@@ -141,6 +141,9 @@ const PostPlaceOrder = async (req, res) => {
             if (!wallet) {
                 return res.status(404).json({ success: false, message: "wallet not Found" });
             }
+            if (wallet.balance < parseFloat(finalAmount)) {
+                return res.status(400).send("Insufficient wallet balance");
+            }
 
             const orderItems = cart.items.map((item) => {
                 return {
@@ -240,7 +243,7 @@ const PostPlaceOrder = async (req, res) => {
 
         cart.items = [];
         await cart.save();
-        res.redirect('/shop');
+        res.redirect('/orderHistory');
 
 
     } catch (error) {
@@ -333,6 +336,80 @@ const cancelOrder = async (req, res) => {
         }
         if (existingOrder.status === "Shipped" || existingOrder.status === "Delivered" || existingOrder.status === "Returned") {
             return res.status(200).json({ success: false, message: `You can't cancel items when the order status is ${existingOrder.status}` });
+        }
+
+        // If productId is not provided, we cancel the entire order
+        if (!productId) {
+            // Find all active items (neither Cancelled nor Returned)
+            const activeItems = existingOrder.orderItems.filter(item => 
+                item.status !== "Cancelled" && item.status !== "Returned"
+            );
+
+            if (activeItems.length === 0) {
+                return res.status(200).json({ success: false, message: "No active items to cancel" });
+            }
+
+            // Calculate refund amount
+            let refundAmount = 0;
+            const orderSubtotal = existingOrder.orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+            for (const item of activeItems) {
+                if (orderSubtotal > 0) {
+                    const itemShare = item.totalPrice / orderSubtotal;
+                    const discountShare = existingOrder.discount * itemShare;
+                    const taxShare = item.totalPrice * (existingOrder.tax / 100);
+                    refundAmount += (item.totalPrice - discountShare + taxShare);
+                } else {
+                    refundAmount += item.totalPrice;
+                }
+            }
+
+            // Since we cancel all remaining active items, refund the shipping fee too!
+            const shippingFee = existingOrder.shipping === 'express' ? 15 : 5;
+            refundAmount += shippingFee;
+
+            refundAmount = Math.max(0, parseFloat(refundAmount.toFixed(2)));
+
+            // Refund to wallet if payment status is Completed
+            if (existingOrder.paymentStatus === "Completed" && refundAmount > 0) {
+                const wallet = await Wallet.findOneAndUpdate(
+                    { userId: new mongoose.Types.ObjectId(userId) },
+                    {
+                        $inc: { balance: refundAmount },
+                        $push: {
+                            transactions: {
+                                transactionType: "Credit",
+                                amount: refundAmount,
+                                status: "Success",
+                                date: new Date(),
+                                orderId: orderIdValue,
+                            },
+                        },
+                    },
+                    { new: true, upsert: true }
+                );
+
+                if (!wallet) {
+                    return res.status(404).json({ success: false, message: "Failed to credit the amount to the user wallet" });
+                }
+            }
+
+            // Mark all items as Cancelled and set order status to Cancelled
+            activeItems.forEach(item => {
+                item.status = "Cancelled";
+            });
+            existingOrder.status = "Cancelled";
+            await existingOrder.save();
+
+            // Restore stock for all cancelled items
+            for (const item of activeItems) {
+                await Product.updateOne(
+                    { _id: new mongoose.Types.ObjectId(item.productId), "stock.size": item.size },
+                    { $inc: { "stock.$.quantity": parseInt(item.quantity) } }
+                );
+            }
+
+            return res.status(200).json({ success: true });
         }
 
         // Find the specific item in orderItems

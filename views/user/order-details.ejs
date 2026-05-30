@@ -375,10 +375,7 @@
                       </button>
                       <% } %>
                         <% if(order.status==='Pending' || order.status==='Processing' ) { %>
-                          <button class="btn btn-danger btn-sm cancel-order" data-order-id="<%= order._id %>"
-                            data-order-quantity="<%= order.orderItems.quantity %>"
-                            data-product-id="<%= order.orderItems.productId %>"
-                            data-product-size="<%= order.orderItems.size %>">
+                          <button class="btn btn-danger btn-sm cancel-order" data-order-id="<%= order._id %>">
                             Cancel
                           </button>
                           <% } %>
@@ -451,7 +448,15 @@
                         .then(data => {
                           if (data.success) {
                             console.log('data', data)
-                            Swal.fire(successText, `Order ${orderId} has been ${action}ed. Reason: ${reason}`, 'success');
+                            Swal.fire({
+                              title: successText,
+                              text: `Order ${orderId} has been successfully updated. Reason: ${reason}`,
+                              icon: 'success',
+                              timer: 1500,
+                              showConfirmButton: false
+                            }).then(() => {
+                              window.location.reload();
+                            });
                             console.log('return request', data.returnStatus)
 
                             const orderRow = button.closest('.order-row');

@@ -394,7 +394,7 @@
                         <label class="payment-method-box">
                             <div class="form-check d-flex align-items-center m-0">
                                 <input class="form-check-input me-3" type="radio" name="payment" value="Card" id="Card" checked>
-                                <span><i class="fas fa-wallet text-secondary me-2"></i> Wallet (Balance: &#8377;<%= wallet.balance %>)</span>
+                                <span><i class="fas fa-wallet text-secondary me-2"></i> Wallet (Balance: &#8377;<%= (wallet && wallet.balance) ? wallet.balance : 0 %>)</span>
                             </div>
                         </label>
                         <label class="payment-method-box">
@@ -462,7 +462,7 @@
                         <input type="hidden" id="razorpay_payment_id" name="razorpay_payment_id" value="">
                         <input type="hidden" id="razorpay_signature" name="razorpay_signature" value="">
                         <input type="hidden" id="paymentStatus" name="paymentStatus" value="Pending">
-                        <input type="hidden" id="walletBalance" value="<%= wallet.balance %>">
+                        <input type="hidden" id="walletBalance" value="<%= (wallet && wallet.balance) ? wallet.balance : 0 %>">
                         <input type="hidden" id="parentAddressId" name="parentAddressId" value="<%=userAddress._id%>">
                         <input type="hidden" id="finalAmount" name="finalAmount" value="">
                         <input type="hidden" name="addressId" id="addressId" value="">
@@ -679,27 +679,23 @@
 
         updateValues();
         const balance = parseFloat(document.getElementById('walletBalance').value)
-        const totalAmount =parseFloat( finalAmount.value)
+        const totalAmount = parseFloat(finalAmount.value)
+        const paymentValue = document.querySelector('input[name="payment"]:checked').value;
             
-            if (selectedPaymentMethod == "Wallet") {
-                if(balance<=totalAmount){
+        if (paymentValue === "Card") {
+            if (balance < totalAmount) {
                 Swal.fire({
                     title: 'Payment Failed',
-                    text: 'insufficient Amount in your wallet, try with different payment method.',
+                    text: 'Insufficient Amount in your wallet, try with a different payment method.',
                     icon: 'error',
-                    })
-                }else{
-                    confirmationModal.show();
-
-                }
-            }else{
+                });
+            } else {
                 confirmationModal.show();
-
-
             }
-              
-            
-        });
+        } else {
+            confirmationModal.show();
+        }
+    });
 
         document.getElementById('confirm-order').addEventListener('click', async () => {
     const selectedPaymentMethod = document.querySelector('input[name="payment"]:checked').value;

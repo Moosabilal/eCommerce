@@ -287,7 +287,7 @@ const checkoutPage = async (req, res)=>{
             expireOn: { $gte: new Date() },
             userId: { $nin: [user] } 
         });
-        const wallet = await Wallet.findOne({userId: user});
+        const wallet = await Wallet.findOne({userId: user}) || { balance: 0 };
             res.render('checkout',{
             user: userData,
             coupons:coupons,

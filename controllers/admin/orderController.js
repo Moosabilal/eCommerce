@@ -69,29 +69,33 @@ const statusSelection = async (req,res)=>{
         return res.json({ message: `Order status is already ${status}` });
         }
 
-        order.status = status;
+        // Identify items that are being transitioned to the new status
+        const itemsToProcess = [];
         order.orderItems.forEach(item => {
             if (item.status !== "Cancelled" && item.status !== "Returned") {
+                itemsToProcess.push(item);
                 item.status = status;
             }
         });
+
+        order.status = status;
         await order.save();
 
         const user = order.userId;
 
-        if (status === "Returned") {
+        if ((status === "Returned" || status === "Cancelled") && itemsToProcess.length > 0) {
             const id = order.orderId;
-            const activeItems = order.orderItems.filter(item => item.status === "Returned");
+            const shouldRefund = order.paymentStatus === "Completed";
+            let refundAmount = 0;
             
-            if (activeItems.length > 0) {
+            if (shouldRefund) {
                 const orderSubtotal = order.orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
-                let refundAmount = 0;
                 
-                for (const item of activeItems) {
+                for (const item of itemsToProcess) {
                     if (orderSubtotal > 0) {
                         const itemShare = item.totalPrice / orderSubtotal;
                         const discountShare = order.discount * itemShare;
-                        const taxShare = item.totalPrice * (order.tax / 100); // tax is stored as percentage
+                        const taxShare = item.totalPrice * (order.tax / 100);
                         refundAmount += (item.totalPrice - discountShare + taxShare);
                     } else {
                         refundAmount += item.totalPrice;
@@ -109,39 +113,43 @@ const statusSelection = async (req,res)=>{
                 
                 refundAmount = Math.max(0, parseFloat(refundAmount.toFixed(2)));
 
-                const wallet = await Wallet.findOneAndUpdate(
-                    { userId: new mongoose.Types.ObjectId(user) },
-                    {
-                        $inc: { balance: refundAmount },
-                        $push: {
-                            transactions: {
-                                transactionType: "Credit",
-                                amount: refundAmount,
-                                status: "Success",
-                                date: new Date(),
-                                orderId: id,
+                if (refundAmount > 0) {
+                    const wallet = await Wallet.findOneAndUpdate(
+                        { userId: new mongoose.Types.ObjectId(user) },
+                        {
+                            $inc: { balance: refundAmount },
+                            $push: {
+                                transactions: {
+                                    transactionType: "Credit",
+                                    amount: refundAmount,
+                                    status: "Success",
+                                    date: new Date(),
+                                    orderId: id,
+                                },
                             },
                         },
-                    }
-                );
-
-                if (!wallet) {
-                    return res.status(404).json({ success: false, message: "Failed to credit the amount to the user wallet" });
-                }
-
-                for (const item of activeItems) {
-                    const productId = item.productId;
-                    const orderSize = item.size;
-                    const orderQuantity = item.quantity;
-
-                    const product = await Product.updateOne(
-                        { _id: new mongoose.Types.ObjectId(productId), "stock.size": orderSize },
-                        { $inc: { "stock.$.quantity": orderQuantity } }
+                        { new: true, upsert: true }
                     );
 
-                    if (product.nModified === 0) {
-                        return res.status(404).json({ success: false, message: `Failed to update stock for product ${productId} with size ${orderSize}` });
+                    if (!wallet) {
+                        return res.status(404).json({ success: false, message: "Failed to credit the amount to the user wallet" });
                     }
+                }
+            }
+
+            // Restore stock for all processed items
+            for (const item of itemsToProcess) {
+                const productId = item.productId;
+                const orderSize = item.size;
+                const orderQuantity = item.quantity;
+
+                const product = await Product.updateOne(
+                    { _id: new mongoose.Types.ObjectId(productId), "stock.size": orderSize },
+                    { $inc: { "stock.$.quantity": orderQuantity } }
+                );
+
+                if (product.nModified === 0) {
+                    return res.status(404).json({ success: false, message: `Failed to update stock for product ${productId} with size ${orderSize}` });
                 }
             }
         }
