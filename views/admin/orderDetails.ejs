@@ -295,7 +295,15 @@
             .then(data => {
               console.log(data)
               if (data.success) {
-                Swal.fire('Updated!', `Order status updated to "${newStatus}".`, 'success');
+                Swal.fire({
+                  title: 'Updated!',
+                  text: `Order status updated to "${newStatus}".`,
+                  icon: 'success',
+                  timer: 1500,
+                  showConfirmButton: false
+                }).then(() => {
+                  window.location.reload();
+                });
               } else {
                 Swal.fire('Error!', 'There was an error updating the status.', 'error');
                 this.value = this.dataset.previousValue || 'Pending';
