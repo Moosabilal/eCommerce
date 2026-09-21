@@ -95,22 +95,31 @@
         .form-control-premium {
             width: 100%;
             padding: 15px 16px;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             text-align: center;
-            letter-spacing: 8px;
-            font-weight: 600;
+            letter-spacing: 6px;
+            font-weight: 700;
             color: #1e293b;
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            cursor: text !important;
+            pointer-events: auto !important;
+        }
+
+        .form-control-premium::placeholder {
+            letter-spacing: normal;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: #94a3b8;
         }
 
         .form-control-premium:focus {
             outline: none;
-            background: #fff;
-            border-color: #1b2138;
-            box-shadow: 0 0 0 4px rgba(27, 33, 56, 0.1);
+            background: #ffffff;
+            border-color: #e53935;
+            box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.15);
         }
 
         .btn-premium {
@@ -162,27 +171,30 @@
 
         .timer-container {
             text-align: center;
-            margin: 20px 0;
+            margin: 20px 0 10px;
+            font-size: 0.9rem;
+            color: #64748b;
         }
 
         .otp-timer {
-            display: inline-block;
-            width: 60px;
-            height: 60px;
-            line-height: 60px;
-            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 30px;
             background: #f1f5f9;
-            font-size: 1.2rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #1b2138;
-            border: 2px solid #e2e8f0;
+            border: 1px solid #e2e8f0;
             transition: all 0.3s;
         }
         
         .otp-timer.expired {
-            border-color: #e53935;
-            color: #e53935;
-            font-size: 0.9rem;
+            border-color: #fecaca;
+            background: #fef2f2;
+            color: #dc2626;
         }
 
         .auth-footer {
@@ -218,12 +230,24 @@
 
         <form id="otpForm" action="/verify-otp" method="post" onsubmit="return validateOTPForm()">
             <div class="form-group">
-                <input type="text" id="otp" name="otp" class="form-control-premium" placeholder="------" required maxlength="6" pattern="\d*" autocomplete="off">
+                <input type="text" 
+                       id="otp" 
+                       name="otp" 
+                       class="form-control-premium" 
+                       placeholder="Enter 6-digit OTP" 
+                       required 
+                       maxlength="6" 
+                       pattern="[0-9]*" 
+                       inputmode="numeric" 
+                       autocomplete="one-time-code"
+                       autofocus>
             </div>
             
             <div class="timer-container">
                 <div id="otpTimer" class="otp-timer">
-                    <span id="timerValue">60</span>
+                    <i class="fas fa-clock mr-1"></i>
+                    <span id="timerLabel">Resend available in:</span>
+                    <strong id="timerValue">60s</strong>
                 </div>
             </div>
 
@@ -245,7 +269,13 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.getElementById("otp").focus();
+        const otpInput = document.getElementById("otp");
+        otpInput.focus();
+
+        // Only allow numbers to be typed
+        otpInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
 
         let timer = 60;
         let timerInterval;
@@ -253,12 +283,13 @@
         function startTimer() {
             timerInterval = setInterval(() => {
                 timer--;
-                document.getElementById("timerValue").textContent = timer;
+                document.getElementById("timerValue").textContent = timer + "s";
                 if (timer <= 0) {
                     clearInterval(timerInterval);
                     document.getElementById("otpTimer").classList.add("expired");
-                    document.getElementById("timerValue").textContent = "Expired";
-                    document.getElementById("otp").disabled = true;
+                    document.getElementById("timerLabel").textContent = "Resend status:";
+                    document.getElementById("timerValue").textContent = "Ready";
+                    // DO NOT disable the OTP input - the OTP is still valid for 10 minutes!
                     document.getElementById("resendButton").disabled = false;
                 }
             }, 1000);
@@ -313,8 +344,13 @@
             
             clearInterval(timerInterval);
             timer = 60;
+            // Make sure OTP input is always editable
             document.getElementById('otp').disabled = false;
+            document.getElementById('otp').value = '';
+            document.getElementById('otp').focus();
             document.getElementById('otpTimer').classList.remove("expired");
+            document.getElementById('timerLabel').textContent = "Resend available in:";
+            document.getElementById('timerValue').textContent = "60s";
             document.getElementById('resendButton').disabled = true;
             startTimer();
             
