@@ -1,6 +1,6 @@
 const User = require('../../models/userSchema');
 const Address = require("../../models/addressSchema")
-const nodemailer = require("nodemailer");
+
 const bcrypt = require('bcrypt')
 const env = require('dotenv').config();
 const session = require("express-session")
@@ -33,22 +33,14 @@ const getForgotPassPage = async (req,res)=>{
 
 const sendVerificationEmail= async (email,otp)=>{
     try {
-        const transporter = nodemailer.createTransport({
-            service:"gmail",
-            port:587,
-            secure:false,
-            requireTLS:true,
-            auth:{
-                user:process.env.NODEMAILER_EMAIL,
-                pass:process.env.NODEMAILER_PASSWORD
-            }
-        })
+        const { Resend } = require('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
 
-        const mailOptions = {
-            from:process.env.NODEMAILER_EMAIL,
-            to:email,
-            subject:"Your OTP for password reset",
-            text:`Your OTP is ${otp} Please enter this OTP to reset your password`,
+        const { data, error } = await resend.emails.send({
+            from: 'EagleWings <support@moosadev.online>',
+            to: email,
+            subject: "Your OTP for password reset",
+            text: `Your OTP is ${otp} Please enter this OTP to reset your password`,
             html: `
                 <!DOCTYPE html>
                 <html lang="en">
@@ -74,7 +66,7 @@ const sendVerificationEmail= async (email,otp)=>{
                         </div>
                         <div class="content">
                             <p>Hello,</p>
-                            <p>We received a request to reset the password for your <strong>EagleSwing</strong> account.</p>
+                            <p>We received a request to reset the password for your <strong>EagleWings</strong> account.</p>
                             <p>Use the OTP below to proceed:</p>
                             
                             <div class="otp-box">${otp}</div>
@@ -82,21 +74,25 @@ const sendVerificationEmail= async (email,otp)=>{
                             <p class="warning">This code is valid for 10 minutes. If you did not request a password reset, please ignore this email or contact support.</p>
                         </div>
                         <div class="footer">
-                            <p>&copy; ${new Date().getFullYear()} EagleSwing Shop. All rights reserved.</p>
+                            <p>&copy; ${new Date().getFullYear()} EagleWings Shop. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
                 </html>
             `
+        });
+
+        if (error) {
+            console.error("Resend API Error:", error);
+            return false;
         }
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent: ",info.messageId);
+        console.log("Email sent via Resend:", data.id);
         return true;
     } catch (error) {
-        console.log('Error sending email',error)
+        console.error('Error sending email via Resend', error);
         return false;
-        }
+    }
 }
 
 const forgotEmailValid = async (req,res)=>{

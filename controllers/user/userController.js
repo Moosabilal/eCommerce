@@ -5,7 +5,8 @@ const Product = require("../../models/productSchema")
 const Wallet = require('../../models/walletSchema')
 const Banner = require('../../models/bannerSchema')
 const env = require('dotenv').config();
-const nodeMailer = require('nodemailer')
+const { Resend } = require('resend');
+
 const bcrypt = require('bcrypt')
 
 function generateOtp() {
@@ -107,7 +108,6 @@ const loadSignup = async (req, res) => {
 
 async function sendVerificationEmail(email, otp) {
     try {
-        const { Resend } = require('resend');
         const resend = new Resend(process.env.RESEND_API_KEY);
 
         const { data, error } = await resend.emails.send({
