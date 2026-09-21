@@ -108,14 +108,18 @@ const loadSignup = async (req, res) => {
 async function sendVerificationEmail(email, otp) {
     try {
         const transporter = nodeMailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
+            service: 'gmail',
+            port: 587,
+            secure: false,
+            requireTLS: true,
             auth: {
                 user: process.env.NODEMAILER_EMAIL,
                 pass: process.env.NODEMAILER_PASSWORD
-            }
-        })
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000
+        });
 
         const info = await transporter.sendMail({
             from: process.env.NODEMAILER_EMAIL,

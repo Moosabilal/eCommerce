@@ -25,9 +25,11 @@
   .home-hero {
     position: relative;
     width: 100%;
-    height: 88vh;
+    height: 80vh; /* Fallback for before JS runs */
     min-height: 520px;
     overflow: hidden;
+    margin-top: 15px; /* Physical gap between header and banner */
+    clear: both;
   }
   .hero-slides-wrapper {
     display: flex;
@@ -38,8 +40,9 @@
   .hero-slide {
     position: absolute;
     inset: 0;
-    background-size: cover;
-    background-position: center;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
     opacity: 0;
     transition: opacity 1.1s cubic-bezier(.4,0,.2,1);
     z-index: 0;
@@ -860,6 +863,22 @@
 <script>
 /* ── Hero slider ── */
 (function () {
+  function adjustHeroHeight() {
+    const hero = document.getElementById('homeHero');
+    const header = document.querySelector('.header-v4');
+    if (hero && header) {
+      // Calculate remaining height: viewport - header height - gap (15px)
+      const remainingHeight = window.innerHeight - header.offsetHeight - 15;
+      hero.style.height = remainingHeight + 'px';
+      hero.style.minHeight = '520px'; // Prevent it from getting too small
+    }
+  }
+  
+  // Run on load and resize
+  window.addEventListener('load', adjustHeroHeight);
+  window.addEventListener('resize', adjustHeroHeight);
+  adjustHeroHeight(); // Run immediately
+
   const slides = document.querySelectorAll('.hero-slide');
   const dots   = document.querySelectorAll('.hero-dot');
   if (slides.length <= 1) return;

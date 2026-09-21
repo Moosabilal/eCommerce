@@ -27,16 +27,29 @@
 
     <style>
         /* --- PREMIUM HEADER STYLES --- */
-        body { background-color: #f8f9fc; }
+        body { 
+            background-color: #f8f9fc; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+        }
         
         .header-v4 {
-            position: sticky;
-            top: 0;
+            position: sticky !important;
+            top: 0 !important;
+            margin-top: 0 !important;
+            left: 0;
+            right: 0;
+            width: 100%;
             z-index: 999;
             box-shadow: 0 4px 20px rgba(0,0,0,0.04);
             background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
+            margin-bottom: 0 !important;
+            border-bottom: 1px solid #d1d5db !important; /* Visible line separating header */
+        }
+        .header-v4 .container-menu-desktop {
+            height: 80px !important;
         }
 
         /* Top Bar */
@@ -73,6 +86,8 @@
         .wrap-menu-desktop {
             height: 80px;
             background: transparent;
+            top: 0 !important;
+            margin-top: 0 !important;
         }
         .logo h3 {
             font-size: 1.6rem;
@@ -276,16 +291,6 @@
     
     <header class="header-v4">
         <div class="container-menu-desktop">
-            <div class="top-bar">
-                <div class="content-topbar flex-sb-m h-full container">
-                    <div class="left-top-bar">Free shipping for standard order over $100</div>
-                    <div class="right-top-bar flex-w h-full">
-                        <a href="#" class="flex-c-m trans-04 p-lr-25">Help & FAQs</a>
-                        <a href="#" class="flex-c-m trans-04 p-lr-25">EN</a>
-                        <a href="#" class="flex-c-m trans-04 p-lr-25">USD</a>
-                    </div>
-                </div>
-            </div>
 
             <div class="wrap-menu-desktop how-shadow1">
                 <nav class="limiter-menu-desktop container">
