@@ -107,23 +107,13 @@ const loadSignup = async (req, res) => {
 
 async function sendVerificationEmail(email, otp) {
     try {
-        const transporter = nodeMailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD
-            },
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 10000
-        });
+        const { Resend } = require('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
 
-        const info = await transporter.sendMail({
-            from: process.env.NODEMAILER_EMAIL,
+        const { data, error } = await resend.emails.send({
+            from: 'EagleWings <support@moosadev.online>', // Update with your actual sending address if you prefer
             to: email,
-            subject: "Verify your account",
+            subject: "Verify your account - EagleWings",
             text: `Your OTP is ${otp}`,
             html: `
                 <!DOCTYPE html>
@@ -145,11 +135,11 @@ async function sendVerificationEmail(email, otp) {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>EagleSwing Shop</h1>
+                            <h1>EagleWings Shop</h1>
                         </div>
                         <div class="content">
                             <p>Hello,</p>
-                            <p>Thank you for registering with EagleSwing. Please use the following One-Time Password (OTP) to verify your account:</p>
+                            <p>Thank you for registering with EagleWings. Please use the following One-Time Password (OTP) to verify your account:</p>
                             
                             <div class="otp-code">${otp}</div>
                             
@@ -157,19 +147,24 @@ async function sendVerificationEmail(email, otp) {
                             <p>If you did not request this email, please ignore it.</p>
                         </div>
                         <div class="footer">
-                            <p>&copy; ${new Date().getFullYear()} EagleSwing. All rights reserved.</p>
+                            <p>&copy; ${new Date().getFullYear()} EagleWings. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
                 </html>
             `,
-        })
+        });
 
-        return info.accepted.length > 0;
+        if (error) {
+            console.error("Resend API Error:", error);
+            return false;
+        }
+
+        console.log("Email sent successfully via Resend:", data.id);
+        return true;
 
     } catch (error) {
-
-        console.error("Error in sending email", error);
+        console.error("Error in sending email via Resend", error);
         return false;
     }
 }
